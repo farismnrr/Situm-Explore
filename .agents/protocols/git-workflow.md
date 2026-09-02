@@ -14,7 +14,7 @@ The goals are isolation, reviewability, recoverability, and low process overhead
 6. Never open a pull request until the user explicitly asks for one.
 7. CI is intentionally deferred for now.
 8. Persistent unit tests are prohibited. Temporary E2E/white-box/black-box checks are allowed only during execution and must be deleted before staging/commit/closeout.
-9. Linting is mandatory for code-changing phases and must pass before commit/push.
+9. Engineering Guard and maintainability are not implementation-time requirements. During implementation use focused direct checks; explicit closure runs the component guard and maintainability lifecycle described below.
 10. Never commit secrets, `.env`, API keys, database credentials, tokens, or generated credential files.
 11. Prefer small, phase-scoped commits with clear Conventional Commit-style messages.
 12. Do not force-push or destructively rewrite branch history as normal workflow.
@@ -105,6 +105,10 @@ Non-plan maintenance may use conventional prefixes such as `docs/`, `chore/`, `f
 
 Do not mix multiple plans into one branch.
 
+## Codebase-serial execution
+
+Current product codebases are `web` and `mobile`. Only one may be actively implemented or verified at a time. For a task that changes both, default to `web -> mobile` unless the active plan records a concrete reason for another order. Finish implementation, focused verification, temporary-test cleanup, and task-owned persistence for the current codebase before moving to the next. Cross-codebase contract tracing is allowed; parallel sibling implementation/validation is not.
+
 ## 3. Phase boundaries
 
 A phase is an explicit phase in the plan. If a plan does not use the word `phase`, treat each top-level numbered implementation section as a phase unless the plan clearly groups sections differently.
@@ -152,23 +156,33 @@ After staging, review exactly what will be committed:
 git diff --staged
 ```
 
-### Nuxt lint requirement
+### Implementation-time validation
 
-Use the maintained Nuxt ESLint integration and project-aware flat config.
+During implementation and trial/error, use **focused direct checks only**. Do not run `.agents/scripts/engineering-guard.sh`, `.agents/scripts/maintainability.py`, or `.agents/scripts/validate.sh` as a reflexive implementation blocker unless the user explicitly asks.
 
-A code-changing phase may not be committed/pushed with lint errors.
+Examples of useful focused checks include a directly relevant lint invocation, typecheck, build/config inspection, runtime repro, browser/device interaction, bounded logs, or a temporary E2E/white-box/black-box aid. Choose the smallest check that materially reduces uncertainty for the current change. Do not require every repository quality surface to pass while implementation is still in progress.
 
-Use the repository's selected package manager:
+Do not switch package managers during a plan. Do not create or restore persistent unit tests. Temporary E2E/white-box/black-box checks may be used when they materially help validation, but they must be removed before staging, final closure commit, and task closeout.
+
+For docs/resources/governance-only phases, use appropriate lightweight validation and `git diff --check`; do not manufacture product builds or framework tooling solely for ceremony.
+
+### Explicit closure validation
+
+Engineering governance is codebase-scoped and closure-oriented:
 
 ```bash
-npm run lint
+./.agents/scripts/engineering-guard.sh web fast|full|release
+./.agents/scripts/engineering-guard.sh mobile fast|full|release
+python3 .agents/scripts/maintainability.py web
+python3 .agents/scripts/maintainability.py mobile
 ```
 
-Do not switch package managers during a plan.
-
-If the active plan defines additional validation such as typecheck or build, run it too. Do not create or restore persistent unit tests. Temporary E2E/white-box/black-box checks may be used when they materially help validation, but they must be removed before staging, commit, and task closeout.
-
-For docs/resources-only phases, use appropriate lightweight validation and `git diff --check`; do not add framework tooling solely for ceremony.
+- Run guards only at explicit closure or when the user directly requests them.
+- Finish changed codebases serially. Run the appropriate Engineering Guard mode, then maintainability exactly once for that changed codebase immediately before the requested PR/merge/branch-close sequence.
+- `fast` is lint/typecheck plus policy. `full` adds broader build/audit/config validation appropriate to the component. `release` is explicit release/package verification; Android release packaging is never part of routine `mobile full`.
+- Maintainability is a non-growing debt ratchet. Existing baseline debt may remain in unrelated work, but it may not grow. When debt improves, lower the baseline instead of preserving hidden capacity.
+- `.agents/scripts/validate.sh` validates agent-governance structure only and never implicitly dispatches product guards.
+- Do not wire Engineering Guard or maintainability into pre-commit, pre-push, package scripts, Make targets, CI, or hidden hooks under the current policy.
 
 ## 6. Commit discipline
 
@@ -278,7 +292,9 @@ Before saying a phase is complete, all applicable items must be true:
 - [ ] `.agents/` persistence pass is complete.
 - [ ] No secrets are staged.
 - [ ] `git diff --check` passes.
-- [ ] Nuxt lint passes for code-changing phases.
+- [ ] Focused implementation checks appropriate to the phase were used without reflexively running closure governance.
+- [ ] At explicit task/branch closure, each changed codebase passed the appropriate Engineering Guard mode and one maintainability run, unless the user explicitly scoped closure differently.
+- [ ] Governance-only closure passed `.agents/scripts/validate.sh` and direct syntax/static checks without manufacturing product work.
 - [ ] Any additional validation required by the plan passes.
 - [ ] Changes are committed with a clear phase-scoped message.
 - [ ] Commit is pushed to the plan branch/upstream.

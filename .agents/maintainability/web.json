@@ -1,0 +1,15 @@
+{
+  "bypasses": {},
+  "codebase": "web",
+  "directories": {
+    "app/pages/app": 14,
+    "server/utils": 14
+  },
+  "files": {},
+  "functions": {},
+  "limits": {
+    "directCodeFilesPerDirectory": 12,
+    "functionLines": 120,
+    "sourceLines": 350
+  }
+}

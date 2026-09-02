@@ -1,0 +1,21 @@
+{
+  "bypasses": {},
+  "codebase": "mobile",
+  "directories": {},
+  "files": {
+    "src/map/NativeMapScreen.tsx": 423
+  },
+  "functions": {
+    "src/map/CustomIndoorMap.tsx": [
+      128
+    ],
+    "src/map/NativeMapScreen.tsx": [
+      260
+    ]
+  },
+  "limits": {
+    "directCodeFilesPerDirectory": 12,
+    "functionLines": 120,
+    "sourceLines": 350
+  }
+}
