@@ -36,7 +36,7 @@ Completed implementation roadmap:
 Plan 021 -> Plan 022 -> Plan 023 -> Plan 024 -> Plan 025 [complete on stacked branch]
 ```
 
-Plans 026–041 are closed/integrated. Plans 028–035 delivered and closed the native companion roadmap, Plans 036–040 completed the follow-up reliability/workspace/fullscreen work, and Plan 041 shipped the app-owned indoor map/navigation experience through PR #39 at merge commit `99318a608af24f036e1744d9e7e929b859fbe15e`. There is currently **no active implementation plan**. New product work must start from updated `main` on a new dedicated plan branch. Google OAuth runtime remains user-owned and deferred.
+Plans 026–041 are closed/integrated. Plans 028–035 delivered and closed the native companion roadmap, Plans 036–040 completed the follow-up reliability/workspace/fullscreen work, and Plan 041 shipped the app-owned indoor map/navigation experience through PR #39 at merge commit `99318a608af24f036e1744d9e7e929b859fbe15e`. Plan 042 — Repository Engineering Governance is currently active on `plan/042-repository-engineering-governance`. Google OAuth runtime remains user-owned and deferred.
 
 ## Backend-refactor direction
 
@@ -59,6 +59,29 @@ For Situm behavior: **no evidence, no implementation**. Verify current official 
 - dependent plans normally start after the preceding plan is integrated into updated `main`;
 - implementation/fixes for an explicitly active plan go to the configured `worker` subagent;
 - parent owns orchestration, review, state/plan persistence, commits, pushes, and transitions.
+
+## Governance ownership
+
+- Agent governance and quality automation lives under `.agents/scripts/`.
+- Root `scripts/` and `mobile/scripts/` remain product-owned operational/build helpers; do not move working product tooling into `.agents/scripts/` merely for symmetry.
+- Governance commands are codebase-scoped. Current codebases are `web` (`app/`, `server/`, `shared/`) and `mobile` (`mobile/src/`). Do not invent an implicit repository-wide product guard.
+
+## Codebase-serial workflow
+
+- Only one product codebase may be actively implemented or verified at a time. Do not parallelize `web` and `mobile` implementation or closure validation through sibling agents/background jobs.
+- For work that genuinely changes both codebases, default to `web -> mobile` unless the active plan records a concrete reason for another order. Finish the current codebase's implementation, focused verification, temporary-test cleanup, and task-owned persistence before moving to the next.
+- Cross-codebase contracts may be traced end to end, but edits and governance execution remain serial.
+
+## Closure and Engineering Guard Lifecycle
+
+`./.agents/scripts/engineering-guard.sh <web|mobile> <fast|full|release>` is the component quality entry point. `python3 .agents/scripts/maintainability.py <web|mobile>` is a separate non-growing debt ratchet.
+
+- **Implementation / trial-error:** do **not** run Engineering Guard, maintainability, or agent-workspace validation wrappers unless the user explicitly asks. Use focused direct checks that help the current change and keep iteration fast. A task does not need every repository quality surface green while implementation is still in progress.
+- **Explicit closure:** finish one changed codebase at a time. Run the relevant requested/focused verification, then the appropriate Engineering Guard mode, then run maintainability exactly once for each changed codebase immediately before the requested PR/merge/branch-close sequence.
+- **Governance-only work:** when no product codebase changed, validate the governance files directly plus `.agents/scripts/validate.sh`; do not manufacture a product guard requirement solely for ceremony.
+- **Release:** `release` is explicit. In particular, Android release packaging is never part of routine `mobile full`; use `mobile release` only when the user requests release/package verification and supplies the required release environment.
+- **No hidden automation:** never wire Engineering Guard or maintainability into pre-commit, pre-push, package scripts, Make targets, CI, or background hooks unless the user explicitly changes this policy.
+- Never weaken security, architecture, maintainability ceilings, or runtime correctness merely to make a guard green.
 
 ## Testing policy
 

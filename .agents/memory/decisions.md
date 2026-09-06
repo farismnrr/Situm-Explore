@@ -11,6 +11,19 @@ This file contains **currently active durable decisions**. Completed execution h
 
 Status: active.
 
+## Closure-only engineering governance (2026-09-02)
+
+- Situm Explore adopts a Sensio-style component governance model with two explicit codebases: `web` and `mobile`.
+- Engineering Guard and maintainability are closure-oriented/manual gates, not routine implementation-loop commands. During implementation/trial-error, use focused direct checks and do not require every quality surface to pass.
+- Product implementation and closure are codebase-serial: only one of `web` or `mobile` is actively implemented/verified at a time; cross-codebase contracts may be traced end to end, but edits and governance execution stay serial. For multi-codebase work, default to `web -> mobile` unless the active plan records a concrete reason otherwise.
+- At explicit closure, finish changed codebases serially; run the appropriate Engineering Guard mode and then the maintainability ratchet exactly once per changed codebase before requested integration/branch closure.
+- `mobile full` must not perform an Android native release build. Android packaging belongs only to explicit `mobile release`, with the existing arm64/public-HTTPS release boundary.
+- Do not wire Engineering Guard or maintainability into pre-commit, pre-push, package scripts, Make targets, CI, or hidden/background hooks without a future explicit user policy change.
+- Agent governance belongs in `.agents/scripts/`; existing root/mobile product operational scripts keep their current ownership.
+
+Source: user-stated on 2026-09-02, modeled after the Sensio workspace governance lifecycle.
+Status: active durable repository policy.
+
 ## Repository testing policy (2026-09-02)
 
 - Persistent unit tests are not allowed in the repository. Existing repo-authored unit/regression test suites and their package scripts were intentionally removed.

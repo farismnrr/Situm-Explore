@@ -52,7 +52,7 @@ Plans 017–020 are complete/integrated into `main` by PR #12.
 
 Plans 026–035 are closed/integrated. Plans 028–034 delivered and closed the native companion roadmap; Plan 035 separately remediated Realtime/foreground-positioning lifecycle and was integrated through PR #32 at merge commit `840c0f9`.
 
-Plans 021–035 are historical execution. There is currently **no active implementation plan**. `plans/028-034-native-mobile-roadmap.md`, Plans 033–035, and their evidence remain historical authority for why the current runtime looks the way it does, but new work must begin from updated `main` with an explicitly created plan.
+Plans 021–041 are historical execution. Plan 042 — Repository Engineering Governance is currently active. `plans/028-034-native-mobile-roadmap.md` and prior plan evidence remain historical authority for why the current runtime looks the way it does; current execution authority is Plan 042 plus current state/decisions.
 
 The roadmap moves the product from the pre-refactor env-defined user/global Situm runtime to DB-backed users, private workspaces, protected workspace configuration, workspace-scoped Situm/analytics context, reused observability, end-to-end correlation, and safe client errors.
 
@@ -69,3 +69,15 @@ For external Situm behavior, verify exact official/current contracts and install
 For future implementation phases, update plan/state/session evidence and required durable decisions, run validation, review the diff, commit, and push.
 
 Never persist real credentials, API keys, JWTs, passwords, session cookies, encryption-key values, or sensitive payloads in repository context.
+
+## Governance and closure gates
+
+`.agents/scripts/` owns manual agent governance:
+
+- `engineering-guard.sh <web|mobile> <fast|full|release>` — component quality entry point;
+- `maintainability.py <web|mobile>` — closure-only non-growing debt ratchet;
+- `codebase-policy.sh <web|mobile>` — component/repository policy enforcement, including the no-persistent-test rule;
+- `environment-guard.sh <web|mobile> <mutate|runtime|read|validate>` — bounded environment safety checks;
+- `validate.sh` — agent-workspace/governance structure validation only; it does not implicitly run product guards.
+
+These wrappers are **not implementation-loop commands**. During implementation/trial-error use focused direct checks only. Product work is codebase-serial (`web -> mobile` by default for multi-codebase tasks), including closure verification. Run Engineering Guard/maintainability at explicit closure or when the user directly requests them. No Git hook, package script, Make target, CI workflow, or background automation may invoke them implicitly under the current policy.
