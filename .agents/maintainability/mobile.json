@@ -3,14 +3,15 @@
   "codebase": "mobile",
   "directories": {},
   "files": {
-    "src/map/NativeMapScreen.tsx": 423
+    "src/map/NativeMapScreen.tsx": 481,
+    "src/map/CustomIndoorMap.tsx": 369
   },
   "functions": {
     "src/map/CustomIndoorMap.tsx": [
-      128
+      273
     ],
     "src/map/NativeMapScreen.tsx": [
-      260
+      314
     ]
   },
   "limits": {

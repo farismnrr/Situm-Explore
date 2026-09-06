@@ -27,11 +27,13 @@ function locationFromSitum(location: Location | null): CustomIndoorLocation | nu
   }
 }
 
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+
 function distance(a: { x: number, y: number }, b: { x: number, y: number }) {
   return Math.hypot(a.x - b.x, a.y - b.y)
 }
 
-export function NativeMapScreen({ workspaces, lifecycle, positioning, layout, fullscreen = false, onFullscreenChange }: { workspaces: WorkspaceContext, lifecycle: string, positioning: ForegroundPositioningSession, layout?: LayoutMode, fullscreen?: boolean, onFullscreenChange?: (fullscreen: boolean) => void }) {
+export function NativeMapScreen({ workspaces, lifecycle, positioning, layout, fullscreen = false, onFullscreenChange, onNavigationFocusChange }: { workspaces: WorkspaceContext, lifecycle: string, positioning: ForegroundPositioningSession, layout?: LayoutMode, fullscreen?: boolean, onFullscreenChange?: (fullscreen: boolean) => void, onNavigationFocusChange?: (active: boolean) => void }) {
   const [cartography, setCartography] = useState<SitumCartographyResponse | null>(null)
   const [paths, setPaths] = useState<SitumPathsResponse | null>(null)
   const [error, setError] = useState('')
@@ -90,14 +92,36 @@ export function NativeMapScreen({ workspaces, lifecycle, positioning, layout, fu
       layout={layout}
       fullscreen={fullscreen}
       onFullscreenChange={onFullscreenChange}
+      onNavigationFocusChange={onNavigationFocusChange}
     />
   )
 }
 
-function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecycle, workspaces, positioning, initialBuildingId, layout: suppliedLayout, fullscreen, onFullscreenChange }: { workspaceId: string, cartography: SitumCartographyResponse, paths: SitumPathsResponse, lifecycle: string, workspaces: WorkspaceContext, positioning: ForegroundPositioningSession, initialBuildingId: number | null, layout?: LayoutMode, fullscreen: boolean, onFullscreenChange?: (fullscreen: boolean) => void }) {
-  const { width } = useWindowDimensions()
+function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecycle, workspaces, positioning, initialBuildingId, layout: suppliedLayout, fullscreen, onFullscreenChange, onNavigationFocusChange }: { workspaceId: string, cartography: SitumCartographyResponse, paths: SitumPathsResponse, lifecycle: string, workspaces: WorkspaceContext, positioning: ForegroundPositioningSession, initialBuildingId: number | null, layout?: LayoutMode, fullscreen: boolean, onFullscreenChange?: (fullscreen: boolean) => void, onNavigationFocusChange?: (active: boolean) => void }) {
+  const { width, height } = useWindowDimensions()
   const layout = suppliedLayout || layoutForWidth(width).mode
   const isPhone = layout === 'phone'
+  const guidanceUi = useMemo(() => {
+    const compact = height <= 760
+    return {
+      inset: clamp(width * 0.012, 10, 16),
+      topWidth: isPhone ? Math.max(0, width - 24) : clamp(width * 0.42, 340, 560),
+      bottomWidth: isPhone ? Math.max(0, width - 24) : clamp(width * 0.34, 300, 440),
+      cardRadius: clamp(height * 0.018, 11, 15),
+      cardPadX: clamp(width * 0.011, 10, 14),
+      cardPadY: clamp(height * 0.012, 8, 11),
+      turnSize: clamp(height * 0.061, 40, 48),
+      turnFont: clamp(height * 0.035, 22, 28),
+      eyebrowFont: clamp(height * 0.011, 8, 9),
+      instructionFont: clamp(height * 0.021, 13, 17),
+      instructionLine: clamp(height * 0.027, 17, 21),
+      summaryFont: clamp(height * 0.020, 13, 16),
+      destinationFont: clamp(height * 0.014, 9, 11),
+      actionHeight: compact ? 40 : 44,
+      recenterSize: compact ? 42 : 46,
+      bottomGap: compact ? 10 : 12,
+    }
+  }, [height, isPhone, width])
   const initialBuilding = cartography.buildings.find(building => building.id === initialBuildingId) ?? cartography.buildings[0]!
   const [buildingId] = useState(initialBuilding.id)
   const building = cartography.buildings.find(candidate => candidate.id === buildingId) ?? initialBuilding
@@ -162,6 +186,12 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
     return () => subscription.remove()
   }, [fullscreen, onFullscreenChange])
 
+  const dismissMapOverlays = useCallback(() => {
+    Keyboard.dismiss()
+    setSearchFocused(false)
+    setFloorMenuOpen(false)
+  }, [])
+
   const startPositioning = useCallback(() => {
     setNavigationMessage('Finding your indoor position…')
     void positioning.start(workspaceId, buildingId, () => workspaces.getPositioningCredential())
@@ -208,23 +238,26 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
     setRoute(nextRoute)
     setNavigationState('active')
     setNavigationMessage('Continue along the highlighted route.')
+    onNavigationFocusChange?.(true)
     setSearchFocused(false)
     setFloorMenuOpen(false)
     setActiveFloorId(indoorLocation.floorId)
     setRecenterNonce(value => value + 1)
-  }, [canNavigate, indoorLocation, paths, selectedPoi])
+  }, [canNavigate, indoorLocation, onNavigationFocusChange, paths, selectedPoi])
 
   const cancelNavigation = useCallback(() => {
     setRoute(null)
     setNavigationState('cancelled')
     setNavigationMessage('Directions stopped.')
-  }, [])
+    onNavigationFocusChange?.(false)
+  }, [onNavigationFocusChange])
 
   const resetGuidanceOutcome = useCallback(() => {
     setNavigationState('idle')
     setNavigationMessage('Choose a place to see directions.')
     setRoute(null)
-  }, [])
+    onNavigationFocusChange?.(false)
+  }, [onNavigationFocusChange])
 
   const recenter = useCallback(() => {
     if (indoorLocation && buildingFloors.some(floor => floor.id === indoorLocation.floorId)) setActiveFloorId(indoorLocation.floorId)
@@ -244,6 +277,8 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
         building={building}
         currentLocation={indoorLocation}
         floor={activeFloor}
+        followLocation={isGuidanceActive}
+        onMapPress={dismissMapOverlays}
         onPoiPress={selectPoi}
         pois={cartography.pois.filter(poi => poi.buildingId === buildingId)}
         recenterNonce={recenterNonce}
@@ -317,10 +352,16 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
             </View>
           ) : null}
 
-          <View style={styles.mapControls}>
-            <MapControlButton label="Enter fullscreen map" visibleLabel={isPhone ? undefined : 'Full screen'} symbol="⛶" onPress={() => onFullscreenChange?.(true)} />
-            {positionState === 'fresh' ? <MapControlButton label="Recenter on my location" visibleLabel={isPhone ? undefined : 'Recenter'} symbol="⌖" tone="primary" onPress={recenter} /> : <MapControlButton label="Find my location" visibleLabel={isPhone ? undefined : (positionState === 'starting' ? 'Locating…' : 'Locate me')} symbol="⌖" disabled={positionState === 'starting'} onPress={startPositioning} />}
-          </View>
+          {isBrowseMode ? (
+            <View style={styles.mapControls}>
+              <MapControlButton label="Enter fullscreen map" visibleLabel={isPhone ? undefined : 'Full screen'} symbol="⛶" onPress={() => onFullscreenChange?.(true)} />
+              {positionState === 'fresh' ? <MapControlButton label="Recenter on my location" visibleLabel={isPhone ? undefined : 'Recenter'} symbol="⌖" tone="primary" onPress={recenter} /> : <MapControlButton label="Find my location" visibleLabel={isPhone ? undefined : (positionState === 'starting' ? 'Locating…' : 'Locate me')} symbol="⌖" disabled={positionState === 'starting'} onPress={startPositioning} />}
+            </View>
+          ) : isGuidanceActive ? (
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Recenter navigation" onPress={recenter} style={[styles.guidanceRecenter, { borderRadius: guidanceUi.recenterSize / 2, bottom: 16 + guidanceUi.actionHeight + guidanceUi.cardPadY * 2 + 12, height: guidanceUi.recenterSize, width: guidanceUi.recenterSize }]}>
+              <Text style={[styles.guidanceRecenterText, { fontSize: guidanceUi.recenterSize * 0.46 }]}>⌖</Text>
+            </TouchableOpacity>
+          ) : null}
 
           {positionState !== 'stopped' && positionState !== 'fresh' ? (
             <View style={[styles.locationStatus, isPhone ? styles.locationStatusPhone : styles.locationStatusLarge]}>
@@ -342,7 +383,7 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
                 <TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear destination" onPress={clearDestination} style={styles.destinationClose}><Text style={styles.destinationCloseText}>×</Text></TouchableOpacity>
               </View>
               <View style={styles.sheetActions}>
-                {canNavigate ? <TouchableOpacity accessibilityRole="button" accessibilityLabel="Directions" onPress={startGuidance} style={styles.primaryButton}><Text style={styles.primaryButtonText}>Directions</Text></TouchableOpacity> : <TouchableOpacity accessibilityRole="button" accessibilityLabel="Locate me for directions" disabled={positionState === 'starting'} onPress={startPositioning} style={[styles.primaryButton, positionState === 'starting' && styles.disabled]}><Text style={styles.primaryButtonText}>{positionState === 'starting' ? 'Locating…' : 'Locate me'}</Text></TouchableOpacity>}
+                {canNavigate ? <TouchableOpacity accessibilityRole="button" accessibilityLabel="Start navigation" onPress={startGuidance} style={styles.primaryButton}><Text style={styles.primaryButtonText}>Start</Text></TouchableOpacity> : <TouchableOpacity accessibilityRole="button" accessibilityLabel="Locate me for directions" disabled={positionState === 'starting'} onPress={startPositioning} style={[styles.primaryButton, positionState === 'starting' && styles.disabled]}><Text style={styles.primaryButtonText}>{positionState === 'starting' ? 'Locating…' : 'Locate me'}</Text></TouchableOpacity>}
                 <TouchableOpacity accessibilityRole="button" accessibilityLabel="Search another place" onPress={() => setSearchFocused(true)} style={styles.secondaryButton}><Text style={styles.secondaryButtonText}>Change</Text></TouchableOpacity>
               </View>
               <Text style={styles.sheetHint}>{canNavigate ? 'Route geometry is calculated from the venue path graph and drawn by this app.' : 'A fresh indoor position is required before route calculation can start.'}</Text>
@@ -351,23 +392,40 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
 
           {showGuidanceHud ? (
             <>
-              <View style={[styles.guidanceTop, isPhone ? styles.guidanceTopPhone : styles.guidanceTopLarge, navigationState === 'outside-route' && styles.guidanceWarning]}>
-                <View style={styles.guidanceTurnIcon}><Text style={styles.guidanceTurnText}>{guidanceSymbol(instruction, navigationState)}</Text></View>
+              <View style={[
+                styles.guidanceTop,
+                {
+                  borderRadius: guidanceUi.cardRadius,
+                  gap: guidanceUi.bottomGap,
+                  left: guidanceUi.inset,
+                  paddingHorizontal: guidanceUi.cardPadX,
+                  paddingVertical: guidanceUi.cardPadY,
+                  width: guidanceUi.topWidth,
+                },
+                navigationState === 'outside-route' && styles.guidanceWarning,
+              ]}>
+                <View style={[styles.guidanceTurnIcon, { borderRadius: guidanceUi.cardRadius - 2, height: guidanceUi.turnSize, width: guidanceUi.turnSize }]}><Text style={[styles.guidanceTurnText, { fontSize: guidanceUi.turnFont, lineHeight: guidanceUi.turnFont + 3 }]}>{guidanceSymbol(instruction, navigationState)}</Text></View>
                 <View style={styles.guidanceTopCopy}>
-                  <Text style={styles.guidanceEyebrow}>{navigationState === 'arrived' ? 'ARRIVED' : navigationState === 'outside-route' ? 'ROUTE UPDATE' : navigationState === 'error' ? 'ROUTE' : navigationState === 'cancelled' ? 'ROUTE' : 'NEXT'}</Text>
-                  <Text numberOfLines={2} style={styles.guidanceInstruction}>{navigationState === 'error' || navigationState === 'cancelled' || navigationState === 'arrived' ? navigationMessage : instruction}</Text>
-                  {selectedPoi ? <Text numberOfLines={1} style={styles.guidanceDestination}>to {selectedPoi.name}</Text> : null}
+                  <Text style={[styles.guidanceEyebrow, { fontSize: guidanceUi.eyebrowFont }]}>{navigationState === 'arrived' ? 'ARRIVED' : navigationState === 'outside-route' ? 'REROUTING' : navigationState === 'error' || navigationState === 'cancelled' ? 'ROUTE' : 'NEXT'}</Text>
+                  <Text numberOfLines={2} style={[styles.guidanceInstruction, { fontSize: guidanceUi.instructionFont, lineHeight: guidanceUi.instructionLine }]}>{navigationState === 'error' || navigationState === 'cancelled' || navigationState === 'arrived' ? navigationMessage : instruction}</Text>
                 </View>
               </View>
-              <View style={[styles.guidanceBottom, isPhone ? styles.guidanceBottomPhone : styles.guidanceBottomLarge]}>
-                <View style={styles.guidanceMetricGroup}>
-                  <View style={styles.guidanceMetric}><Text style={styles.guidanceMetricValue}>{navigationState === 'arrived' ? '0 min' : progressEta || '—'}</Text><Text style={styles.guidanceMetricLabel}>ETA</Text></View>
-                  <View style={styles.guidanceDivider} />
-                  <View style={styles.guidanceMetric}><Text style={styles.guidanceMetricValue}>{navigationState === 'arrived' ? '0 m' : progressDistance || '—'}</Text><Text style={styles.guidanceMetricLabel}>Remaining</Text></View>
-                  <View style={styles.guidanceDivider} />
-                  <View style={styles.guidanceMetric}><Text numberOfLines={1} style={styles.guidanceMetricValue}>{activeFloor.name}</Text><Text style={styles.guidanceMetricLabel}>Floor</Text></View>
+              <View style={[
+                styles.guidanceBottom,
+                {
+                  borderRadius: guidanceUi.cardRadius,
+                  gap: guidanceUi.bottomGap,
+                  left: guidanceUi.inset,
+                  paddingHorizontal: guidanceUi.cardPadX,
+                  paddingVertical: guidanceUi.cardPadY,
+                  width: guidanceUi.bottomWidth,
+                },
+              ]}>
+                <View style={styles.guidanceBottomCopy}>
+                  <Text numberOfLines={1} style={[styles.guidanceSummary, { fontSize: guidanceUi.summaryFont }]}>{navigationState === 'arrived' ? '0 min · 0 m' : `${progressEta || '—'} · ${progressDistance || '—'}`}</Text>
+                  {selectedPoi ? <Text numberOfLines={1} style={[styles.guidanceDestination, { fontSize: guidanceUi.destinationFont }]}>{selectedPoi.name} · {activeFloor.name}</Text> : <Text numberOfLines={1} style={[styles.guidanceDestination, { fontSize: guidanceUi.destinationFont }]}>{activeFloor.name}</Text>}
                 </View>
-                {isGuidanceActive ? <TouchableOpacity accessibilityRole="button" accessibilityLabel="Stop guidance" onPress={cancelNavigation} style={styles.stopButton}><Text style={styles.stopText}>Stop</Text></TouchableOpacity> : <TouchableOpacity accessibilityRole="button" accessibilityLabel="Return to map browsing" onPress={resetGuidanceOutcome} style={styles.doneButton}><Text style={styles.doneText}>Done</Text></TouchableOpacity>}
+                {isGuidanceActive ? <TouchableOpacity accessibilityRole="button" accessibilityLabel="Stop guidance" onPress={cancelNavigation} style={[styles.stopButton, { minHeight: guidanceUi.actionHeight }]}><Text style={styles.stopText}>Stop</Text></TouchableOpacity> : <TouchableOpacity accessibilityRole="button" accessibilityLabel="Return to map browsing" onPress={resetGuidanceOutcome} style={[styles.doneButton, { minHeight: guidanceUi.actionHeight }]}><Text style={styles.doneText}>Done</Text></TouchableOpacity>}
               </View>
             </>
           ) : null}
@@ -417,7 +475,7 @@ const styles = StyleSheet.create({
   mapControls: { bottom: 18, gap: 8, left: 16, position: 'absolute' }, mapControlButton: { alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.97)', borderColor: colors.border, borderRadius: 13, borderWidth: 1, elevation: 5, flexDirection: 'row', gap: 7, justifyContent: 'center', minHeight: 44, minWidth: 44, paddingHorizontal: 11, shadowColor: '#0f172a', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.1, shadowRadius: 8 }, mapControlButtonPrimary: { backgroundColor: colors.action, borderColor: colors.action }, mapControlSymbol: { color: colors.action, fontSize: 20, fontWeight: '800' }, mapControlSymbolPrimary: { color: '#fff' }, mapControlLabel: { color: colors.secondary, fontSize: 11, fontWeight: '800' }, mapControlLabelPrimary: { color: '#fff' },
   locationStatus: { alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.96)', borderColor: colors.border, borderRadius: 12, borderWidth: 1, bottom: 18, flexDirection: 'row', gap: 9, paddingHorizontal: 12, paddingVertical: 9, position: 'absolute' }, locationStatusPhone: { left: 70, right: 12 }, locationStatusLarge: { left: 160, maxWidth: 360 }, locationStatusText: { color: colors.secondary, flexShrink: 1, fontSize: 11, lineHeight: 15 },
   poiSheet: { backgroundColor: 'rgba(255,255,255,0.98)', borderColor: 'rgba(255,255,255,0.9)', borderRadius: 18, borderWidth: 1, bottom: 16, elevation: 9, padding: 15, position: 'absolute', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.15, shadowRadius: 16 }, poiSheetPhone: { left: 12, right: 12 }, poiSheetLarge: { left: 126, width: 410 }, sheetHandle: { alignSelf: 'center', backgroundColor: colors.strongBorder, borderRadius: 3, height: 4, marginBottom: 10, width: 36 }, destinationHeader: { alignItems: 'center', flexDirection: 'row', gap: 11 }, destinationIcon: { alignItems: 'center', backgroundColor: '#eaf1ff', borderRadius: 18, height: 36, justifyContent: 'center', width: 36 }, destinationIconText: { color: colors.action, fontSize: 16 }, destinationCopy: { flex: 1 }, destinationClose: { alignItems: 'center', height: 36, justifyContent: 'center', width: 36 }, destinationCloseText: { color: colors.tertiary, fontSize: 24 }, sheetEyebrow: { color: colors.muted, fontSize: 9, fontWeight: '800', letterSpacing: 1.1 }, sheetTitle: { color: colors.ink, fontSize: 17, fontWeight: '800', marginTop: 2 }, sheetMeta: { color: colors.tertiary, fontSize: 11, marginTop: 3 }, sheetActions: { alignItems: 'center', flexDirection: 'row', gap: 8, marginTop: 12 }, primaryButton: { alignItems: 'center', backgroundColor: colors.action, borderRadius: 11, flex: 1, justifyContent: 'center', minHeight: 42, paddingHorizontal: 14 }, primaryButtonText: { color: '#fff', fontSize: 12, fontWeight: '800' }, secondaryButton: { alignItems: 'center', borderColor: colors.strongBorder, borderRadius: 11, borderWidth: 1, justifyContent: 'center', minHeight: 42, paddingHorizontal: 14 }, secondaryButtonText: { color: colors.secondary, fontSize: 12, fontWeight: '700' }, sheetHint: { color: colors.muted, fontSize: 10, lineHeight: 14, marginTop: 9 }, disabled: { opacity: 0.55 },
-  guidanceTop: { backgroundColor: 'rgba(255,255,255,0.98)', borderColor: 'rgba(255,255,255,0.92)', borderRadius: 18, borderWidth: 1, elevation: 10, flexDirection: 'row', gap: 13, padding: 14, position: 'absolute', top: 14, shadowColor: '#0f172a', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.16, shadowRadius: 18 }, guidanceTopPhone: { left: 12, right: 12 }, guidanceTopLarge: { left: 16, width: 470 }, guidanceWarning: { borderColor: '#f59e0b' }, guidanceTurnIcon: { alignItems: 'center', backgroundColor: colors.action, borderRadius: 15, height: 54, justifyContent: 'center', width: 54 }, guidanceTurnText: { color: '#fff', fontSize: 30, fontWeight: '700', lineHeight: 34 }, guidanceTopCopy: { flex: 1 }, guidanceEyebrow: { color: colors.muted, fontSize: 9, fontWeight: '900', letterSpacing: 1.2 }, guidanceInstruction: { color: colors.ink, fontSize: 18, fontWeight: '800', lineHeight: 22, marginTop: 2 }, guidanceDestination: { color: colors.tertiary, fontSize: 11, marginTop: 5 },
-  guidanceBottom: { alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.98)', borderColor: 'rgba(255,255,255,0.92)', borderRadius: 18, borderWidth: 1, bottom: 16, elevation: 9, flexDirection: 'row', gap: 12, padding: 12, position: 'absolute', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.15, shadowRadius: 16 }, guidanceBottomPhone: { left: 12, right: 12 }, guidanceBottomLarge: { left: 126, width: 520 }, guidanceMetricGroup: { alignItems: 'center', flex: 1, flexDirection: 'row' }, guidanceMetric: { flex: 1, minWidth: 62 }, guidanceMetricValue: { color: colors.ink, fontSize: 13, fontWeight: '800' }, guidanceMetricLabel: { color: colors.muted, fontSize: 9, marginTop: 2 }, guidanceDivider: { backgroundColor: colors.border, height: 30, marginHorizontal: 8, width: 1 }, stopButton: { alignItems: 'center', backgroundColor: '#111827', borderRadius: 11, justifyContent: 'center', minHeight: 42, paddingHorizontal: 16 }, stopText: { color: '#fff', fontSize: 12, fontWeight: '800' }, doneButton: { alignItems: 'center', backgroundColor: colors.action, borderRadius: 11, justifyContent: 'center', minHeight: 42, paddingHorizontal: 16 }, doneText: { color: '#fff', fontSize: 12, fontWeight: '800' },
+  guidanceTop: { alignItems: 'center', backgroundColor: '#1769E0', elevation: 10, flexDirection: 'row', position: 'absolute', top: 12, shadowColor: '#0f172a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.16, shadowRadius: 14 }, guidanceWarning: { backgroundColor: '#B45309' }, guidanceTurnIcon: { alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.16)', justifyContent: 'center' }, guidanceTurnText: { color: '#fff', fontWeight: '700' }, guidanceTopCopy: { flex: 1 }, guidanceEyebrow: { color: 'rgba(255,255,255,0.72)', fontWeight: '900', letterSpacing: 1.1 }, guidanceInstruction: { color: '#fff', fontWeight: '800', marginTop: 1 }, guidanceDestination: { color: colors.tertiary, marginTop: 2 },
+  guidanceBottom: { alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.98)', borderColor: 'rgba(15,23,42,0.08)', borderWidth: 1, bottom: 14, elevation: 10, flexDirection: 'row', position: 'absolute', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.13, shadowRadius: 13 }, guidanceBottomCopy: { flex: 1 }, guidanceSummary: { color: colors.action, fontWeight: '900' }, guidanceRecenter: { alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.98)', borderColor: colors.border, borderWidth: 1, elevation: 8, justifyContent: 'center', position: 'absolute', right: 14, shadowColor: '#0f172a', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 9 }, guidanceRecenterText: { color: colors.action, fontWeight: '800' }, stopButton: { alignItems: 'center', backgroundColor: '#111827', borderRadius: 10, justifyContent: 'center', paddingHorizontal: 15 }, stopText: { color: '#fff', fontSize: 11, fontWeight: '800' }, doneButton: { alignItems: 'center', backgroundColor: colors.action, borderRadius: 10, justifyContent: 'center', paddingHorizontal: 15 }, doneText: { color: '#fff', fontSize: 11, fontWeight: '800' },
   loading: { alignItems: 'center', flex: 1, gap: 12, justifyContent: 'center' }, card: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radii.panel, borderWidth: 1, margin: 16, padding: 18 }, cardTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, muted: { color: colors.tertiary, fontSize: 13, lineHeight: 20, marginTop: 5 },
 })

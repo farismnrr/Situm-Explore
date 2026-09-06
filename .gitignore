@@ -12,9 +12,14 @@ dist/
 !.env.example
 deploy/staging.env
 .data/
+.tools/
 
 # Local building resources are not approved for repository distribution.
 resources/buildings/
+
+# Local public floorplan/photo assets are kept out of Git as requested.
+public/building-layouts/
+public/building-photos/
 
 # Logs and temporary files
 *.log

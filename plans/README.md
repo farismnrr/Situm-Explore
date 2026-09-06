@@ -80,7 +80,8 @@ Roadmap history: `plans/028-034-native-mobile-roadmap.md`. Plan 036 — Realtime
 - Plan 040 — Explicit Explore Fullscreen: complete/integrated through PR #38 at merge commit `845b437`.
 - Plan 041 — App-Owned Indoor Map + Navigation UI: complete/integrated through PR #39 at merge commit `99318a6`. React Native owns the visible floorplan/POI/bluedot/route renderer and route graph; authenticated Situm REST remains the cartography/path source and the native Situm runtime remains headless positioning only. Physical POS functional acceptance covered real indoor fixes, real POI selection, same/cross-floor routing, floor switching, fullscreen/back route preservation, Stop, bounded crash checks, final arm64 packaging/checksum, and the branded same-logo cold launch. Pixel-level screenshot polish and movement-dependent arrival/off-route reproduction remain explicitly unclaimed follow-ups.
 
-Plan 042 — Repository Engineering Governance: implementation and closure validation complete on `plan/042-repository-engineering-governance`; integration pending user authorization. It ports the Sensio-style component-scoped governance model for `web` and `mobile`, with Engineering Guard and maintainability explicitly reserved for closure or direct user request rather than routine implementation/trial-error.
+- Plan 042 — Repository Engineering Governance: complete/integrated locally into `main`; component-scoped Engineering Guard and maintainability remain closure-only or explicit-user-request tools.
+- Plan 043 — Map Marker & Interaction Polish: complete/integrated locally into `main`; includes the accepted mobile map polish and reproducible Blender-to-Situm 2D/3D asset pipeline. Local building photos and generated artifacts remain outside repository distribution.
 
 ## Transition direction
 

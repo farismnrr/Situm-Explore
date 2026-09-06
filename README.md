@@ -84,7 +84,7 @@ npm run typecheck
 
 Persistent unit tests are intentionally not kept in this repository. When a task needs E2E, white-box, or black-box checks, they are temporary execution artifacts and must be deleted before commit/closeout.
 
-Runtime acceptance should use a production build/preview for the web application. Android release verification is documented in [docs/mobile-distribution.md](docs/mobile-distribution.md).
+Runtime acceptance should use a production build/preview for the web application. Android release verification is documented in [docs/mobile-distribution.md](docs/mobile-distribution.md). The Blender-to-Situm 3D asset workflow is documented in [docs/situm-3d-models.md](docs/situm-3d-models.md).
 
 ## Deployment and Android distribution
 
