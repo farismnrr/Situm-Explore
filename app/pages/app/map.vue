@@ -131,7 +131,7 @@ function updateFullscreenState() {
 onMounted(() => document.addEventListener('fullscreenchange', updateFullscreenState))
 onBeforeUnmount(() => document.removeEventListener('fullscreenchange', updateFullscreenState))
 
-definePageMeta({ middleware: 'auth', layout: 'app', title: 'Map', fullWidth: true })
+definePageMeta({ middleware: 'auth', layout: 'app', title: 'Explore', fullWidth: true })
 </script>
 
 <template>
@@ -169,7 +169,7 @@ definePageMeta({ middleware: 'auth', layout: 'app', title: 'Map', fullWidth: tru
           @poi-select="selectPoi"
           @map-press="dismissMapOverlays"
         />
-        <MapMapSearchDock
+        <MapSearchDock
           ref="searchDock"
           :building-name="activeBuilding.name"
           :floors="buildingFloors"
@@ -180,8 +180,8 @@ definePageMeta({ middleware: 'auth', layout: 'app', title: 'Map', fullWidth: tru
           @poi-select="selectPoi"
           @clear-destination="clearDestination"
         />
-        <MapMapControlStack :fullscreen="isFullscreen" @reset="resetView" @fullscreen-toggle="toggleFullscreen" />
-        <MapMapDestinationCard
+        <MapControlStack :fullscreen="isFullscreen" @reset="resetView" @fullscreen-toggle="toggleFullscreen" />
+        <MapDestinationCard
           v-if="selectedPoi"
           :poi="selectedPoi"
           :floor-name="selectedPoiFloorName"
