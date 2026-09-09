@@ -16,7 +16,7 @@ const initials = computed(() => displayName.value.split(' ').map(part => part.ch
 const searchDestinations = [
   { label: 'Home', detail: 'Workspace', to: '/app', icon: 'i-lucide-house' },
   { label: 'Dashboard', detail: 'Workspace', to: '/app/dashboard', icon: 'i-lucide-layout-dashboard' },
-  { label: 'Map Viewer', detail: 'Workspace', to: '/app/map', icon: 'i-lucide-map' },
+  { label: 'Map', detail: 'Workspace', to: '/app/map', icon: 'i-lucide-map' },
   { label: 'Buildings & floors', detail: 'Cartography', to: '/app/buildings', icon: 'i-lucide-building-2' },
   { label: 'Points of interest', detail: 'Cartography', to: '/app/pois', icon: 'i-lucide-map-pin' },
   { label: 'Realtime', detail: 'Operations', to: '/app/realtime', icon: 'i-lucide-radio' },

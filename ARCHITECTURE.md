@@ -41,10 +41,10 @@ browser / Vue / Nuxt UI
         └── existing observability stack
               logs / traces / metrics as supported
 
-browser Situm Viewer
+browser app-owned Map
         ▲
-        └── only evidence-backed browser authentication;
-            never the stored long-lived workspace API key
+        └── authenticated workspace cartography through Nitro;
+            no Situm credential in the Map renderer
 ```
 
 Do not introduce a second backend application, microservice, client-side database access, or duplicate observability stack.
@@ -135,11 +135,11 @@ Rules:
 - long-lived workspace credentials are encrypted at rest using authenticated encryption;
 - encryption uses one server-only master key configured outside the database;
 - stored envelopes are versioned so future rotation/migration is possible;
-- normal configuration/status reads return only non-secret metadata/booleans; the Only Read value is returned only by the bounded authenticated Viewer/mobile credential endpoints that need it;
+- normal configuration/status reads return only non-secret metadata/booleans; the Only Read value is returned only by bounded authenticated client credential endpoints that explicitly need it; the current app-owned web Map does not receive the credential;
 - raw credentials are never logged, traced, persisted in docs/tests, or exposed through public runtime config;
 - missing/invalid encryption configuration fails closed;
 - workspace configuration supports exactly two independently optional Situm credentials: Only Read and Read & Write;
-- Only Read is the bounded client/read authority used for browser Viewer, native positioning, and server read operations where applicable;
+- Only Read is the bounded read authority used for native positioning and server-side Situm reads; any retained direct browser Viewer utility must use only this least-privilege credential and is not the current Map route;
 - Read & Write is server-only and reserved for operations that require mutation/admin authority;
 - the Situm organization/account ID is derived from the first verified configured credential and replacement credentials must match that persisted organization;
 - upstream Situm authorization remains authoritative;
@@ -147,15 +147,13 @@ Rules:
 
 Use the existing versioned authenticated-encryption implementation; do not invent a second credential storage protocol.
 
-## Browser Situm Viewer
+## Browser indoor Map
 
-`app/components/situm/SitumViewer.vue` remains the single Viewer instance/lifecycle owner.
+`app/pages/app/map.vue` owns the responsive browser Map workspace and `app/components/map/IndoorMapCanvas.vue` owns the visible floorplan/POI renderer. The renderer consumes authenticated workspace-scoped cartography from Nitro and does not receive a Situm credential.
 
-Keep a small typed command surface only for verified product behavior. Never expose the raw Viewer or a generic method-invocation escape hatch.
+The browser Map owns non-positioning exploration: floorplan rendering, POI search/selection, floor switching, pan/zoom, reset/fullscreen, and native-app handoff. It must not fabricate sensor-backed blue-dot state, indoor positioning, ETA, rerouting, or turn-by-turn guidance. Those remain native responsibilities.
 
-The current Viewer flow uses the workspace-managed **Only Read API key**. The owner-scoped server endpoint verifies its permission and organization match before returning it to the authenticated browser, where the Situm SDK uses the documented direct-API-key Viewer flow. The Read & Write credential is never returned to the browser.
-
-Any future Viewer-auth change must preserve least privilege and be revalidated against the installed `@situm/sdk-js` contract and current Situm behavior.
+`app/components/situm/SitumViewer.vue` may remain as an isolated verified SDK utility while it has a concrete caller, but it is no longer the primary `/app/map` renderer. Any direct Viewer use must keep the small typed command surface, use only the verified Only Read credential boundary, and never expose Read & Write.
 
 ## Situm REST integration
 
@@ -261,19 +259,18 @@ Missing material evidence stays unresolved/absent. Historical plans and prototyp
 
 Current web runtime may retain verified:
 
-- cartography/map exploration;
-- static directions between known points;
+- app-owned cartography/map exploration across responsive layouts;
 - analytics/reports;
 - organization/users/groups/alarms read views;
-- browser-safe Viewer settings/actions;
+- isolated browser-safe Viewer behavior where a concrete verified caller still exists;
 - workspace-scoped realtime backend reads where needed by server/client contracts.
 
 The native companion is a **separate client** while Nitro remains the single application backend. It is not a Nuxt wrapper and does not own a separate identity or data authority.
 
 Current ownership:
 
-- desktop/tablet web Map uses the browser Viewer where the layout is capable;
-- phone web Map hands off to the native app;
+- web Map uses the app-owned responsive floorplan/POI renderer on desktop, tablet, and phone-sized browser layouts;
+- web exposes native-app handoff for sensor-backed positioning/navigation instead of blocking small browser layouts;
 - web Realtime entry points hand off to native on desktop/tablet/phone;
 - sensor-generated handset blue dot, positioning permissions/runtime, mobile navigation/rerouting, and native Realtime presentation belong to the React Native companion;
 - native Realtime remote reads remain foreground-oriented and server-mediated through the owner-scoped workspace route;

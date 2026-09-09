@@ -61,7 +61,7 @@ A workspace is a private app-owned container for one user's Situm configuration 
 
 Workspace configuration distinguishes exactly two Situm credentials:
 
-- Only Read API key — used for browser Viewer, mobile positioning, and read-only Situm access; it may be issued only to authenticated clients through bounded backend endpoints;
+- Only Read API key — used for mobile positioning and read-only Situm access; the app-owned browser Map consumes server-mediated cartography and does not need the raw key, while any separate verified direct Viewer caller may receive it only through a bounded authenticated endpoint;
 - Read & Write API key — server-only authority for operations that modify Situm data and must never be returned to browser/mobile clients;
 - Situm account/organization ID — derived server-side from whichever verified credential establishes the workspace context rather than manually entered.
 
@@ -78,7 +78,7 @@ Native Explore is map-first and uses real Situm cartography.
 - navigation actions use actual supported Situm behavior and do not invent ETA, route steps, or geometry fields that are not available;
 - positioning, follow, floor, and guidance states must remain tied to real runtime state.
 
-Web map behavior remains the browser Viewer experience on capable layouts and follows the handoff policy defined in the capability matrix.
+Web Map uses the same map-first visual language with an app-owned responsive floorplan/POI renderer. It supports truthful non-positioning browse interactions at browser sizes, while sensor-backed blue-dot positioning and turn-by-turn guidance hand off to the native app.
 
 ## Realtime UX
 

@@ -38,7 +38,7 @@ Status: active durable repository policy.
 ## Situm two-key credential boundary
 
 - The current workspace credential model has exactly two user-managed Situm keys: **Only Read** and **Read & Write**.
-- Only Read is verified as `READ_ONLY`, encrypted at rest, used by server read paths, and may be issued through authenticated owner-scoped endpoints to the browser Viewer and native positioning flow.
+- Only Read is verified as `READ_ONLY`, encrypted at rest, used by server read paths, and may be issued through authenticated owner-scoped endpoints to native positioning or a separately verified direct Viewer caller. The app-owned browser Map itself consumes server-mediated cartography and does not receive the raw key.
 - Read & Write is verified as `READ_WRITE`, encrypted at rest, and remains server-only; it must never be returned to browser/mobile clients or embedded in client artifacts.
 - Either key may be configured independently. A replacement must match the workspace Situm organization and an omitted credential is preserved.
 - Native positioning continues to request a credential from Nitro and receives Only Read; the dedicated Positioning-key storage/configuration model is superseded.
@@ -78,11 +78,22 @@ Status: active.
 - The Nuxt web product remains the operations/admin/exploration/analytics client; Nitro remains the single application backend.
 - Plans 028–035 established a separate React Native companion client rather than turning the Nuxt application into a hybrid/mobile wrapper.
 - Device indoor positioning, sensor/permission handling, handset blue-dot positioning, mobile navigation/rerouting, and the product's mobile Realtime experience belong to the native companion roadmap.
-- Web Map remains the product path for capable desktop/tablet Viewer layouts; phone web Map hands off to native under the integrated product policy.
+- Web Map uses an app-owned responsive floorplan/POI renderer across desktop, tablet, and phone-sized browser layouts; native handoff is an action for sensor-backed positioning/navigation rather than a small-screen gate.
 - Web Realtime intentionally hands off to native on desktop/tablet/phone. This is a product policy, not a claim that Situm web APIs are technically incapable of realtime reads.
 - Situm-domain UI without a truthful owner is removed or left unresolved rather than faked.
 
 Status: active product boundary. Plans 028–035 are closed/integrated; no native roadmap plan is currently active.
+
+### App-owned responsive web Map (2026-09-09)
+
+- The primary `/app/map` experience is now app-owned Vue presentation over authenticated workspace-scoped Situm cartography rather than the embedded Situm Viewer.
+- Web Map may render real floorplans/POIs and own browse interactions such as search, floor selection, POI selection, pan/zoom, reset, fullscreen, and native-app handoff.
+- The Map renderer does not receive a Situm API key; server-mediated cartography remains the browser data boundary.
+- Phone-sized browser Map layouts are supported instead of being blocked by the former Viewer-capability gate. Native handoff remains the truthful path for sensor-backed indoor positioning and turn-by-turn guidance.
+- Web must not fabricate blue-dot, heading/accuracy, ETA, rerouting, arrival, or guidance state without a proven browser runtime source.
+
+Source: user-approved Plan 044 direction on 2026-09-09.
+Status: active; supersedes the earlier capable-layout Viewer + phone Map gate policy while preserving native ownership of sensor-backed positioning/navigation.
 
 ## Native companion technology and credential direction (Plans 028–035)
 
@@ -269,7 +280,7 @@ Status: active durable runtime decision.
 ## Browser security headers (Plan 027)
 
 - Safe, universal response headers (X-Content-Type-Options, Referrer-Policy, X-Frame-Options: DENY, conservative Permissions-Policy) are applied via `server/middleware/security-headers.ts` and are live-verified.
-- A Content-Security-Policy was deliberately NOT added. The Situm Map Viewer's exact script/frame/connect origins are not proven by any live network trace in this repo, and this repo has already hit one real Viewer-behavior surprise (the wait_for_auth/postMessage building-mismatch investigation). A guessed CSP risks silently breaking the map for every user. Revisit only with a live browser network trace against the real hosted Viewer to derive a proven allowlist.
+- A Content-Security-Policy was deliberately NOT added when the embedded Situm Viewer was the primary web Map because its exact script/frame/connect origins were not proven by a live network trace. Plan 044 removed the Viewer from the primary `/app/map` path, reducing that map-specific risk, but the retained SDK/Viewer utility still has no proven allowlist. Revisit CSP as a separate security change with current runtime/network evidence rather than guessing origins.
 
 Status: active durable security decision; CSP is an open, intentionally documented limitation, not solved.
 

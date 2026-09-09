@@ -48,7 +48,7 @@ const geofenceHours = computed(() => analytics.value?.geofencing[0] ? Math.round
         <UAlert v-else-if="!hasAnalytics" color="neutral" variant="subtle" title="No reported metrics" description="No synced analytics rows are available for the last 7 days." />
         <div v-else class="grid gap-3 sm:grid-cols-3"><ProductStatCard label="Visitors" :value="visitorTotal" note="Reported visitor count" /><ProductStatCard label="Positioning time" :value="`${positioningMinutes} min`" note="Reported positioning time" /><ProductStatCard label="Geofence stay" :value="`${geofenceHours} hr`" note="Reported matched-fence time" /></div>
       </UCard>
-      <UCard :ui="{ body: 'p-0' }"><div class="panel-head"><h2 class="font-semibold text-highlighted">System status</h2><span class="text-xs text-muted">Just now</span></div><div class="status-list panel-body"><div><span>Map Viewer</span><ProductStatusBadge label="Open map to verify" /></div><div><span>Database</span><ProductStatusBadge :label="databaseLabel" :tone="databaseColor" /></div><div><span>Situm configuration</span><ProductStatusBadge :label="situmLabel" :tone="situmColor" /></div></div></UCard>
+      <UCard :ui="{ body: 'p-0' }"><div class="panel-head"><h2 class="font-semibold text-highlighted">System status</h2><span class="text-xs text-muted">Just now</span></div><div class="status-list panel-body"><div><span>Map</span><ProductStatusBadge label="Open map to verify" /></div><div><span>Database</span><ProductStatusBadge :label="databaseLabel" :tone="databaseColor" /></div><div><span>Situm configuration</span><ProductStatusBadge :label="situmLabel" :tone="situmColor" /></div></div></UCard>
     </div>
   </div>
 </template>
