@@ -72,6 +72,10 @@ roadmap/033-034-native-ui-reconciliation          [historical/closed]
 
 Roadmap history: `plans/028-034-native-mobile-roadmap.md`. Plan 036 — Realtime Reliability is **complete / integrated via PR #35** at merge commit `7a87afb`. Historical Plan 034 limitations remain evidence unless a future scoped plan explicitly reopens them.
 
+## Active plan
+
+- Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening: proposed/planning-complete, implementation not started. It supersedes Plan 044 only as the next execution authority; Plan 044 remains historical evidence. Plan 045 makes app-owned 2D the default browser Explore surface, makes Digital Twin 3D explicit opt-in, removes semantic-room inference as 3D orientation authority, and treats the reported LT1 top/bottom reversal as a runtime presentation/orientation-contract defect unless new evidence proves an asset transform is wrong. Arbitrary LT1 mirror/180-degree corrective transforms are prohibited by the current diagnostic evidence.
+
 ## Completed recent work
 
 - Plan 037 — Web Loading-State Hygiene: complete/integrated through PR #36 at merge commit `80dad1b`.
