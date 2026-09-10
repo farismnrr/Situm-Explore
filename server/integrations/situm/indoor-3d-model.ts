@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { H3Event } from 'h3'
-import { requireOwnedWorkspace } from './workspace-owner'
+import { requireOwnedWorkspace } from '../../utils/workspace-owner'
 
 const modelFiles = {
   lt1: 'situm-explore-lt1.glb',

@@ -56,9 +56,9 @@ Stored secret values are never returned by normal configuration reads and must n
 
 ## Browser Map
 
-`app/pages/app/map.vue` composes the browser Map workspace and `app/components/map/IndoorMapCanvas.vue` owns visible floorplan/POI rendering. Real workspace cartography comes through authenticated Nitro routes; the Map renderer does not receive a Situm API key.
+`app/pages/app/map.vue` composes the browser Explore workspace and `app/components/map/IndoorWalkCanvas.vue` owns the Three.js/WebGL eye-level walkthrough. Real building/floor context comes through authenticated workspace cartography, while floor-scoped GLB assets are served by authenticated Nitro routes from configured HTTPS object storage or the staging read-only asset mount. The renderer does not receive a Situm API key.
 
-The browser surface may implement map-local presentation and interaction such as POI search/selection, floor switching, pan/zoom, reset, fullscreen, and native-app handoff. It must not synthesize sensor-backed location, ETA, rerouting, or turn-by-turn guidance.
+The browser surface is 3D-only: room discovery comes from canonical semantic room objects embedded in the active GLB, and interaction includes floor switching, mouse-look, keyboard/touch walking, deterministic camera travel to a selected room, reset, and fullscreen. Missing GLB, WebGL, or semantic-room capability is an explicit error; do not add a 2D/Viewer fallback. The browser must not synthesize sensor-backed location, ETA, rerouting, or turn-by-turn guidance.
 
 Any retained `SitumViewer.vue` use is separate from the primary Map route and must preserve its narrow verified Only Read command/auth boundary. Read & Write must never be exposed to the browser.
 

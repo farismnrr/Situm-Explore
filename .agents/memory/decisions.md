@@ -78,7 +78,7 @@ Status: active.
 - The Nuxt web product remains the operations/admin/exploration/analytics client; Nitro remains the single application backend.
 - Plans 028–035 established a separate React Native companion client rather than turning the Nuxt application into a hybrid/mobile wrapper.
 - Device indoor positioning, sensor/permission handling, handset blue-dot positioning, mobile navigation/rerouting, and the product's mobile Realtime experience belong to the native companion roadmap.
-- Web Map uses an app-owned responsive floorplan/POI renderer across desktop, tablet, and phone-sized browser layouts; native handoff is an action for sensor-backed positioning/navigation rather than a small-screen gate.
+- Web Explore uses an app-owned responsive 3D-only digital-twin walkthrough across desktop, tablet, and phone-sized browser layouts; native handoff remains the action for sensor-backed positioning/navigation rather than a small-screen gate.
 - Web Realtime intentionally hands off to native on desktop/tablet/phone. This is a product policy, not a claim that Situm web APIs are technically incapable of realtime reads.
 - Situm-domain UI without a truthful owner is removed or left unresolved rather than faked.
 

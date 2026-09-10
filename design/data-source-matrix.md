@@ -12,7 +12,7 @@ This is the current product capability and runtime-owner matrix. Detailed techni
 | Situm mutation/admin authority | Verified Read & Write credential; server-only and never returned to browser/mobile |
 | App-owned browser Map authority | Authenticated workspace cartography through Nitro; no Situm credential is issued to the Map renderer |
 | Native positioning authority | Workspace Only Read credential requested from Nitro after authenticated workspace-owner authorization |
-| Browser Map/cartography | App-owned responsive floorplan/POI renderer over workspace-scoped Situm cartography |
+| Browser Explore / digital twin | App-owned Three.js/WebGL eye-level renderer over authenticated floor-scoped GLB assets; Situm cartography supplies real building/floor context |
 | Buildings/Floors/POIs/Categories | Workspace-scoped Situm/cartography; web and native consume authorized real data |
 | Geofences/Paths | Workspace-scoped server Situm integration where implemented |
 | Web navigation | No sensor-backed guidance in browser Map; native app owns positioning/navigation handoff, and web must not synthesize route metrics |

@@ -149,9 +149,9 @@ Use the existing versioned authenticated-encryption implementation; do not inven
 
 ## Browser indoor Map
 
-`app/pages/app/map.vue` owns the responsive browser Map workspace and `app/components/map/IndoorMapCanvas.vue` owns the visible floorplan/POI renderer. The renderer consumes authenticated workspace-scoped cartography from Nitro and does not receive a Situm credential.
+`app/pages/app/map.vue` owns the responsive browser Explore workspace and `app/components/map/IndoorWalkCanvas.vue` owns the visible Three.js/WebGL walkthrough. The browser loads floor-scoped GLB assets through authenticated workspace routes and consumes Situm cartography only for real building/floor context; it does not receive a Situm credential.
 
-The browser Map owns non-positioning exploration: floorplan rendering, POI search/selection, floor switching, pan/zoom, reset/fullscreen, and native-app handoff. It must not fabricate sensor-backed blue-dot state, indoor positioning, ETA, rerouting, or turn-by-turn guidance. Those remain native responsibilities.
+Browser Explore is intentionally 3D-only. It owns eye-level perspective rendering, room discovery from canonical semantic objects embedded in the active GLB, floor switching, mouse-look, keyboard/touch walking, deterministic camera travel, reset, and fullscreen. Missing GLB/WebGL/semantic-room capability is an explicit error; there is no 2D floorplan or Viewer fallback. It must not fabricate sensor-backed blue-dot state, indoor positioning, ETA, rerouting, or turn-by-turn guidance. Those remain native responsibilities.
 
 `app/components/situm/SitumViewer.vue` may remain as an isolated verified SDK utility while it has a concrete caller, but it is no longer the primary `/app/map` renderer. Any direct Viewer use must keep the small typed command surface, use only the verified Only Read credential boundary, and never expose Read & Write.
 

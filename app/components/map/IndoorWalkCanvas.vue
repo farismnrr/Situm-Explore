@@ -16,6 +16,7 @@ import {
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { IndoorWalkDestination } from '#shared/indoor-walk'
+import { extractIndoorWalkDestinations } from '~/utils/indoor-walk-destinations'
 
 const EYE_HEIGHT = 1.62
 const MOVE_SPEED = 2.35
@@ -55,49 +56,6 @@ let lastPointerY = 0
 const pressedKeys = new Set<string>()
 const clock = new Clock()
 let travel: { from: Vector3; to: Vector3; startedAt: number; duration: number } | null = null
-
-function titleCase(value: string) {
-  return value.toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase())
-}
-
-function semanticRoomName(source: string) {
-  const match = source.match(/^3D\s*\|\s*F\d+\s*\|\s*(GLASS ENTRY|KITCHEN(?: \+ WALKWAY)?|RESTROOM ZONE|WORKROOM \d+)$/i)
-  if (!match?.[1]) return null
-  const name = match[1].replace(/\s+ZONE$/i, '').trim()
-  if (/^glass entry$/i.test(name)) return 'Main Entry'
-  if (/^kitchen \+ walkway$/i.test(name)) return 'Kitchen'
-  return titleCase(name)
-}
-
-function destinationCategory(name: string) {
-  if (/entry/i.test(name)) return 'Entrance'
-  if (/kitchen/i.test(name)) return 'Kitchen'
-  if (/restroom/i.test(name)) return 'Restroom'
-  if (/workroom/i.test(name)) return 'Workroom'
-  return 'Room'
-}
-
-function extractDestinations(root: Object3D) {
-  const result: IndoorWalkDestination[] = []
-  const seen = new Set<string>()
-  root.traverse((object) => {
-    const source = String(object.userData.source_object || '').trim()
-    const name = semanticRoomName(source)
-    if (!name || seen.has(name)) return
-    const bounds = new Box3().setFromObject(object)
-    if (bounds.isEmpty()) return
-    const center = bounds.getCenter(new Vector3())
-    result.push({
-      id: `${props.floorId}:${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-      name,
-      category: destinationCategory(name),
-      floorId: props.floorId,
-      position: { x: center.x, y: EYE_HEIGHT, z: center.z }
-    })
-    seen.add(name)
-  })
-  return result.sort((a, b) => a.name.localeCompare(b.name))
-}
 
 function updateCanvasDiagnostics() {
   if (!renderer || !camera) return
@@ -285,7 +243,7 @@ async function initialise() {
     scene.add(modelRoot)
     modelBounds = new Box3().setFromObject(modelRoot)
     if (modelBounds.isEmpty()) throw new Error('The 3D model contains no renderable geometry.')
-    const destinations = extractDestinations(modelRoot)
+    const destinations = extractIndoorWalkDestinations(modelRoot, props.floorId, EYE_HEIGHT)
     if (!destinations.length) throw new Error('The 3D model contains no discoverable rooms.')
     setSpawn(destinations)
     resizeObserver = new ResizeObserver(resize)
