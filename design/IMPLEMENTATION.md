@@ -11,7 +11,8 @@ Web/backend:
 - `nuxt-auth-utils` session infrastructure;
 - PostgreSQL + Drizzle for application relational state;
 - ClickHouse for workspace-isolated analytics;
-- `@situm/sdk-js` for verified browser Viewer behavior;
+- app-owned Vue/SVG/DOM indoor Map rendering over workspace-scoped cartography;
+- `@situm/sdk-js` only for any retained, separately verified Viewer utility;
 - authenticated Nitro integrations for server-side Situm capabilities.
 
 Native:
@@ -46,20 +47,20 @@ Google OAuth wiring exists, but runtime provider acceptance must be treated sepa
 
 Workspace Situm configuration is secret write input plus safe metadata/status output.
 
-- Only Read credential: encrypted server-side and returned only through authenticated owner-scoped client credential boundaries after permission/org validation; it powers browser Viewer, native positioning, and read-only Situm operations;
+- Only Read credential: encrypted server-side; it powers native positioning and server-side read-only Situm operations, while the app-owned browser Map consumes server-mediated cartography without receiving the raw credential; bounded direct Viewer issuance remains allowed only for a concrete verified Viewer caller;
 - Read & Write credential: encrypted server-side and server-only for Situm mutation/admin operations;
 - either credential may be configured independently and replacing one preserves the other;
 - account/organization ID: derived from a verified credential and stored as metadata; later replacements must match it.
 
 Stored secret values are never returned by normal configuration reads and must not enter logs, traces, docs, public runtime config, or client errors.
 
-## Browser Viewer
+## Browser Map
 
-`app/components/situm/SitumViewer.vue` is the single browser Viewer lifecycle owner.
+`app/pages/app/map.vue` composes the browser Explore workspace and `app/components/map/IndoorWalkCanvas.vue` owns the Three.js/WebGL eye-level walkthrough. Real building/floor context comes through authenticated workspace cartography, while floor-scoped GLB assets are served by authenticated Nitro routes from configured HTTPS object storage or the staging read-only asset mount. The renderer does not receive a Situm API key.
 
-The current flow uses the verified workspace Only Read API key with Situm's direct API-key Viewer initialization. The Read & Write key must never be exposed to the browser.
+The browser surface is 3D-only: room discovery comes from canonical semantic room objects embedded in the active GLB, and interaction includes floor switching, mouse-look, keyboard/touch walking, deterministic camera travel to a selected room, reset, and fullscreen. Missing GLB, WebGL, or semantic-room capability is an explicit error; do not add a 2D/Viewer fallback. The browser must not synthesize sensor-backed location, ETA, rerouting, or turn-by-turn guidance.
 
-Keep a small typed Viewer command surface. Do not expose raw Viewer access or a generic invoke escape hatch.
+Any retained `SitumViewer.vue` use is separate from the primary Map route and must preserve its narrow verified Only Read command/auth boundary. Read & Write must never be exposed to the browser.
 
 ## Native positioning and Map
 
@@ -103,9 +104,9 @@ Normalize validation, unauthenticated, forbidden, not-found, conflict, upstream,
 
 ## Web/native product boundary
 
-Web owns administration, analytics, capable-layout Viewer exploration, and static web operations. Native owns sensor-backed indoor positioning, native Map/navigation, and the native Realtime experience.
+Web owns administration, analytics, responsive app-owned 3D digital-twin exploration, and static web operations. Native owns sensor-backed indoor positioning, turn-by-turn Map/navigation, and the native Realtime experience.
 
-Web Map on phone and web Realtime use the integrated native handoff policy. This is a product decision, not a claim that the web SDK is technically incapable of all related APIs.
+Web Explore renders floor-scoped GLB assets through Three.js/WebGL with an eye-level camera on desktop/tablet/phone-sized browser layouts. There is no 2D fallback: missing GLB/WebGL/semantic-room data is an error. Model-derived semantic rooms may be used as browser destinations when Situm has no POIs. Web Realtime continues to use the integrated native handoff policy.
 
 ## Android release
 

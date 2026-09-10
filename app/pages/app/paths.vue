@@ -23,7 +23,7 @@ definePageMeta({ middleware: 'auth', layout: 'app', title: 'Paths & routing' })
       <UCard v-if="paths.length === 0"><p class="py-8 text-center text-sm text-muted">No real path networks are available.</p></UCard>
     </template>
     <UAlert color="neutral" variant="subtle" title="Route planning controls unavailable" description="This page exposes verified Situm path metadata only. Route planning controls are not available in the current web surface, so no route details or steps are shown." />
-    <UButton to="/app/map" icon="i-lucide-map" label="Open Map Viewer for cartography" color="neutral" variant="outline" />
+    <UButton to="/app/map" icon="i-lucide-map" label="Open Map for cartography" color="neutral" variant="outline" />
   </div>
 </template>
 

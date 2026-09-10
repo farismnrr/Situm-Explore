@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { getDb } from '../../db/client'
 import { workspaceSitumConfigs, workspaces } from '../../db/schema'
+import { serveWorkspace3dModel } from '../../integrations/situm/indoor-3d-model'
 import { resolveMobilePositioningCredential } from '../../utils/mobile-positioning'
 import { issueWorkspaceViewerApiKey } from '../../utils/viewer-auth'
 import { encryptWorkspaceApiKey } from '../../utils/workspace-credentials'
@@ -69,6 +70,10 @@ export default defineEventHandler(async (event) => {
         return config
       },
     })
+  }
+  if (parts.length === 4 && parts[1] === 'situm' && parts[2] === '3d-model') {
+    if (getMethod(event) !== 'GET') throw createError({ statusCode: 405, statusMessage: 'Method not allowed.' })
+    return serveWorkspace3dModel(event, parts[0] || '', parts[3])
   }
   if (parts.length !== 2 || parts[1] !== 'situm-config') throw createError({ statusCode: 404, statusMessage: 'The requested resource was not found.' })
   const workspaceId = assertWorkspaceId(parts[0] || '')

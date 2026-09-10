@@ -1,6 +1,6 @@
 # Situm 3D model pipeline
 
-Situm Explore keeps its editable indoor-layout source in Blender scripts and exports floor-scoped GLB assets for Situm Map Viewer.
+Situm Explore keeps its editable indoor-layout source in Blender scripts and exports floor-scoped GLB assets for both Situm cartography workflows and the app-owned web Explore walkthrough.
 
 ## Why the export is per floor
 
@@ -88,9 +88,11 @@ The exact Situm editor translation/rotation values are deployment data and shoul
 
 ## Runtime boundary
 
-The web application embeds the official Situm Viewer, so configured Situm 3D cartography is expected to be rendered by that Viewer.
+The primary web `/app/map` experience is now an app-owned Three.js/WebGL walkthrough. It consumes floor-scoped GLBs through an authenticated workspace route and uses a perspective eye-level camera. Web Explore is deliberately 3D-only: a missing/unreadable GLB, unavailable WebGL runtime, or model without discoverable semantic-room objects is an explicit error and does not fall back to a 2D floorplan or Situm Viewer.
 
-The native mobile Explore map currently uses the project's custom React Native raster/SVG renderer. Uploading a GLB to Situm does not automatically make the GLB appear in that custom renderer. Mobile 3D requires separate acceptance of Situm's visual MapView path or a dedicated 3D renderer; do not replace the current mobile navigation surface until physical-device behavior has been verified.
+Generated GLBs remain excluded from Git. The current staging runtime mounts `.data/3d-models` read-only into the container and serves the selected floor asset through the authenticated Nitro workspace boundary. A durable production distribution should move those versioned GLBs to object storage without changing the browser auth boundary.
+
+The native mobile Explore map currently uses the project's custom React Native raster/SVG renderer. The web 3D walkthrough does not change that native ownership. Mobile 3D requires separate physical-device acceptance; do not replace the current mobile navigation surface until that behavior has been verified.
 
 ## Acceptance checklist
 
@@ -103,4 +105,4 @@ Before publishing a model revision:
 - model orientation matches floor cartography;
 - model placement does not offset Situm POIs/routes from their physical rooms;
 - floor switching does not show duplicated geometry from another floor;
-- Web Map Viewer remains usable at normal phone/tablet/desktop zoom levels.
+- web Explore renders the intended GLB in WebGL at normal phone/tablet/desktop layouts, with eye-level camera movement and floor switching accepted.

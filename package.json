@@ -22,7 +22,7 @@
   "dependencies": {
     "@clickhouse/client": "^1.23.1",
     "@iconify-json/lucide": "^1.2.123",
-    "@nuxt/ui": "^4.10.0",
+    "@nuxt/ui": "^4.11.1",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.221.0",
     "@opentelemetry/sdk-node": "^0.221.0",
@@ -34,11 +34,13 @@
     "nuxt-auth-utils": "^0.5.30",
     "pg": "^8.23.0",
     "qrcode": "^1.5.4",
+    "three": "^0.180.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",
     "@types/pg": "^8.21.0",
+    "@types/three": "^0.185.4",
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",

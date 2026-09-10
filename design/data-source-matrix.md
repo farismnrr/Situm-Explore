@@ -8,14 +8,14 @@ This is the current product capability and runtime-owner matrix. Detailed techni
 | Google OAuth | Provider plumbing exists; runtime provider acceptance is not part of the verified path |
 | Private workspaces | PostgreSQL/Drizzle + owner-scoped Nitro APIs |
 | Workspace Situm configuration | Nitro + encrypted PostgreSQL workspace credential storage |
-| Situm read/client authority | Verified Only Read credential; used for server read paths and issued through authenticated owner scope to browser Viewer/native positioning when needed |
+| Situm read/client authority | Verified Only Read credential; used for server read paths and issued through authenticated owner scope to native positioning or a concrete verified direct Viewer caller when needed; the app-owned web Map consumes server-mediated cartography |
 | Situm mutation/admin authority | Verified Read & Write credential; server-only and never returned to browser/mobile |
-| Browser Viewer authority | Workspace Only Read credential issued through authenticated owner scope |
+| App-owned browser Map authority | Authenticated workspace cartography through Nitro; no Situm credential is issued to the Map renderer |
 | Native positioning authority | Workspace Only Read credential requested from Nitro after authenticated workspace-owner authorization |
-| Browser Viewer/cartography | `@situm/sdk-js` Viewer on capable web layouts |
+| Browser Explore / digital twin | App-owned Three.js/WebGL eye-level renderer over authenticated floor-scoped GLB assets; Situm cartography supplies real building/floor context |
 | Buildings/Floors/POIs/Categories | Workspace-scoped Situm/cartography; web and native consume authorized real data |
 | Geofences/Paths | Workspace-scoped server Situm integration where implemented |
-| Web static directions | Browser Viewer over real known Situm POIs; no synthetic route metrics |
+| Web navigation | No sensor-backed guidance in browser Map; native app owns positioning/navigation handoff, and web must not synthesize route metrics |
 | Native Map/positioning/navigation | `@situm/react-native` + shared `ForegroundPositioningSession` |
 | Native Realtime remote positions | Server-mediated owner-scoped workspace Realtime API |
 | Own-device Realtime positioning | Shared foreground native positioning session; reported position reaches server-mediated Realtime |
@@ -32,8 +32,10 @@ This is the current product capability and runtime-owner matrix. Detailed techni
 
 ## Web/native routing policy
 
-- capable desktop/tablet web Map: browser Viewer;
-- phone web Map: native handoff;
+- desktop/tablet/phone-sized web Explore: app-owned 3D-only Three.js/WebGL renderer over floor-scoped GLB digital-twin assets;
+- web Explore destinations: canonical semantic room objects from the active GLB when Situm POIs are empty; never synthetic POIs;
+- missing GLB/WebGL/semantic-room capability: explicit error, no 2D/Viewer fallback;
+- sensor-backed positioning/navigation from web Explore: explicit native-app handoff;
 - web Realtime on desktop/tablet/phone: native handoff;
 - native positioning/navigation: native client only;
 - analytics/admin/workspace configuration: web product.
