@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { SitumCartographyPoi } from '#shared/situm-cartography'
+import type { IndoorWalkDestination } from '#shared/indoor-walk'
 
 defineProps<{
-  poi: SitumCartographyPoi
+  destination: IndoorWalkDestination
   floorName: string
-  nativeHref?: string
 }>()
 
 const emit = defineEmits<{
   close: []
   change: []
+  go: []
 }>()
 </script>
 
@@ -20,16 +20,16 @@ const emit = defineEmits<{
       <span class="destination-icon" aria-hidden="true"><UIcon name="i-lucide-map-pin" /></span>
       <div class="destination-copy">
         <span class="eyebrow">DESTINATION</span>
-        <strong>{{ poi.name }}</strong>
-        <span class="meta">{{ poi.categoryName || 'Place' }} · {{ floorName }}</span>
+        <strong>{{ destination.name }}</strong>
+        <span class="meta">{{ destination.category }} · {{ floorName }}</span>
       </div>
       <button type="button" class="close-button" aria-label="Clear destination" @click="emit('close')"><UIcon name="i-lucide-x" /></button>
     </div>
     <div class="destination-actions">
-      <UButton v-if="nativeHref" :href="nativeHref" target="_self" icon="i-lucide-navigation" label="Open in app" class="primary-action" />
+      <UButton icon="i-lucide-navigation" label="Go" class="primary-action" @click="emit('go')" />
       <UButton color="neutral" variant="outline" label="Change" @click="emit('change')" />
     </div>
-    <p>Indoor positioning and turn-by-turn guidance stay in Situm Explore Mobile; web browsing uses the same real venue cartography.</p>
+    <p>Go moves the 3D walk camera to this room at eye level.</p>
   </section>
 </template>
 

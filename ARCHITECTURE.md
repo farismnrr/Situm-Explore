@@ -269,7 +269,9 @@ The native companion is a **separate client** while Nitro remains the single app
 
 Current ownership:
 
-- web Map uses the app-owned responsive floorplan/POI renderer on desktop, tablet, and phone-sized browser layouts;
+- web Explore uses an app-owned responsive Three.js/WebGL renderer with floor-scoped GLB digital-twin assets and an eye-level perspective camera on desktop, tablet, and phone-sized browser layouts;
+- web Explore has no 2D floorplan/Viewer fallback: unavailable GLB/WebGL/semantic-room data is an explicit error state;
+- browser destination discovery may use canonical semantic room objects embedded in the trusted GLB asset when Situm returns no POIs; these are model-derived destinations, not fabricated Situm POIs;
 - web exposes native-app handoff for sensor-backed positioning/navigation instead of blocking small browser layouts;
 - web Realtime entry points hand off to native on desktop/tablet/phone;
 - sensor-generated handset blue dot, positioning permissions/runtime, mobile navigation/rerouting, and native Realtime presentation belong to the React Native companion;

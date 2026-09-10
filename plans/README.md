@@ -82,7 +82,7 @@ Roadmap history: `plans/028-034-native-mobile-roadmap.md`. Plan 036 — Realtime
 
 - Plan 042 — Repository Engineering Governance: complete/integrated locally into `main`; component-scoped Engineering Guard and maintainability remain closure-only or explicit-user-request tools.
 - Plan 043 — Map Marker & Interaction Polish: complete/integrated locally into `main`; includes the accepted mobile map polish and reproducible Blender-to-Situm 2D/3D asset pipeline. Local building photos and generated artifacts remain outside repository distribution.
-- Plan 044 — Web / Native Map UI Parity: active on `plan/044-web-native-map-parity`; replaces the primary web Map Viewer presentation with an app-owned responsive floorplan/POI renderer while keeping sensor-backed positioning/navigation native-only.
+- Plan 044 — Web / Native Map UI Parity: active on `plan/044-web-native-map-parity`; replaces the primary web Map Viewer presentation with a 3D-only app-owned WebGL walkthrough over floor-scoped GLB digital-twin assets. Search targets canonical rooms extracted from the model, floor switching and camera travel are browser-owned, and sensor-backed positioning/navigation remain native-only.
 
 ## Transition direction
 

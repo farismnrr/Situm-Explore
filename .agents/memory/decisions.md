@@ -84,16 +84,17 @@ Status: active.
 
 Status: active product boundary. Plans 028–035 are closed/integrated; no native roadmap plan is currently active.
 
-### App-owned responsive web Map (2026-09-09)
+### App-owned 3D-only web Explore (2026-09-10)
 
-- The primary `/app/map` experience is now app-owned Vue presentation over authenticated workspace-scoped Situm cartography rather than the embedded Situm Viewer.
-- Web Map may render real floorplans/POIs and own browse interactions such as search, floor selection, POI selection, pan/zoom, reset, fullscreen, and native-app handoff.
-- The Map renderer does not receive a Situm API key; server-mediated cartography remains the browser data boundary.
-- Phone-sized browser Map layouts are supported instead of being blocked by the former Viewer-capability gate. Native handoff remains the truthful path for sensor-backed indoor positioning and turn-by-turn guidance.
-- Web must not fabricate blue-dot, heading/accuracy, ETA, rerouting, arrival, or guidance state without a proven browser runtime source.
+- The primary `/app/map` experience is an app-owned Three.js/WebGL digital-twin walkthrough rather than the embedded Situm Viewer or a top-down floorplan renderer.
+- The browser view is perspective/eye-level and may own mouse-look, WASD/arrow/touch movement, floor switching, destination search, reset/fullscreen, and deterministic camera travel to a selected room.
+- There is intentionally no 2D or Viewer fallback. Missing GLB, WebGL, or discoverable semantic-room data must surface an explicit error.
+- Floor-scoped GLB assets are served only through authenticated workspace scope; the renderer does not receive a Situm API key. Runtime deployment may mount generated GLBs read-only while durable distribution uses an external asset source.
+- When the current Situm workspace returns no POIs, browser destination discovery may use canonical semantic-room objects embedded in the trusted GLB model. These are digital-twin room destinations and must not be represented as upstream Situm POIs.
+- Sensor-backed blue-dot positioning, heading/accuracy, ETA, rerouting, arrival, and turn-by-turn guidance remain native-owned unless a future browser runtime source is proven.
 
-Source: user-approved Plan 044 direction on 2026-09-09.
-Status: active; supersedes the earlier capable-layout Viewer + phone Map gate policy while preserving native ownership of sensor-backed positioning/navigation.
+Source: explicit user direction on 2026-09-10 during Plan 044.
+Status: active; supersedes the 2026-09-09 2D floorplan/POI web Map decision while preserving native ownership of sensor-backed positioning/navigation.
 
 ## Native companion technology and credential direction (Plans 028–035)
 

@@ -32,8 +32,10 @@ This is the current product capability and runtime-owner matrix. Detailed techni
 
 ## Web/native routing policy
 
-- desktop/tablet/phone-sized web Map: app-owned responsive cartography renderer;
-- sensor-backed positioning/navigation from web Map: explicit native-app handoff;
+- desktop/tablet/phone-sized web Explore: app-owned 3D-only Three.js/WebGL renderer over floor-scoped GLB digital-twin assets;
+- web Explore destinations: canonical semantic room objects from the active GLB when Situm POIs are empty; never synthetic POIs;
+- missing GLB/WebGL/semantic-room capability: explicit error, no 2D/Viewer fallback;
+- sensor-backed positioning/navigation from web Explore: explicit native-app handoff;
 - web Realtime on desktop/tablet/phone: native handoff;
 - native positioning/navigation: native client only;
 - analytics/admin/workspace configuration: web product.

@@ -19,6 +19,10 @@ export default defineNuxtConfig({
     oauth: { google: { clientId: process.env.NUXT_OAUTH_GOOGLE_CLIENT_ID || '', clientSecret: process.env.NUXT_OAUTH_GOOGLE_CLIENT_SECRET || '', redirectURL: process.env.NUXT_OAUTH_GOOGLE_REDIRECT_URL || '' } },
     workspaceCredentialEncryptionKey: process.env.NUXT_WORKSPACE_CREDENTIAL_ENCRYPTION_KEY || '',
     clickhouse: { url: process.env.CLICKHOUSE_URL || 'http://localhost:8124', user: process.env.CLICKHOUSE_USER || '', password: process.env.CLICKHOUSE_PASSWORD || '', database: process.env.CLICKHOUSE_DB || '' },
+    situm3d: {
+      assetDir: process.env.NUXT_SITUM3D_ASSET_DIR || '',
+      modelBaseUrl: process.env.NUXT_SITUM3D_MODEL_BASE_URL || ''
+    },
     public: {
       mobile: {
         appScheme: process.env.NUXT_PUBLIC_MOBILE_APP_SCHEME || 'situm-explore',

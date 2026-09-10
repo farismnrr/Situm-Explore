@@ -104,9 +104,9 @@ Normalize validation, unauthenticated, forbidden, not-found, conflict, upstream,
 
 ## Web/native product boundary
 
-Web owns administration, analytics, responsive app-owned cartography exploration, and static web operations. Native owns sensor-backed indoor positioning, turn-by-turn Map/navigation, and the native Realtime experience.
+Web owns administration, analytics, responsive app-owned 3D digital-twin exploration, and static web operations. Native owns sensor-backed indoor positioning, turn-by-turn Map/navigation, and the native Realtime experience.
 
-Web Map renders on desktop/tablet/phone-sized browser layouts and offers native handoff when the user needs positioning/navigation. Web Realtime continues to use the integrated native handoff policy.
+Web Explore renders floor-scoped GLB assets through Three.js/WebGL with an eye-level camera on desktop/tablet/phone-sized browser layouts. There is no 2D fallback: missing GLB/WebGL/semantic-room data is an error. Model-derived semantic rooms may be used as browser destinations when Situm has no POIs. Web Realtime continues to use the integrated native handoff policy.
 
 ## Android release
 
