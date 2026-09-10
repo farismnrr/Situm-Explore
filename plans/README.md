@@ -82,7 +82,7 @@ Roadmap history: `plans/028-034-native-mobile-roadmap.md`. Plan 036 — Realtime
 
 - Plan 042 — Repository Engineering Governance: complete/integrated locally into `main`; component-scoped Engineering Guard and maintainability remain closure-only or explicit-user-request tools.
 - Plan 043 — Map Marker & Interaction Polish: complete/integrated locally into `main`; includes the accepted mobile map polish and reproducible Blender-to-Situm 2D/3D asset pipeline. Local building photos and generated artifacts remain outside repository distribution.
-- Plan 044 — Web / Native Map UI Parity: closure-complete on `plan/044-web-native-map-parity`, awaiting user-gated PR/integration. The primary web Explore experience is a 3D-only app-owned WebGL walkthrough over floor-scoped GLB digital-twin assets; search targets canonical rooms extracted from the model, floor switching and camera travel are browser-owned, and sensor-backed positioning/navigation remain native-only. Closure `web full` Engineering Guard and maintainability passed on 2026-09-10; user visual E2E is not claimed as executed.
+- Plan 044 — Web / Native Map UI Parity: complete/integrated through PR #42 at merge commit `420f399bf10979f389f36f686d056ce3e4b77012`. The primary web Explore experience is a 3D-only app-owned WebGL walkthrough over floor-scoped GLB digital-twin assets; search targets canonical rooms extracted from the model, floor switching and camera travel are browser-owned, and sensor-backed positioning/navigation remain native-only. Closure `web full` Engineering Guard and maintainability passed on 2026-09-10; user visual E2E is not claimed as executed.
 
 ## Transition direction
 
