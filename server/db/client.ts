@@ -13,10 +13,11 @@ function databaseSchema(value: unknown) {
 
 export function getDb() {
   const config = useRuntimeConfig()
-  if (!config.databaseUrl) throw createError({ statusCode: 500, statusMessage: 'DATABASE_URL is not configured.' })
+  const databaseUrl = process.env.DATABASE_URL || config.databaseUrl
+  if (!databaseUrl) throw createError({ statusCode: 500, statusMessage: 'DATABASE_URL is not configured.' })
   const schema = databaseSchema(process.env.DATABASE_SCHEMA || config.databaseSchema)
   db ||= drizzle(new Pool({
-    connectionString: config.databaseUrl,
+    connectionString: databaseUrl,
     options: `-c search_path=${schema},public`,
   }))
   return db
