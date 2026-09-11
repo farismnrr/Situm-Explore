@@ -90,9 +90,16 @@ The exact Situm editor translation/rotation values are deployment data and shoul
 
 The primary web `/app/map` experience is the app-owned 2D floorplan renderer. Digital Twin 3D is an explicit opt-in mode that consumes floor-scoped GLBs through an authenticated workspace route and uses a perspective eye-level camera. The 3D renderer is lazy-mounted, so default 2D does not initialize WebGL or request a GLB. Its initial/reset camera pose follows the same canonical floor-to-GLB orientation contract on LT1 and LT2 rather than deriving orientation from semantic rooms. A missing/unreadable GLB, unavailable WebGL runtime, or model without discoverable semantic-room objects remains an explicit 3D error after opt-in; the app does not silently switch back to 2D.
 
-Generated GLBs remain excluded from Git. The current staging runtime mounts `.data/3d-models` read-only into the container and serves the selected floor asset through the authenticated Nitro workspace boundary. A durable production distribution should move those versioned GLBs to object storage without changing the browser auth boundary.
+Generated GLBs remain excluded from Git. The current staging runtime mounts `.data/3d-models` read-only into the container and serves the selected floor asset through the authenticated Nitro workspace boundary. Assets are scoped by both application workspace and Situm building so switching workspace/building can never reuse another context's model implicitly:
 
-The native mobile Explore map currently uses the project's custom React Native raster/SVG renderer. The web 3D walkthrough does not change that native ownership. Mobile 3D requires separate physical-device acceptance; do not replace the current mobile navigation surface until that behavior has been verified.
+```text
+.data/3d-models/<workspace-id>/<building-id>/situm-explore-lt1.glb
+.data/3d-models/<workspace-id>/<building-id>/situm-explore-lt2.glb
+```
+
+There is intentionally no flat/global asset fallback. If that scoped path is absent, Digital Twin 3D reports that it has not been configured for the active workspace/building. A durable production distribution should preserve the same `<workspace-id>/<building-id>/...` object-storage layout so the browser auth and isolation boundary remains unchanged.
+
+Native Explore remains 2D-first for live positioning/navigation and now exposes an explicit Digital Twin 3D opt-in using the same authenticated workspace/building model boundary and shared canonical view semantics. Native 3D does not replace or fabricate the existing 2D blue-dot, route, ETA, arrival, off-route, or turn-by-turn behavior.
 
 ## Acceptance checklist
 

@@ -2,7 +2,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
   app: {
     head: {
-      link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }]
+      title: 'Situm Explore',
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/favicon.png?v=20260911' },
+        { rel: 'shortcut icon', type: 'image/png', href: '/favicon.png?v=20260911' }
+      ]
     }
   },
   modules: ['@nuxt/ui', 'nuxt-auth-utils', '@nuxt/eslint', 'nuxt-agentation'],

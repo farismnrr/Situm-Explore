@@ -15,9 +15,17 @@ function modelSlot(value: string | undefined): ModelSlot {
   throw createError({ statusCode: 404, statusMessage: '3D model not found.' })
 }
 
-function remoteModelUrl(baseUrl: string, filename: string) {
+function modelBuildingId(value: unknown) {
+  const buildingId = Number(value)
+  if (!Number.isSafeInteger(buildingId) || buildingId <= 0) {
+    throw createError({ statusCode: 400, statusMessage: 'A valid building is required for the 3D model.' })
+  }
+  return buildingId
+}
+
+function remoteModelUrl(baseUrl: string, relativePath: string) {
   if (!baseUrl) return null
-  const url = new URL(filename, `${baseUrl.replace(/\/$/, '')}/`)
+  const url = new URL(relativePath, `${baseUrl.replace(/\/$/, '')}/`)
   if (url.protocol !== 'https:') throw createError({ statusCode: 503, statusMessage: '3D model source is not configured securely.' })
   return url
 }
@@ -37,24 +45,26 @@ async function loadRemoteModel(url: URL) {
   return validatePayload(new Uint8Array(await response.arrayBuffer()))
 }
 
-export async function serveWorkspace3dModel(event: H3Event, workspaceId: string, requestedSlot: string | undefined) {
-  await requireOwnedWorkspace(event, workspaceId)
+export async function serveWorkspace3dModel(event: H3Event, workspaceId: string, requestedSlot: string | undefined, requestedBuildingId: unknown) {
+  const ownedWorkspaceId = await requireOwnedWorkspace(event, workspaceId)
   const slot = modelSlot(requestedSlot)
+  const buildingId = modelBuildingId(requestedBuildingId)
   const filename = modelFiles[slot]
+  const relativePath = `${ownedWorkspaceId}/${buildingId}/${filename}`
   const config = useRuntimeConfig(event).situm3d
   let payload: Uint8Array
 
   if (config.assetDir) {
     let localPayload: Uint8Array
     try {
-      localPayload = new Uint8Array(await readFile(join(config.assetDir, filename)))
+      localPayload = new Uint8Array(await readFile(join(config.assetDir, ownedWorkspaceId, String(buildingId), filename)))
     } catch {
-      throw createError({ statusCode: 404, statusMessage: '3D model asset is not available.' })
+      throw createError({ statusCode: 404, statusMessage: 'Digital Twin 3D is not configured for this workspace and building.' })
     }
     payload = validatePayload(localPayload)
   } else {
-    const remoteUrl = remoteModelUrl(config.modelBaseUrl, filename)
-    if (!remoteUrl) throw createError({ statusCode: 404, statusMessage: '3D model asset is not configured.' })
+    const remoteUrl = remoteModelUrl(config.modelBaseUrl, relativePath)
+    if (!remoteUrl) throw createError({ statusCode: 404, statusMessage: 'Digital Twin 3D is not configured for this workspace and building.' })
     payload = await loadRemoteModel(remoteUrl)
   }
 

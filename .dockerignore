@@ -10,6 +10,7 @@
 !server/**
 !shared/**
 !drizzle/**
+!public/**
 .env*
 .git
 .git/**

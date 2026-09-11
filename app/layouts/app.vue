@@ -3,6 +3,7 @@ import TransientFeedback from '~/components/feedback/TransientFeedback.vue'
 
 const { user, clear } = useUserSession()
 const { loadWorkspaces } = useWorkspaceContext()
+const route = useRoute()
 const mobileOpen = ref(false)
 const isDesktop = ref(false)
 const searchOpen = ref(false)
@@ -12,6 +13,13 @@ const displayName = computed(() => {
   return localPart.split(/[._-]/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
 })
 const initials = computed(() => displayName.value.split(' ').map(part => part.charAt(0)).slice(0, 2).join('').toUpperCase())
+
+useHead({
+  title: computed(() => {
+    const pageTitle = typeof route.meta.title === 'string' ? route.meta.title.trim() : ''
+    return pageTitle ? `${pageTitle} · Situm Explore` : 'Situm Explore'
+  })
+})
 
 const searchDestinations = [
   { label: 'Home', detail: 'Workspace', to: '/app', icon: 'i-lucide-house' },

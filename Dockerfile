@@ -19,6 +19,7 @@ COPY app ./app
 COPY server ./server
 COPY shared ./shared
 COPY drizzle ./drizzle
+COPY public ./public
 COPY nuxt.config.ts tsconfig.json eslint.config.mjs drizzle.config.ts ./
 RUN npm run build
 

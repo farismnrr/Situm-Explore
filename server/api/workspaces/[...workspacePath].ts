@@ -73,7 +73,7 @@ export default defineEventHandler(async (event) => {
   }
   if (parts.length === 4 && parts[1] === 'situm' && parts[2] === '3d-model') {
     if (getMethod(event) !== 'GET') throw createError({ statusCode: 405, statusMessage: 'Method not allowed.' })
-    return serveWorkspace3dModel(event, parts[0] || '', parts[3])
+    return serveWorkspace3dModel(event, parts[0] || '', parts[3], getQuery(event).buildingId)
   }
   if (parts.length !== 2 || parts[1] !== 'situm-config') throw createError({ statusCode: 404, statusMessage: 'The requested resource was not found.' })
   const workspaceId = assertWorkspaceId(parts[0] || '')

@@ -62,8 +62,8 @@ const routeStartFloorName = computed(() => cartography.value?.floors.find(floor 
 const routeDestinationFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === routeDestinationPoi.value?.floorId)?.name || 'Floor')
 const selectedPoiFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === selectedPoi.value?.floorId)?.name || activeFloor.value?.name || 'Floor')
 const modelSlot = computed<IndoorWalkModelSlot | null>(() => activeFloor.value ? indoorWalkModelSlotForFloorLevel(activeFloor.value.level) : null)
-const modelUrl = computed(() => selectedWorkspaceId.value && modelSlot.value
-  ? `/api/workspaces/${selectedWorkspaceId.value}/situm/3d-model/${modelSlot.value}`
+const modelUrl = computed(() => selectedWorkspaceId.value && activeBuildingId.value && modelSlot.value
+  ? `/api/workspaces/${selectedWorkspaceId.value}/situm/3d-model/${modelSlot.value}?buildingId=${activeBuildingId.value}`
   : '')
 const nativeMapHref = computed(() => buildNativeMapHref(
   config.public.mobile,
@@ -292,11 +292,11 @@ definePageMeta({ middleware: 'auth', layout: 'app', title: 'Explore', fullWidth:
 
         <template v-else>
           <div v-if="!modelSlot" class="absolute inset-0 flex items-center justify-center bg-neutral-950 px-6">
-            <UAlert color="error" variant="subtle" title="3D model unavailable" description="This floor has no configured Digital Twin 3D model." class="max-w-md" />
+            <UAlert color="error" variant="subtle" title="Digital Twin 3D isn't available yet" description="No 3D model has been configured for this workspace and floor." class="max-w-md" />
           </div>
           <template v-else>
             <LazyMapIndoorWalkCanvas
-              :key="`${activeFloor.id}:${modelSlot}`"
+              :key="`${selectedWorkspaceId}:${activeBuilding.id}:${activeFloor.id}:${modelSlot}`"
               ref="walkCanvas"
               :floor-id="activeFloor.id"
               :floor-level="activeFloor.level"
