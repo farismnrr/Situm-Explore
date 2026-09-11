@@ -1,0 +1,48 @@
+{
+  "links": [
+    {
+      "accessible": true,
+      "floor_id": 70557,
+      "id": "1_2",
+      "origin": "both",
+      "source": 1,
+      "tags": [],
+      "target": 2,
+      "type": "link"
+    }
+  ],
+  "nodes": [
+    {
+      "floor_id": 70557,
+      "id": 1,
+      "lat": -6.150661046805553,
+      "lng": 106.89667996148233,
+      "type": "node",
+      "x": 16.133938,
+      "y": 3.292751,
+      "metadata": {
+        "attached_links": {
+          "1_2": {
+            "target_floor": null
+          }
+        }
+      }
+    },
+    {
+      "floor_id": 70557,
+      "id": 2,
+      "lat": -6.150680913020906,
+      "lng": 106.89666706713763,
+      "type": "node",
+      "x": 16.065625,
+      "y": 0.661639,
+      "metadata": {
+        "attached_links": {
+          "1_2": {
+            "target_floor": null
+          }
+        }
+      }
+    }
+  ]
+}
