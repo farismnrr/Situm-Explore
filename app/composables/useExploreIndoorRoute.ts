@@ -62,7 +62,7 @@ export function useExploreIndoorRoute(input: {
     activeRoute.value = null
     try {
       const response = await $fetch<SitumPathsResponse>(
-        `/api/workspaces/${encodeURIComponent(workspaceId)}/situm/paths?buildingId=${buildingId}`
+        `/api/workspaces/${encodeURIComponent(workspaceId)}/situm/paths`
       )
       if (input.workspaceId.value !== workspaceId || input.buildingId.value !== buildingId) return
       const result = calculateIndoorRoute(response, from, to)
