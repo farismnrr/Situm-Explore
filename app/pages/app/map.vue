@@ -3,7 +3,7 @@ import type { IndoorWalkDestination } from '#shared/indoor-walk'
 import type { SitumCartographyPoi, SitumCartographyResponse } from '#shared/situm-cartography'
 import { isWorkspaceRequestLoading } from '~/utils/async-state'
 import { buildNativeMapHref, positiveQueryId } from '~/utils/explore-map'
-import type { IndoorWalkModelSlot } from '~/utils/indoor-walk-view'
+import { indoorWalkModelSlotForFloorLevel, type IndoorWalkModelSlot } from '~/utils/indoor-walk-view'
 type ExploreViewMode = '2d' | '3d'
 const route = useRoute()
 const router = useRouter()
@@ -61,11 +61,7 @@ const { routeStartPoiId, routeDestinationPoiId, routeStartPoi, routeDestinationP
 const routeStartFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === routeStartPoi.value?.floorId)?.name || 'Floor')
 const routeDestinationFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === routeDestinationPoi.value?.floorId)?.name || 'Floor')
 const selectedPoiFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === selectedPoi.value?.floorId)?.name || activeFloor.value?.name || 'Floor')
-const modelSlot = computed<IndoorWalkModelSlot | null>(() => {
-  if (activeFloor.value?.level === 0) return 'lt1'
-  if (activeFloor.value?.level === 1) return 'lt2'
-  return null
-})
+const modelSlot = computed<IndoorWalkModelSlot | null>(() => activeFloor.value ? indoorWalkModelSlotForFloorLevel(activeFloor.value.level) : null)
 const modelUrl = computed(() => selectedWorkspaceId.value && modelSlot.value
   ? `/api/workspaces/${selectedWorkspaceId.value}/situm/3d-model/${modelSlot.value}`
   : '')
