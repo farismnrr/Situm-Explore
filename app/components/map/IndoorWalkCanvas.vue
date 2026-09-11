@@ -332,7 +332,6 @@ defineExpose({ resetView, goToDestination })
       <strong>3D walkthrough unavailable</strong>
       <span>{{ errorMessage }}</span>
     </div>
-    <div v-else class="walk-mode-badge"><span class="walk-live-dot" />3D Walk · {{ floorName }}</div>
     <div v-if="!loading && !errorMessage" class="walk-hint">Drag to look · WASD / arrows to walk</div>
 
     <div v-if="!loading && !errorMessage" class="walk-touch-controls" aria-label="Walk controls">

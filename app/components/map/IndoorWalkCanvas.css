@@ -16,7 +16,6 @@
 }
 .walk-status-card,
 .walk-error-card,
-.walk-mode-badge,
 .walk-hint {
   position: absolute;
   z-index: 8;
@@ -48,26 +47,6 @@
 }
 .walk-error-card strong { font-size: 14px; }
 .walk-error-card span { color: #cbd5e1; font-size: 12px; line-height: 1.5; }
-.walk-mode-badge {
-  top: 16px;
-  right: 16px;
-  display: flex;
-  min-height: 34px;
-  align-items: center;
-  gap: 8px;
-  border-radius: 999px;
-  padding: 0 12px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .02em;
-}
-.walk-live-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: #22c55e;
-  box-shadow: 0 0 0 4px rgb(34 197 94 / 16%);
-}
 .walk-hint {
   right: 16px;
   bottom: 16px;
@@ -104,7 +83,6 @@
 }
 .walk-touch-controls button:active { transform: scale(.96); background: rgb(36 107 253 / 88%); }
 @media (max-width: 768px) {
-  .walk-mode-badge { top: 112px; right: 12px; }
   .walk-hint { display: none; }
   .walk-touch-controls { display: grid; }
 }

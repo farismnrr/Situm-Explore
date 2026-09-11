@@ -1,7 +1,7 @@
 # Plan 046 — Web Explore 2D Routing Foundation
 
 Repository: `/home/farismnrr/Documents/Projects/situm-explore`
-Status: execution active; Phase 0 complete with fresh authenticated A→B/B→A Situm topology oracle
+Status: execution active; Phases 0–1 complete, Phase 2 implementation underway
 Expected branch: `plan/046-web-explore-2d-routing-foundation`
 Codebase: web only
 Dependency: Plan 045 / PR #43 already integrated into `main`
