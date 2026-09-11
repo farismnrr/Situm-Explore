@@ -11,7 +11,7 @@ else
   mkdir -p "$context_dir"
 fi
 
-for path in Dockerfile .dockerignore package.json package-lock.json nuxt.config.ts tsconfig.json eslint.config.mjs drizzle.config.ts app server shared drizzle; do
+for path in Dockerfile .dockerignore package.json package-lock.json nuxt.config.ts tsconfig.json eslint.config.mjs drizzle.config.ts app server shared drizzle public; do
   cp -R "$repo_dir/$path" "$context_dir/$path"
 done
 
