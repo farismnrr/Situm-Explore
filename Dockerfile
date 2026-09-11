@@ -23,6 +23,12 @@ COPY public ./public
 COPY nuxt.config.ts tsconfig.json eslint.config.mjs drizzle.config.ts ./
 RUN npm run build
 
+FROM dependencies AS migration
+COPY drizzle ./drizzle
+COPY server/db/schema.ts ./server/db/schema.ts
+COPY drizzle.config.ts tsconfig.json ./
+CMD ["npm", "run", "db:migrate"]
+
 FROM node:22.22.0-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \

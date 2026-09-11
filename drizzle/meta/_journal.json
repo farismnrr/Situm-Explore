@@ -71,6 +71,13 @@
       "when": 1787812040031,
       "tag": "0009_unusual_wrecking_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789132313102,
+      "tag": "0010_move_app_tables_to_configured_schema",
+      "breakpoints": true
     }
   ]
 }

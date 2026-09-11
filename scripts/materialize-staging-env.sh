@@ -14,6 +14,7 @@ value() {
 }
 
 database_url=$(value DATABASE_URL)
+database_schema=$(value DATABASE_SCHEMA)
 session_password=$(value NUXT_SESSION_PASSWORD)
 encryption_key=$(value NUXT_WORKSPACE_CREDENTIAL_ENCRYPTION_KEY)
 clickhouse_user=$(value CLICKHOUSE_USER)
@@ -23,6 +24,8 @@ service_name=$(value OTEL_SERVICE_NAME)
 otel_protocol=$(value OTEL_EXPORTER_OTLP_PROTOCOL)
 
 test -n "$database_url" || { echo 'local environment is missing DATABASE_URL' >&2; exit 1; }
+test -n "$database_schema" || { echo 'local environment is missing DATABASE_SCHEMA' >&2; exit 1; }
+printf '%s' "$database_schema" | grep -Eq '^[a-z_][a-z0-9_]*$' || { echo 'local environment has invalid DATABASE_SCHEMA' >&2; exit 1; }
 test -n "$session_password" || { echo 'local environment is missing NUXT_SESSION_PASSWORD' >&2; exit 1; }
 test -n "$encryption_key" || { echo 'local environment is missing NUXT_WORKSPACE_CREDENTIAL_ENCRYPTION_KEY' >&2; exit 1; }
 
@@ -33,6 +36,8 @@ mkdir -p "$(dirname "$target_file")"
 {
   printf 'DATABASE_URL=%s\n' "$database_url"
   printf 'NUXT_DATABASE_URL=%s\n' "$database_url"
+  printf 'DATABASE_SCHEMA=%s\n' "$database_schema"
+  printf 'NUXT_DATABASE_SCHEMA=%s\n' "$database_schema"
   printf 'CLICKHOUSE_URL=http://host.docker.internal:8124\n'
   printf 'NUXT_CLICKHOUSE_URL=http://host.docker.internal:8124\n'
   printf 'CLICKHOUSE_USER=%s\n' "$clickhouse_user"
