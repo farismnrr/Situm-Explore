@@ -1,0 +1,44 @@
+services:
+  situm-explore:
+    image: ${IMAGE_REPOSITORY:-ghcr.io/farismnrr/situm-explore}:${PRODUCTION_TAG:?set PRODUCTION_TAG to an immutable sha tag}
+    container_name: situm-explore
+    ports:
+      - "0.0.0.0:${SITUM_PORT:-3002}:3000"
+    restart: unless-stopped
+    init: true
+    env_file:
+      - path: production.env
+        format: raw
+    environment:
+      HOST: 0.0.0.0
+      NITRO_HOST: 0.0.0.0
+      PORT: 3000
+      NITRO_PORT: 3000
+      NUXT_SITUM3D_ASSET_DIR: /var/lib/situm-explore/3d
+    volumes:
+      - ${SITUM_3D_ASSET_DIR:?set SITUM_3D_ASSET_DIR}:/var/lib/situm-explore/3d:ro
+    networks:
+      - situm-runtime
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - require('http').get('http://127.0.0.1:3000/api/health/liveness',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    stop_grace_period: 30s
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+
+networks:
+  situm-runtime:
+    external: true
+    name: ${SITUM_DOCKER_NETWORK:-sensio-network}

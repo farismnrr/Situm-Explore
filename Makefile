@@ -6,6 +6,7 @@ IMAGE_REPOSITORY ?= ghcr.io/farismnrr/situm-explore
 IMAGE ?= $(IMAGE_REPOSITORY)
 SHA_TAG ?= sha-$(shell git rev-parse --short=12 HEAD 2>/dev/null || printf 'unknown')
 STAGING_TAG ?= staging
+MIGRATION_TAG ?= migrate-$(SHA_TAG)
 PLATFORMS ?= linux/amd64
 LOCAL_PLATFORM ?= $(shell docker version --format '{{.Server.Os}}/{{.Server.Arch}}' 2>/dev/null || printf 'linux/amd64')
 COMPOSE_FILE ?= deploy/staging.compose.yml
@@ -17,7 +18,7 @@ BUILDX_BUILDER ?= situm-explore
 
 export COMPOSE_FILE STAGING_ENV_FILE STAGING_PORT IMAGE_REPOSITORY STAGING_TAG
 
-.PHONY: help doctor check image-build image-push image-inspect image-security-check \
+.PHONY: help doctor check image-build image-push image-migration-push image-inspect image-security-check \
         staging-pull staging-up staging-update staging-down staging-restart \
         staging-ps staging-logs staging-migrate staging-config release-staging
 
@@ -30,6 +31,7 @@ help:
 		'  check                  Run repository whitespace, lint, typecheck, and build checks' \
 		'  image-build            Build a local image using the filtered Docker context' \
 		'  image-push             Build and publish immutable SHA and staging tags' \
+		'  image-migration-push   Build and publish the immutable migration image' \
 		'  image-inspect          Inspect the configured image manifest or local image' \
 		'  image-security-check   Run Docker Scout or report that it is unavailable' \
 		'' \
@@ -73,6 +75,14 @@ image-push:
 		docker buildx build --builder '$(BUILDX_BUILDER)' --platform '$(PLATFORMS)' \
 			--push --tag '$(IMAGE):$(SHA_TAG)' --tag '$(IMAGE):$(STAGING_TAG)' \
 			--build-arg OCI_REVISION=$$(git rev-parse HEAD) --build-arg OCI_VERSION='$(SHA_TAG)' "$$context"
+
+image-migration-push:
+	@context=$$(mktemp -d "$${TMPDIR:-/tmp}/situm-explore-docker.XXXXXX"); trap 'rm -rf "$$context"' EXIT INT TERM; \
+		context=$$(./scripts/docker-context.sh "$$context"); \
+		docker buildx inspect '$(BUILDX_BUILDER)' >/dev/null 2>&1 || docker buildx create --name '$(BUILDX_BUILDER)' --use >/dev/null; \
+		docker buildx build --builder '$(BUILDX_BUILDER)' --platform '$(PLATFORMS)' --target migration \
+			--push --tag '$(IMAGE):$(MIGRATION_TAG)' \
+			--build-arg OCI_REVISION=$$(git rev-parse HEAD) --build-arg OCI_VERSION='$(MIGRATION_TAG)' "$$context"
 
 image-inspect:
 	@docker buildx imagetools inspect '$(IMAGE):$(STAGING_TAG)' 2>/dev/null || docker image inspect '$(IMAGE):$(SHA_TAG)'

@@ -180,7 +180,7 @@ PostgreSQL owns application relational state, including:
 - private workspace ownership;
 - encrypted workspace Situm configuration metadata/envelope.
 
-Use the dedicated `situm_explore` schema. Do not touch unrelated schemas/databases.
+Use a dedicated application database and select the application schema through `DATABASE_SCHEMA`; production currently uses database `situm` with schema `public`. Do not touch unrelated databases or schemas outside the configured application database/schema.
 
 Do not persist arbitrary Situm resources merely as a cache.
 

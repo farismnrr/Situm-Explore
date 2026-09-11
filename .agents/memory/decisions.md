@@ -77,7 +77,7 @@ Status: historical acceptance policy. Plan 025 is complete; do not reuse any tem
 
 - The existing Nuxt 4 application with Nitro server routes remains the single web application and application backend for Situm Explore.
 - Plans 028–035 established a React Native companion **client**, not a second backend/service or separate application authority.
-- Use Nuxt UI, `nuxt-auth-utils`, PostgreSQL/Drizzle in the application-owned `situm_explore` schema, and the existing ClickHouse analytics integration for the web/backend runtime.
+- Use Nuxt UI, `nuxt-auth-utils`, PostgreSQL/Drizzle in a dedicated application database with schema selected through `DATABASE_SCHEMA`; production currently uses database `situm` and schema `public`. The existing ClickHouse analytics integration remains the web/backend analytics store.
 - Keep `app/`, `server/`, and genuinely shared `shared/` boundaries Nuxt-native; share contracts with mobile only when they are genuinely runtime-neutral.
 - KISS is the default tie-breaker. Do not add generic repositories/services, DI, global stores, event buses, caches, workers, or a second backend without concrete need.
 
