@@ -11,9 +11,8 @@ const route = useRoute()
 const router = useRouter()
 const config = useRuntimeConfig()
 const workspaceElement = ref<HTMLElement | null>(null)
-const mapCanvas = ref<{ resetView: () => void } | null>(null)
+const explore2d = ref<{ resetView: () => void; dismissSearch: () => void; focusSearch: () => void; clearSearch: () => void } | null>(null)
 const walkCanvas = ref<{ resetView: () => void; goToDestination: (destination: IndoorWalkDestination) => boolean } | null>(null)
-const searchDock = ref<{ dismiss: () => void; focusSearch: () => void; clearQuery: () => void } | null>(null)
 const walkSearchDock = ref<{ dismiss: () => void; focusSearch: () => void; clearQuery: () => void } | null>(null)
 const actionMessage = ref('')
 const isFullscreen = ref(false)
@@ -63,6 +62,11 @@ const activeBuilding = computed(() => cartography.value?.buildings.find(building
 const buildingFloors = computed(() => (cartography.value?.floors ?? []).filter(floor => floor.buildingId === activeBuildingId.value).sort((a, b) => b.level - a.level))
 const activeFloor = computed(() => buildingFloors.value.find(floor => floor.id === activeFloorId.value) ?? buildingFloors.value[0] ?? null)
 const buildingPois = computed(() => (cartography.value?.pois ?? []).filter(poi => poi.buildingId === activeBuildingId.value))
+const { routeStartPoiId, routeDestinationPoiId, routeStartPoi, routeDestinationPoi, activeRoute, routeRequestState, routeError,
+  setRouteStart, setRouteDestination, calculateRoute, clearRoute
+} = useExploreIndoorRoute({ workspaceId: selectedWorkspaceId, buildingId: activeBuildingId, pois: buildingPois })
+const routeStartFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === routeStartPoi.value?.floorId)?.name || 'Floor')
+const routeDestinationFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === routeDestinationPoi.value?.floorId)?.name || 'Floor')
 const selectedPoiFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === selectedPoi.value?.floorId)?.name || activeFloor.value?.name || 'Floor')
 const modelSlot = computed<IndoorWalkModelSlot | null>(() => {
   if (activeFloor.value?.level === 0) return 'lt1'
@@ -150,25 +154,32 @@ function setViewMode(mode: ExploreViewMode) {
 function selectPoi(poi: SitumCartographyPoi) {
   if (activeFloorId.value !== poi.floorId) selectFloor(poi.floorId)
   selectedPoi.value = poi
-  searchDock.value?.dismiss()
+  explore2d.value?.dismissSearch()
 }
 
 function clearPoi() {
   selectedPoi.value = null
 }
 
+function setSelectedRouteEndpoint(role: 'start' | 'destination') {
+  if (!selectedPoi.value) return
+  if (role === 'start') setRouteStart(selectedPoi.value)
+  else setRouteDestination(selectedPoi.value)
+  selectedPoi.value = null
+}
+
 function closePoi() {
   selectedPoi.value = null
-  searchDock.value?.clearQuery()
+  explore2d.value?.clearSearch()
 }
 
 function dismissMapOverlays() {
-  searchDock.value?.dismiss()
+  explore2d.value?.dismissSearch()
 }
 
 function changePoi() {
   clearPoi()
-  searchDock.value?.focusSearch()
+  explore2d.value?.focusSearch()
 }
 
 function onWalkReady(loadedDestinations: IndoorWalkDestination[]) {
@@ -212,7 +223,7 @@ function goToDestination() {
 
 function resetView() {
   if (viewMode.value === '3d') walkCanvas.value?.resetView()
-  else mapCanvas.value?.resetView()
+  else explore2d.value?.resetView()
 }
 
 async function toggleFullscreen() {
@@ -261,37 +272,39 @@ definePageMeta({ middleware: 'auth', layout: 'app', title: 'Explore', fullWidth:
       </div>
 
       <template v-else-if="activeBuilding && activeFloor">
-        <template v-if="viewMode === '2d'">
-          <MapIndoorMapCanvas
-            ref="mapCanvas"
-            :building="activeBuilding"
-            :floor="activeFloor"
-            :pois="buildingPois"
-            :selected-poi="selectedPoi"
-            @poi-select="selectPoi"
-            @map-press="dismissMapOverlays"
-          />
-          <MapSearchDock
-            ref="searchDock"
-            :building-name="activeBuilding.name"
-            :floors="buildingFloors"
-            :active-floor-id="activeFloor.id"
-            :pois="buildingPois"
-            :selected-poi="selectedPoi"
-            @floor-select="selectFloor"
-            @poi-select="selectPoi"
-            @clear-destination="clearPoi"
-          />
-          <MapControlStack :fullscreen="isFullscreen" @reset="resetView" @fullscreen-toggle="toggleFullscreen" />
-          <MapDestinationCard
-            v-if="selectedPoi"
-            :poi="selectedPoi"
-            :floor-name="selectedPoiFloorName"
-            :native-href="nativeMapHref"
-            @close="closePoi"
-            @change="changePoi"
-          />
-        </template>
+        <MapExplore2D
+          v-if="viewMode === '2d'"
+          ref="explore2d"
+          :building="activeBuilding"
+          :floor="activeFloor"
+          :floors="buildingFloors"
+          :pois="buildingPois"
+          :selected-poi="selectedPoi"
+          :selected-poi-floor-name="selectedPoiFloorName"
+          :native-href="nativeMapHref"
+          :route="activeRoute"
+          :route-start-poi-id="routeStartPoiId"
+          :route-destination-poi-id="routeDestinationPoiId"
+          :route-start-poi="routeStartPoi"
+          :route-destination-poi="routeDestinationPoi"
+          :route-start-floor-name="routeStartFloorName"
+          :route-destination-floor-name="routeDestinationFloorName"
+          :route-state="routeRequestState"
+          :route-error="routeError"
+          :fullscreen="isFullscreen"
+          @poi-select="selectPoi"
+          @map-press="dismissMapOverlays"
+          @floor-select="selectFloor"
+          @clear-destination="clearPoi"
+          @close-poi="closePoi"
+          @change-poi="changePoi"
+          @set-route-start="setSelectedRouteEndpoint('start')"
+          @set-route-destination="setSelectedRouteEndpoint('destination')"
+          @calculate-route="calculateRoute"
+          @clear-route="clearRoute"
+          @reset="resetView"
+          @fullscreen-toggle="toggleFullscreen"
+        />
 
         <template v-else>
           <div v-if="!modelSlot" class="absolute inset-0 flex items-center justify-center bg-neutral-950 px-6">

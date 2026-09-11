@@ -10,6 +10,8 @@ defineProps<{
 const emit = defineEmits<{
   close: []
   change: []
+  setRouteStart: []
+  setRouteDestination: []
 }>()
 </script>
 
@@ -25,11 +27,15 @@ const emit = defineEmits<{
       </div>
       <button type="button" class="close-button" aria-label="Clear destination" @click="emit('close')"><UIcon name="i-lucide-x" /></button>
     </div>
+    <div class="route-actions" aria-label="Use place for static route">
+      <UButton size="sm" color="neutral" variant="soft" icon="i-lucide-circle-dot" label="Set as start" @click="emit('setRouteStart')" />
+      <UButton size="sm" color="neutral" variant="soft" icon="i-lucide-map-pin-check" label="Set as destination" @click="emit('setRouteDestination')" />
+    </div>
     <div class="destination-actions">
       <UButton v-if="nativeHref" :href="nativeHref" target="_self" icon="i-lucide-navigation" label="Open in app" class="primary-action" />
       <UButton color="neutral" variant="outline" label="Change" @click="emit('change')" />
     </div>
-    <p>Indoor positioning and turn-by-turn guidance stay in Situm Explore Mobile; web browsing uses the same real venue cartography.</p>
+    <p>Static web routes use the venue's configured Situm wayfinding paths. Indoor positioning and turn-by-turn guidance stay in Situm Explore Mobile.</p>
   </section>
 </template>
 
@@ -100,7 +106,9 @@ const emit = defineEmits<{
   cursor: pointer;
 }
 .close-button:hover { background: #f1f5f9; color: #10233f; }
-.destination-actions { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.route-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 12px; }
+.route-actions :deep(button) { justify-content: center; }
+.destination-actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .primary-action { flex: 1; justify-content: center; }
 p { margin: 9px 0 0; color: #7b8794; font-size: 10px; line-height: 1.45; }
 @media (max-width: 640px) {
