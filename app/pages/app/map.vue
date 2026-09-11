@@ -4,16 +4,13 @@ import type { SitumCartographyPoi, SitumCartographyResponse } from '#shared/situ
 import { isWorkspaceRequestLoading } from '~/utils/async-state'
 import { buildNativeMapHref, positiveQueryId } from '~/utils/explore-map'
 import type { IndoorWalkModelSlot } from '~/utils/indoor-walk-view'
-
 type ExploreViewMode = '2d' | '3d'
-
 const route = useRoute()
 const router = useRouter()
 const config = useRuntimeConfig()
 const workspaceElement = ref<HTMLElement | null>(null)
-const mapCanvas = ref<{ resetView: () => void } | null>(null)
+const explore2d = ref<{ resetView: () => void; dismissSearch: () => void; focusSearch: () => void; clearSearch: () => void } | null>(null)
 const walkCanvas = ref<{ resetView: () => void; goToDestination: (destination: IndoorWalkDestination) => boolean } | null>(null)
-const searchDock = ref<{ dismiss: () => void; focusSearch: () => void; clearQuery: () => void } | null>(null)
 const walkSearchDock = ref<{ dismiss: () => void; focusSearch: () => void; clearQuery: () => void } | null>(null)
 const actionMessage = ref('')
 const isFullscreen = ref(false)
@@ -25,12 +22,10 @@ const selectedDestination = ref<IndoorWalkDestination | null>(null)
 const walkReady = ref(false)
 const walkError = ref('')
 const viewMode = ref<ExploreViewMode>(route.query.view === '3d' ? '3d' : '2d')
-
 const { selectedWorkspaceId, loaded: workspaceLoaded } = useWorkspaceContext()
 const cartography = ref<SitumCartographyResponse | null>(null)
 const cartographyError = ref<unknown>(null)
 const cartographyStatus = ref<'idle' | 'pending' | 'success' | 'error'>('idle')
-
 async function refreshCartography() {
   const workspaceId = selectedWorkspaceId.value
   if (!workspaceId) {
@@ -39,7 +34,6 @@ async function refreshCartography() {
     cartographyStatus.value = 'idle'
     return
   }
-
   cartographyStatus.value = 'pending'
   cartographyError.value = null
   try {
@@ -54,15 +48,18 @@ async function refreshCartography() {
     cartographyStatus.value = 'error'
   }
 }
-
 watch(selectedWorkspaceId, () => { void refreshCartography() }, { immediate: true })
 watch(() => route.query.view, value => { viewMode.value = value === '3d' ? '3d' : '2d' })
-
 const cartographyLoading = computed(() => isWorkspaceRequestLoading(workspaceLoaded.value, selectedWorkspaceId.value, cartographyStatus.value))
 const activeBuilding = computed(() => cartography.value?.buildings.find(building => building.id === activeBuildingId.value) ?? null)
 const buildingFloors = computed(() => (cartography.value?.floors ?? []).filter(floor => floor.buildingId === activeBuildingId.value).sort((a, b) => b.level - a.level))
 const activeFloor = computed(() => buildingFloors.value.find(floor => floor.id === activeFloorId.value) ?? buildingFloors.value[0] ?? null)
 const buildingPois = computed(() => (cartography.value?.pois ?? []).filter(poi => poi.buildingId === activeBuildingId.value))
+const { routeStartPoiId, routeDestinationPoiId, routeStartPoi, routeDestinationPoi, activeRoute, routeRequestState, routeError,
+  setRouteStart, setRouteDestination, calculateRoute, clearRoute
+} = useExploreIndoorRoute({ workspaceId: selectedWorkspaceId, buildingId: activeBuildingId, pois: buildingPois })
+const routeStartFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === routeStartPoi.value?.floorId)?.name || 'Floor')
+const routeDestinationFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === routeDestinationPoi.value?.floorId)?.name || 'Floor')
 const selectedPoiFloorName = computed(() => cartography.value?.floors.find(floor => floor.id === selectedPoi.value?.floorId)?.name || activeFloor.value?.name || 'Floor')
 const modelSlot = computed<IndoorWalkModelSlot | null>(() => {
   if (activeFloor.value?.level === 0) return 'lt1'
@@ -72,13 +69,11 @@ const modelSlot = computed<IndoorWalkModelSlot | null>(() => {
 const modelUrl = computed(() => selectedWorkspaceId.value && modelSlot.value
   ? `/api/workspaces/${selectedWorkspaceId.value}/situm/3d-model/${modelSlot.value}`
   : '')
-
 const nativeMapHref = computed(() => buildNativeMapHref(
   config.public.mobile,
   selectedWorkspaceId.value,
   activeBuildingId.value
 ))
-
 function resolveMapContext() {
   if (!cartography.value?.buildings.length) {
     activeBuildingId.value = null
@@ -90,7 +85,6 @@ function resolveMapContext() {
     ?? cartography.value.buildings.find(candidate => candidate.id === activeBuildingId.value)
     ?? cartography.value.buildings[0]!
   activeBuildingId.value = building.id
-
   const floors = cartography.value.floors.filter(floor => floor.buildingId === building.id).sort((a, b) => b.level - a.level)
   const requestedFloorId = positiveQueryId(route.query.floorId)
   const floor = floors.find(candidate => candidate.id === requestedFloorId)
@@ -99,7 +93,6 @@ function resolveMapContext() {
   activeFloorId.value = floor?.id ?? null
   if (selectedPoi.value?.buildingId !== building.id) selectedPoi.value = null
 }
-
 watch([cartography, () => route.query.buildingId, () => route.query.floorId], resolveMapContext, { immediate: true })
 watch(selectedWorkspaceId, () => {
   activeBuildingId.value = null
@@ -110,7 +103,6 @@ watch(selectedWorkspaceId, () => {
   walkReady.value = false
   walkError.value = ''
 })
-
 function syncFloorQuery(floorId: number) {
   if (!activeBuildingId.value) return
   void router.replace({
@@ -150,25 +142,32 @@ function setViewMode(mode: ExploreViewMode) {
 function selectPoi(poi: SitumCartographyPoi) {
   if (activeFloorId.value !== poi.floorId) selectFloor(poi.floorId)
   selectedPoi.value = poi
-  searchDock.value?.dismiss()
+  explore2d.value?.dismissSearch()
 }
 
 function clearPoi() {
   selectedPoi.value = null
 }
 
+function setSelectedRouteEndpoint(role: 'start' | 'destination') {
+  if (!selectedPoi.value) return
+  if (role === 'start') setRouteStart(selectedPoi.value)
+  else setRouteDestination(selectedPoi.value)
+  selectedPoi.value = null
+}
+
 function closePoi() {
   selectedPoi.value = null
-  searchDock.value?.clearQuery()
+  explore2d.value?.clearSearch()
 }
 
 function dismissMapOverlays() {
-  searchDock.value?.dismiss()
+  explore2d.value?.dismissSearch()
 }
 
 function changePoi() {
   clearPoi()
-  searchDock.value?.focusSearch()
+  explore2d.value?.focusSearch()
 }
 
 function onWalkReady(loadedDestinations: IndoorWalkDestination[]) {
@@ -212,7 +211,7 @@ function goToDestination() {
 
 function resetView() {
   if (viewMode.value === '3d') walkCanvas.value?.resetView()
-  else mapCanvas.value?.resetView()
+  else explore2d.value?.resetView()
 }
 
 async function toggleFullscreen() {
@@ -261,37 +260,39 @@ definePageMeta({ middleware: 'auth', layout: 'app', title: 'Explore', fullWidth:
       </div>
 
       <template v-else-if="activeBuilding && activeFloor">
-        <template v-if="viewMode === '2d'">
-          <MapIndoorMapCanvas
-            ref="mapCanvas"
-            :building="activeBuilding"
-            :floor="activeFloor"
-            :pois="buildingPois"
-            :selected-poi="selectedPoi"
-            @poi-select="selectPoi"
-            @map-press="dismissMapOverlays"
-          />
-          <MapSearchDock
-            ref="searchDock"
-            :building-name="activeBuilding.name"
-            :floors="buildingFloors"
-            :active-floor-id="activeFloor.id"
-            :pois="buildingPois"
-            :selected-poi="selectedPoi"
-            @floor-select="selectFloor"
-            @poi-select="selectPoi"
-            @clear-destination="clearPoi"
-          />
-          <MapControlStack :fullscreen="isFullscreen" @reset="resetView" @fullscreen-toggle="toggleFullscreen" />
-          <MapDestinationCard
-            v-if="selectedPoi"
-            :poi="selectedPoi"
-            :floor-name="selectedPoiFloorName"
-            :native-href="nativeMapHref"
-            @close="closePoi"
-            @change="changePoi"
-          />
-        </template>
+        <MapExplore2D
+          v-if="viewMode === '2d'"
+          ref="explore2d"
+          :building="activeBuilding"
+          :floor="activeFloor"
+          :floors="buildingFloors"
+          :pois="buildingPois"
+          :selected-poi="selectedPoi"
+          :selected-poi-floor-name="selectedPoiFloorName"
+          :native-href="nativeMapHref"
+          :route="activeRoute"
+          :route-start-poi-id="routeStartPoiId"
+          :route-destination-poi-id="routeDestinationPoiId"
+          :route-start-poi="routeStartPoi"
+          :route-destination-poi="routeDestinationPoi"
+          :route-start-floor-name="routeStartFloorName"
+          :route-destination-floor-name="routeDestinationFloorName"
+          :route-state="routeRequestState"
+          :route-error="routeError"
+          :fullscreen="isFullscreen"
+          @poi-select="selectPoi"
+          @map-press="dismissMapOverlays"
+          @floor-select="selectFloor"
+          @clear-destination="clearPoi"
+          @close-poi="closePoi"
+          @change-poi="changePoi"
+          @set-route-start="setSelectedRouteEndpoint('start')"
+          @set-route-destination="setSelectedRouteEndpoint('destination')"
+          @calculate-route="calculateRoute"
+          @clear-route="clearRoute"
+          @reset="resetView"
+          @fullscreen-toggle="toggleFullscreen"
+        />
 
         <template v-else>
           <div v-if="!modelSlot" class="absolute inset-0 flex items-center justify-center bg-neutral-950 px-6">

@@ -74,7 +74,8 @@ Roadmap history: `plans/028-034-native-mobile-roadmap.md`. Plan 036 — Realtime
 
 ## Active plan
 
-- Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening: implementation, authenticated production-browser acceptance, user visual checkpoint, Leader Review remediation, and explicit web closure governance are complete. It supersedes Plan 044 as the current product direction while Plan 044 remains historical evidence. App-owned 2D is the default browser Explore surface, Digital Twin 3D is explicit opt-in, and semantic-room inference no longer owns 3D orientation. LT1/LT2 share the deterministic canonical view contract; arbitrary LT1 mirror/180-degree corrective transforms remain prohibited. Integration is not yet authorized or claimed.
+- Plan 046 — Web Explore 2D Routing Foundation: implementation, authenticated production-preview acceptance, leader remediation, and explicit `web full` closure governance are complete. Real Situm POIs plus real Situm wayfinding paths now feed one renderer-independent app-owned static route core; custom 2D renders the verified route while 3D route projection remains intentionally deferred. The user explicitly authorized Plan 046 closure/integration on 2026-09-11. PR/merge are the remaining integration steps; Plan 047 has not started.
+- Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening: complete/integrated through PR #43 at merge commit `7782e7d`. It established the current custom 2D-primary + explicit custom 3D product direction that Plan 046 preserves.
 
 ## Completed recent work
 
