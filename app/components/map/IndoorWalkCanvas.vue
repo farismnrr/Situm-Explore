@@ -11,13 +11,12 @@ import {
   Scene,
   SRGBColorSpace,
   Vector3,
-  WebGLRenderer,
-  type Object3D
+  type Object3D,
+  type WebGLRenderer
 } from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { IndoorWalkDestination } from '#shared/indoor-walk'
 import { extractIndoorWalkDestinations } from '~/utils/indoor-walk-destinations'
-import { disposeIndoorWalkObject, disposeIndoorWalkRenderer, updateIndoorWalkDiagnostics } from '~/utils/indoor-walk-renderer'
+import { createIndoorWalkRenderer, disposeIndoorWalkObject, disposeIndoorWalkRenderer, loadIndoorWalkModel, updateIndoorWalkDiagnostics } from '~/utils/indoor-walk-renderer'
 import { INDOOR_WALK_EYE_HEIGHT, indoorWalkViews, type IndoorWalkModelSlot } from '~/utils/indoor-walk-view'
 
 const EYE_HEIGHT = INDOOR_WALK_EYE_HEIGHT
@@ -236,10 +235,15 @@ async function initialise() {
   loading.value = true
   errorMessage.value = ''
   try {
+    const gltf = await loadIndoorWalkModel(props.modelUrl)
+    if (disposed) {
+      disposeIndoorWalkObject(gltf.scene)
+      return
+    }
     scene = new Scene()
     scene.background = new Color('#101722')
     camera = new PerspectiveCamera(68, 1, 0.05, 180)
-    renderer = new WebGLRenderer({ antialias: true, powerPreference: 'high-performance' })
+    renderer = createIndoorWalkRenderer()
     renderer.outputColorSpace = SRGBColorSpace
     renderer.toneMapping = ACESFilmicToneMapping
     renderer.toneMappingExposure = 1.05
@@ -257,11 +261,6 @@ async function initialise() {
     fillLight.position.set(-8, 4, -5)
     scene.add(fillLight)
 
-    const gltf = await new GLTFLoader().loadAsync(props.modelUrl)
-    if (disposed) {
-      disposeIndoorWalkObject(gltf.scene)
-      return
-    }
     modelRoot = gltf.scene
     scene.add(modelRoot)
     modelBounds = new Box3().setFromObject(modelRoot)
@@ -329,7 +328,7 @@ defineExpose({ resetView, goToDestination })
   >
     <div v-if="loading" class="walk-status-card">Loading 3D digital twin…</div>
     <div v-else-if="errorMessage" class="walk-error-card" role="alert">
-      <strong>3D walkthrough unavailable</strong>
+      <strong>Digital Twin 3D isn't available</strong>
       <span>{{ errorMessage }}</span>
     </div>
     <div v-if="!loading && !errorMessage" class="walk-hint">Drag to look · WASD / arrows to walk</div>

@@ -1,5 +1,21 @@
-import { Vector3, type Box3, type Object3D, type PerspectiveCamera, type WebGLRenderer } from 'three'
+import { Vector3, WebGLRenderer, type Box3, type Object3D, type PerspectiveCamera } from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { indoorWalkViews, type IndoorWalkModelSlot } from '~/utils/indoor-walk-view'
+
+export async function loadIndoorWalkModel(modelUrl: string) {
+  const response = await fetch(modelUrl, { credentials: 'same-origin' })
+  if (response.status === 404) throw new Error('No 3D model has been configured for this workspace and floor yet.')
+  if (!response.ok) throw new Error('Digital Twin 3D could not be loaded right now. Please try again later.')
+  return new GLTFLoader().parseAsync(await response.arrayBuffer(), '')
+}
+
+export function createIndoorWalkRenderer() {
+  try {
+    return new WebGLRenderer({ antialias: true, powerPreference: 'high-performance' })
+  } catch {
+    throw new Error('Digital Twin 3D cannot start because WebGL is unavailable in this browser.')
+  }
+}
 
 export function disposeIndoorWalkObject(root: Object3D) {
   root.traverse((object) => {
