@@ -18,7 +18,7 @@ Web/backend:
 Native:
 
 - React Native 0.86.2 + React 19.2.3;
-- Expo 57.0.13;
+- Expo 57.0.14;
 - `@situm/react-native` 3.19.2;
 - `expo-secure-store` for bearer-equivalent mobile session material;
 - standalone package under `mobile/`.
@@ -56,7 +56,7 @@ Stored secret values are never returned by normal configuration reads and must n
 
 ## Browser Map
 
-`app/pages/app/map.vue` composes the browser Explore workspace and owns shared static-route state, `app/components/map/IndoorMapCanvas.vue` owns the app-rendered 2D floorplan/route projection, and `app/components/map/IndoorWalkCanvas.vue` owns the Three.js/WebGL eye-level walkthrough. Real building/floor/POI context and wayfinding paths come through authenticated workspace Nitro reads, while floor-scoped GLB assets are served by authenticated Nitro routes from configured HTTPS object storage or the staging read-only asset mount. The renderers do not receive a Situm API key.
+`app/pages/app/map.vue` composes the browser Explore workspace and owns shared static-route state, `app/components/map/IndoorMapCanvas.vue` owns the app-rendered 2D floorplan/route projection, and `app/components/map/IndoorWalkCanvas.vue` owns the Three.js/WebGL eye-level walkthrough. Real building/floor/POI context and wayfinding paths come through authenticated workspace Nitro reads, while workspace-and-building-scoped floor GLB assets are served by authenticated Nitro routes from configured HTTPS object storage or the staging read-only asset mount. The model request carries the active building ID and the renderer identity includes workspace/building/floor/model slot so stale models cannot cross context boundaries. The renderers do not receive a Situm API key.
 
 The browser surface is 2D-primary. The default renderer consumes authenticated workspace cartography, real floor images, building dimensions, floors, and POIs and owns pan/zoom, search, selection, reset, and fullscreen. Same-floor static POI-to-POI routes are computed by a renderer-independent app route core over real Situm path nodes/links: endpoints project to eligible path edges, directionality is preserved, and the 2D renderer draws the resulting geometry under the same floor transform used by the raster. Tagged graphs fail explicitly until their route-filter behavior is proven, and cross-floor routing remains unsupported rather than guessed. Route requests are generation-owned so a late response cannot restore geometry after Clear, endpoint replacement, workspace/building changes, or a newer request. Digital Twin 3D is explicit opt-in and is lazy-mounted so default 2D does not initialize WebGL or request a GLB. In 3D, room discovery comes from canonical semantic room objects embedded in the active GLB, and interaction includes floor switching, mouse-look, keyboard/touch walking, deterministic camera travel, reset, and fullscreen. Initial/reset orientation comes from the explicit floor-view descriptor and never from semantic destination bounds. Shared route state may survive 2D/3D switching, but 3D route geometry is not rendered yet. Missing GLB, WebGL, or semantic-room capability after explicit 3D selection is a truthful 3D error; do not silently change modes. The browser must not synthesize sensor-backed location, ETA, rerouting, arrival, or turn-by-turn guidance.
 
@@ -71,6 +71,8 @@ The native app receives only the workspace Only Read credential after applicatio
 Positioning starts only after explicit user action and runtime permission success. Stop/workspace switch/logout/background/native failure/teardown must clear protected location state according to the established lifecycle.
 
 Map/cartography/POI/floor/navigation UI must consume real Situm state. Do not invent route metrics or product data.
+
+Native Explore remains 2D-first. `NativeMapScreen` owns the explicit `2d | 3d` mode boundary: 2D keeps live positioning/navigation authority, while `NativeDigitalTwin` is lazy-mounted only after explicit opt-in and retrieves GLB bytes through the authenticated owner-scoped workspace/building model endpoint. Native 3D uses `expo-gl` plus mobile-owned Three `0.162.0`, shares only runtime-neutral model-slot/view and semantic-room contracts with web, and owns room search/Go/reset/floor selection/touch look-walk plus renderer lifecycle cleanup. It must not project or fabricate blue-dot state, 2D route geometry, ETA, arrival/off-route state, turn-by-turn guidance, or vertical navigation inside 3D. Missing/unavailable 3D stays an explicit error until the user manually returns to 2D.
 
 ## Native Realtime
 
@@ -106,7 +108,7 @@ Normalize validation, unauthenticated, forbidden, not-found, conflict, upstream,
 
 Web owns administration, analytics, responsive app-owned 3D digital-twin exploration, and static web operations. Native owns sensor-backed indoor positioning, turn-by-turn Map/navigation, and the native Realtime experience.
 
-Web Explore defaults to the app-owned 2D floorplan across desktop/tablet/phone-sized browser layouts. Digital Twin 3D explicitly mounts floor-scoped GLB assets through Three.js/WebGL with an eye-level camera; missing GLB/WebGL/semantic-room data remains an error inside that requested mode rather than triggering a silent fallback. Model-derived semantic rooms are 3D destinations only and are not fuzzily matched to Situm POIs across modes. Web Realtime continues to use the integrated native handoff policy.
+Web Explore defaults to the app-owned 2D floorplan across desktop/tablet/phone-sized browser layouts. Digital Twin 3D explicitly mounts workspace/building-scoped floor GLB assets through Three.js/WebGL with an eye-level camera; missing GLB/WebGL/semantic-room data remains an error inside that requested mode rather than triggering a silent fallback. Model-derived semantic rooms are 3D destinations only and are not fuzzily matched to Situm POIs across modes. Native Explore likewise stays 2D-first and exposes its own explicit native-GL Digital Twin 3D walkthrough without taking over 2D positioning/navigation authority. Web Realtime continues to use the integrated native handoff policy.
 
 ## Android release
 

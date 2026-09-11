@@ -74,10 +74,13 @@ Roadmap history: `plans/028-034-native-mobile-roadmap.md`. Plan 036 — Realtime
 
 ## Active plan
 
-No implementation plan is active. Plan 047 — Digital Twin 3D Route Projection remains a future successor and has not started.
+No implementation plan is active.
+
+Future work starts from updated `main` under a newly created explicit plan. In particular, browser/native 3D route projection is **not** Plan 047 and remains unplanned until separately scoped.
 
 ## Completed recent work
 
+- Plan 047 — Native Explore Digital Twin 3D Parity: complete/integrated through PR #46 at merge commit `21fd074532af6db93db9996fc9acdf175d541ea2`. Native Explore remains 2D-first for live positioning/navigation and exposes an explicit native-GL Digital Twin 3D walkthrough using authenticated workspace/building model retrieval plus shared deterministic view/semantic contracts. 3D route projection is not part of Plan 047.
 - Plan 046 — Web Explore 2D Routing Foundation: complete/integrated through PR #44 at merge commit `9aad66f964f01b87815893a50e86fbf95236b815`. Real Situm POIs plus real Situm wayfinding paths feed one renderer-independent app-owned static route core; custom 2D renders the verified same-floor route, while 3D route projection remains intentionally deferred to a future plan.
 - Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening: complete/integrated through PR #43 at merge commit `7782e7d`; established the custom 2D-primary + explicit custom 3D product direction preserved by Plan 046.
 - Plan 037 — Web Loading-State Hygiene: complete/integrated through PR #36 at merge commit `80dad1b`.
@@ -88,13 +91,13 @@ No implementation plan is active. Plan 047 — Digital Twin 3D Route Projection 
 
 - Plan 042 — Repository Engineering Governance: complete/integrated locally into `main`; component-scoped Engineering Guard and maintainability remain closure-only or explicit-user-request tools.
 - Plan 043 — Map Marker & Interaction Polish: complete/integrated locally into `main`; includes the accepted mobile map polish and reproducible Blender-to-Situm 2D/3D asset pipeline. Local building photos and generated artifacts remain outside repository distribution.
-- Plan 044 — Web / Native Map UI Parity: complete/integrated through PR #42 at merge commit `420f399bf10979f389f36f686d056ce3e4b77012`. The primary web Explore experience is a 3D-only app-owned WebGL walkthrough over floor-scoped GLB digital-twin assets; search targets canonical rooms extracted from the model, floor switching and camera travel are browser-owned, and sensor-backed positioning/navigation remain native-only. Closure `web full` Engineering Guard and maintainability passed on 2026-09-10; user visual E2E is not claimed as executed.
+- Plan 044 — Web / Native Map UI Parity: complete/integrated through PR #42 at merge commit `420f399bf10979f389f36f686d056ce3e4b77012`. This is a historical predecessor whose 3D-only web direction was superseded by Plan 045's current 2D-primary + explicit-3D contract. Closure `web full` Engineering Guard and maintainability passed on 2026-09-10; user visual E2E is not claimed as executed.
 
 ## Transition direction
 
 The historical pre-refactor baseline used env-defined app auth and process-global Situm account/Viewer/building context; it also produced analytics history before workspace ownership existed.
 
-Plans 021–025 replaced those incrementally. Plans 026–027 completed production containerization plus analytics/security hardening. Plans 028–035 established and closed the native companion work while preserving Nitro as the single application backend.
+Plans 021–025 replaced those incrementally. Plans 026–027 completed production containerization plus analytics/security hardening. Plans 028–035 established and closed the native companion foundation while preserving Nitro as the single application backend. Plans 041 and 045–047 then established the current app-owned native 2D navigation, web 2D-primary/static-routing + explicit 3D direction, and native Digital Twin 3D parity.
 
 Do not remove a working old path before its replacement is implemented and accepted.
 

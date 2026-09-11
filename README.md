@@ -15,8 +15,8 @@ Current product behavior includes:
 - private single-owner workspaces;
 - workspace-managed Situm credentials with exactly two authorities: Only Read for client/read flows and Read & Write for server-side mutation/admin flows;
 - workspace-scoped Situm cartography and operational data;
-- web Situm Viewer exploration on capable desktop/tablet layouts;
-- native indoor positioning, map exploration, POI navigation, and foreground positioning lifecycle;
+- app-owned web Explore with a 2D-primary indoor floorplan, real same-floor Situm path routing, and explicit Digital Twin 3D walkthrough mode;
+- native indoor positioning, map exploration, POI navigation, foreground positioning lifecycle, and explicit native Digital Twin 3D walkthrough mode;
 - server-mediated native Realtime position monitoring;
 - ClickHouse-backed workspace analytics;
 - web-to-native Map/Realtime handoff;
@@ -32,12 +32,33 @@ server/               Nitro API, application services, integrations, persistence
 shared/               runtime-neutral shared contracts/helpers
 mobile/               React Native + Expo companion app
 design/               product UI/UX implementation references
-docs/                 operator/developer documentation
+docs/                 human-facing operator/developer/research documentation
 deploy/               staging deployment configuration
 scripts/              repository operational helpers
 plans/                historical and future scoped implementation plans
-.agents/               agent work state, decisions, evidence, sessions, protocols
+.agents/               agent-only work state, decisions, evidence, sessions, protocols
 ```
+
+## Documentation map
+
+Documentation is intentionally split by audience:
+
+### Human documentation
+
+- [README.md](README.md) — project overview, setup, capabilities, and entry points.
+- [ARCHITECTURE.md](ARCHITECTURE.md) — current runtime, security, and ownership boundaries.
+- [DESIGN.md](DESIGN.md) and [`design/`](design/) — current product UX and implementation contracts.
+- [`docs/README.md`](docs/README.md) — operator/developer documentation index, including Android distribution, Digital Twin assets, and research notes.
+
+These files describe the product **as it exists now**. Update them when current runtime behavior or operating procedures change.
+
+### Agent documentation
+
+- [AGENTS.md](AGENTS.md) — agent entry point and mandatory read order.
+- [`.agents/`](.agents/) — current agent state, durable decisions, execution protocols, evidence, and session history.
+- [`plans/`](plans/) — implementation plans and historical execution records.
+
+Agent evidence, sessions, and completed plans are historical records unless a current-authority file explicitly says otherwise. They must not override the human product contracts above.
 
 ## Architecture
 
