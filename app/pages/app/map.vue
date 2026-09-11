@@ -4,9 +4,7 @@ import type { SitumCartographyPoi, SitumCartographyResponse } from '#shared/situ
 import { isWorkspaceRequestLoading } from '~/utils/async-state'
 import { buildNativeMapHref, positiveQueryId } from '~/utils/explore-map'
 import type { IndoorWalkModelSlot } from '~/utils/indoor-walk-view'
-
 type ExploreViewMode = '2d' | '3d'
-
 const route = useRoute()
 const router = useRouter()
 const config = useRuntimeConfig()
@@ -24,12 +22,10 @@ const selectedDestination = ref<IndoorWalkDestination | null>(null)
 const walkReady = ref(false)
 const walkError = ref('')
 const viewMode = ref<ExploreViewMode>(route.query.view === '3d' ? '3d' : '2d')
-
 const { selectedWorkspaceId, loaded: workspaceLoaded } = useWorkspaceContext()
 const cartography = ref<SitumCartographyResponse | null>(null)
 const cartographyError = ref<unknown>(null)
 const cartographyStatus = ref<'idle' | 'pending' | 'success' | 'error'>('idle')
-
 async function refreshCartography() {
   const workspaceId = selectedWorkspaceId.value
   if (!workspaceId) {
@@ -38,7 +34,6 @@ async function refreshCartography() {
     cartographyStatus.value = 'idle'
     return
   }
-
   cartographyStatus.value = 'pending'
   cartographyError.value = null
   try {
@@ -53,10 +48,8 @@ async function refreshCartography() {
     cartographyStatus.value = 'error'
   }
 }
-
 watch(selectedWorkspaceId, () => { void refreshCartography() }, { immediate: true })
 watch(() => route.query.view, value => { viewMode.value = value === '3d' ? '3d' : '2d' })
-
 const cartographyLoading = computed(() => isWorkspaceRequestLoading(workspaceLoaded.value, selectedWorkspaceId.value, cartographyStatus.value))
 const activeBuilding = computed(() => cartography.value?.buildings.find(building => building.id === activeBuildingId.value) ?? null)
 const buildingFloors = computed(() => (cartography.value?.floors ?? []).filter(floor => floor.buildingId === activeBuildingId.value).sort((a, b) => b.level - a.level))
@@ -76,13 +69,11 @@ const modelSlot = computed<IndoorWalkModelSlot | null>(() => {
 const modelUrl = computed(() => selectedWorkspaceId.value && modelSlot.value
   ? `/api/workspaces/${selectedWorkspaceId.value}/situm/3d-model/${modelSlot.value}`
   : '')
-
 const nativeMapHref = computed(() => buildNativeMapHref(
   config.public.mobile,
   selectedWorkspaceId.value,
   activeBuildingId.value
 ))
-
 function resolveMapContext() {
   if (!cartography.value?.buildings.length) {
     activeBuildingId.value = null
@@ -94,7 +85,6 @@ function resolveMapContext() {
     ?? cartography.value.buildings.find(candidate => candidate.id === activeBuildingId.value)
     ?? cartography.value.buildings[0]!
   activeBuildingId.value = building.id
-
   const floors = cartography.value.floors.filter(floor => floor.buildingId === building.id).sort((a, b) => b.level - a.level)
   const requestedFloorId = positiveQueryId(route.query.floorId)
   const floor = floors.find(candidate => candidate.id === requestedFloorId)
@@ -103,7 +93,6 @@ function resolveMapContext() {
   activeFloorId.value = floor?.id ?? null
   if (selectedPoi.value?.buildingId !== building.id) selectedPoi.value = null
 }
-
 watch([cartography, () => route.query.buildingId, () => route.query.floorId], resolveMapContext, { immediate: true })
 watch(selectedWorkspaceId, () => {
   activeBuildingId.value = null
@@ -114,7 +103,6 @@ watch(selectedWorkspaceId, () => {
   walkReady.value = false
   walkError.value = ''
 })
-
 function syncFloorQuery(floorId: number) {
   if (!activeBuildingId.value) return
   void router.replace({
