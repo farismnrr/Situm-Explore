@@ -1,7 +1,7 @@
 # Plan 046 — Web Explore 2D Routing Foundation
 
 Repository: `/home/farismnrr/Documents/Projects/situm-explore`
-Status: closure governance PASS; user explicitly authorized Plan 046 closure/integration on 2026-09-11; awaiting PR/merge
+Status: complete/integrated through PR #44 at merge commit `9aad66f964f01b87815893a50e86fbf95236b815`
 Expected branch: `plan/046-web-explore-2d-routing-foundation`
 Codebase: web only
 Dependency: Plan 045 / PR #43 already integrated into `main`

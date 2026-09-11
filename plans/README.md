@@ -74,11 +74,12 @@ Roadmap history: `plans/028-034-native-mobile-roadmap.md`. Plan 036 — Realtime
 
 ## Active plan
 
-- Plan 046 — Web Explore 2D Routing Foundation: implementation, authenticated production-preview acceptance, leader remediation, and explicit `web full` closure governance are complete. Real Situm POIs plus real Situm wayfinding paths now feed one renderer-independent app-owned static route core; custom 2D renders the verified route while 3D route projection remains intentionally deferred. The user explicitly authorized Plan 046 closure/integration on 2026-09-11. PR/merge are the remaining integration steps; Plan 047 has not started.
-- Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening: complete/integrated through PR #43 at merge commit `7782e7d`. It established the current custom 2D-primary + explicit custom 3D product direction that Plan 046 preserves.
+No implementation plan is active. Plan 047 — Digital Twin 3D Route Projection remains a future successor and has not started.
 
 ## Completed recent work
 
+- Plan 046 — Web Explore 2D Routing Foundation: complete/integrated through PR #44 at merge commit `9aad66f964f01b87815893a50e86fbf95236b815`. Real Situm POIs plus real Situm wayfinding paths feed one renderer-independent app-owned static route core; custom 2D renders the verified same-floor route, while 3D route projection remains intentionally deferred to a future plan.
+- Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening: complete/integrated through PR #43 at merge commit `7782e7d`; established the custom 2D-primary + explicit custom 3D product direction preserved by Plan 046.
 - Plan 037 — Web Loading-State Hygiene: complete/integrated through PR #36 at merge commit `80dad1b`.
 - Plan 038 — Two-Key Situm Credential Model: complete/integrated through PR #36 at merge commit `80dad1b` by explicit user waiver on 2026-08-27. Automated validation, GHCR immutable publication, staging recreate, authenticated Workspace/Map acceptance, and release APK build passed. Physical Android sensor-backed positioning and raw-secret browser form replay were not executed and are not claimed as PASS.
 - Plan 039 — Workspace Situm Isolation: complete/integrated through PR #37 at merge commit `a9acda6`.
