@@ -1,6 +1,6 @@
 # Situm 3D model pipeline
 
-Situm Explore keeps its editable indoor-layout source in Blender scripts and exports floor-scoped GLB assets for both Situm cartography workflows and the app-owned web Explore walkthrough.
+Situm Explore keeps its editable indoor-layout source in Blender scripts and exports one GLB per supported floor. Runtime delivery then scopes each floor asset by application workspace and Situm building for both web and native Digital Twin walkthroughs.
 
 ## Why the export is per floor
 
@@ -88,7 +88,7 @@ The exact Situm editor translation/rotation values are deployment data and shoul
 
 ## Runtime boundary
 
-The primary web `/app/map` experience is the app-owned 2D floorplan renderer. Digital Twin 3D is an explicit opt-in mode that consumes floor-scoped GLBs through an authenticated workspace route and uses a perspective eye-level camera. The 3D renderer is lazy-mounted, so default 2D does not initialize WebGL or request a GLB. Its initial/reset camera pose follows the same canonical floor-to-GLB orientation contract on LT1 and LT2 rather than deriving orientation from semantic rooms. A missing/unreadable GLB, unavailable WebGL runtime, or model without discoverable semantic-room objects remains an explicit 3D error after opt-in; the app does not silently switch back to 2D.
+The primary web `/app/map` experience is the app-owned 2D floorplan renderer. Digital Twin 3D is an explicit opt-in mode that consumes workspace/building-scoped floor GLBs through an authenticated workspace route and uses a perspective eye-level camera. The 3D renderer is lazy-mounted, so default 2D does not initialize WebGL or request a GLB. Its initial/reset camera pose follows the same canonical floor-to-GLB orientation contract on LT1 and LT2 rather than deriving orientation from semantic rooms. A missing/unreadable GLB, unavailable WebGL runtime, or model without discoverable semantic-room objects remains an explicit 3D error after opt-in; the app does not silently switch back to 2D.
 
 Generated GLBs remain excluded from Git. The current staging runtime mounts `.data/3d-models` read-only into the container and serves the selected floor asset through the authenticated Nitro workspace boundary. Assets are scoped by both application workspace and Situm building so switching workspace/building can never reuse another context's model implicitly:
 
@@ -112,4 +112,5 @@ Before publishing a model revision:
 - model orientation matches floor cartography;
 - model placement does not offset Situm POIs/routes from their physical rooms;
 - floor switching does not show duplicated geometry from another floor;
-- web Explore renders the intended GLB in WebGL at normal phone/tablet/desktop layouts, with eye-level camera movement and floor switching accepted.
+- web Explore renders the intended workspace/building GLB in WebGL at normal phone/tablet/desktop layouts, with eye-level camera movement and floor switching accepted;
+- native Explore renders the intended authenticated workspace/building GLB on the supported Android target when native 3D is part of the release scope, while 2D positioning/navigation remains unaffected.

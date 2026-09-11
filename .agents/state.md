@@ -2,66 +2,100 @@
 
 _Last reviewed: 2026-09-11_
 
-## Work status
+## Current execution state
 
-Plan 047 — Native Explore Digital Twin 3D Parity is **closure-complete on dedicated branch `plan/047-native-digital-twin-parity` with implementation commit `61fd329`; integration remains pending explicit user authorization**. Native Explore stays 2D-first with existing app-owned Situm positioning/navigation, while Digital Twin 3D is explicit opt-in, lazy, authenticated through the existing workspace GLB route, and scoped by workspace/building/floor/model generation. Native 3D uses Expo GL plus mobile-owned Three `0.162.0`, shared deterministic view/semantic contracts, model-derived room search/Go, deterministic reset, floor switching, touch look/walk, lifecycle pause/resume, and explicit error states with no silent fallback or fabricated 3D navigation. Physical Android feasibility proved actual authenticated LT1/LT2 workspace GLBs; user product E2E accepted the flow apart from a final mode-switch collision that was subsequently relocated into the existing control clusters without claiming a second physical retest. Closure validation passed web full Engineering Guard (0 web vulnerabilities), web/mobile maintainability, mobile fast Engineering Guard, Expo config, fresh Android Expo export, `git diff --check`, and agent workspace validation. Mobile full audit remains truthfully nonzero only for four aggregate findings from the two pre-existing `image-size` advisories whose exact parser behaviors are locally remediated with the repository's documented `patch-package`; no scanner suppression or dismissal was introduced. Closure evidence: `.agents/evidence/plan-047-closure-2026-09-11.md`.
+No product implementation plan is active.
 
-Plan 046 — Web Explore 2D Routing Foundation is **complete/integrated through PR #44 at merge commit `9aad66f964f01b87815893a50e86fbf95236b815`**. The Phase 0 blocker was resolved with a temporary local-only authenticated Viewer harness and fresh A→B/B→A reference screenshots for real POIs `1274449` (PT Perkasa Pilar Utama) and `1274451` (BCA Cab Artha Gading Niaga), both on floor `69907` / Base in building `19870`. The selected graph contains 1 path object, 22 nodes, and 29 links; every link is `origin: both`, accessible, and untagged. The app-owned route core snaps endpoints to real same-floor path edges, preserves path-object identity in graph keys, uses verified directional traversal plus Cartesian-length Dijkstra, and returns one renderer-independent `IndoorRoute` consumed by 2D only. Tagged eligible graphs now fail closed until Situm route-tag semantics are proven; cross-floor routing also remains explicit unsupported. Route requests are generation-owned so Clear, endpoint replacement, workspace/building invalidation, or a newer request prevents stale in-flight results from restoring obsolete route state. Production-preview A→B and B→A materially agree with the fresh Situm topology oracle; pan/zoom/reset, route clear/replace/error behavior, 2D→3D→2D route-state preservation, zero pre-opt-in GLB requests, one WebGL canvas per explicit 3D entry, and absence of fabricated 3D route geometry were verified. The redundant 3D badge/live dot is removed and `2D Map` remains intact. Leader remediation white-box checks plus clean-snapshot diff-check, lint, typecheck, and build pass. Final clean-snapshot `web full` Engineering Guard, dependency audit (0 vulnerabilities), maintainability, and agent workspace validation passed before integration. Plan 047 remains unstarted.
+New implementation work must start from updated `main` on a dedicated branch under the normal user-gated PR/merge lifecycle. Historical plans, sessions, evidence, and retired branches are context only unless explicitly reopened.
 
-Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening is **complete/integrated through PR #43**; planning-time Git inspection on 2026-09-11 observed `main`/`origin/main` at merge commit `7782e7d`. Browser Explore defaults to the app-owned 2D floorplan and exposes Digital Twin 3D as an explicit opt-in mode. The LT1 presentation defect was traced to the lack of one deterministic runtime orientation/spawn contract rather than a mirrored LT1 mesh: live Situm floorplans match canonical exports, floor/model slot mapping is correct, runtime GLB geometry has no reflection transform, Blender/export axis conversion is shared across floors, and no CSS/Three.js model mirror exists. The implementation removes semantic `Entrance` geometry from orientation authority and uses the same canonical normalized pose on LT1/LT2: spawn `x=0.50,z=0.78`, lookAt `x=0.94,z=0.78`, eye height `1.620`, with canonical high-Y/top mapping to runtime `-Z`. Authenticated production-browser evidence proves default 2D makes zero GLB requests, explicit F1/F2 3D loads the correct model, repeated mode switching tears down WebGL canvases, and forced GLB failure remains an explicit 3D error. No LT1 negative-scale/mirror or magic 180-degree correction is permitted. See `plans/045-web-explore-2d-digital-twin-orientation.md` and `.agents/evidence/plan-045-orientation-implementation-2026-09-10.md`.
+The latest integrated product baseline before this documentation refresh is `main` at PR #48 merge commit `4de87b602ea595d873c0c5235a3e807753349eef`.
 
-Plan 044 — Web / Native Map UI Parity is **complete/integrated** through PR #42 at merge commit `420f399bf10979f389f36f686d056ce3e4b77012`. `/app/map` is a 3D-only app-owned Three.js/WebGL digital-twin walkthrough with an eye-level 1.62 m perspective camera; there is no 2D floorplan/Viewer fallback, and missing GLB/WebGL/discoverable-room capability is an explicit error. The browser owns mouse-look, WASD/arrow/touch walking controls, floor switching, room search, reset/fullscreen, and deterministic camera travel to canonical semantic rooms extracted from trusted floor GLBs when Situm POIs are absent. Sensor-backed blue-dot positioning and turn-by-turn guidance remain native-only. Authenticated Playwright acceptance passed on both configured floors before closure, and final `Engineering Guard web full`, dependency audit (0 vulnerabilities), agent workspace validation, and maintainability passed with no new file/function/bypass debt. User visual E2E is not claimed as executed. Local staging remains healthy on `sha-b39c25c6e7ae-publicschema-local`, which intentionally combines the integrated product source with the user's still-uncommitted PostgreSQL `public`-schema compatibility worktree; GHCR publication remains blocked by local 403 push authorization. Plan 044 remains historical evidence; Plan 045 superseded its 3D-only product direction and is now integrated.
+## Latest integrated work
 
-Plan 037 — Web Loading-State Hygiene is complete/integrated through PR #36 at merge commit `80dad1bf87300846fab2f7b914d5ec666acf06d6`. It centralizes unresolved `idle`/`pending` semantics, removes transient false empty/configuration copy, and gates Alarms/Map/Workspace states behind real resolution. Validation passed with 74/74 tests, lint, typecheck, build, and `git diff --check`.
+### Plan 047 — Native Explore Digital Twin 3D Parity
 
-Plan 038 — Two-Key Situm Credential Model is complete/integrated through PR #36 at merge commit `80dad1bf87300846fab2f7b914d5ec666acf06d6`. The runtime/configuration model exposes exactly **Only Read** plus **Read & Write**: Only Read powers authenticated browser Viewer, native positioning, and server read paths; Read & Write remains server-only for mutation/admin authority. Dedicated Positioning storage/UI/runtime contracts were removed and a forward migration drops the legacy column. Automated validation passed: 75/75 root tests, root lint/typecheck/build, mobile lint/typecheck/security/update tests, release APK build, and `git diff --check`. The user explicitly waived the remaining physical/raw-secret E2E gates on 2026-08-27 so the plan could close under time pressure; those checks remain documented as not executed rather than PASS.
+Plan 047 is **complete/integrated through PR #46** at merge commit `21fd074532af6db93db9996fc9acdf175d541ea2`.
 
-Plan 038 is deployed to the local production-style Compose runtime on port 3005 using the final Plan 038 image built from closeout commit `bddd72889135429df9f6fac5880e15e1795badac`. Before migration, a mode-0600 PostgreSQL custom-format backup was created and recorded at `/tmp/situm-explore-plan038-pre-migration-20260827-134152.dump`; the path was missing at final closeout, likely because `/tmp` was cleaned, so backup retention is not claimed. Migration `0009_unusual_wrecking_crew` was applied successfully: the Read & Write column is nullable, the legacy encrypted Positioning column is gone, the existing workspace configuration row remains, and both Only Read and Read & Write slots remain configured without reading their secret values. The final GHCR `staging` image is immutable at digest `sha256:75739ca6d557fc9c5098879cc668284581ee77b61a1d9889df5376ad2b0b6f58`; the container was pulled and force-recreated from it, is healthy on Node `v22.22.0`, liveness/root return 200, unauthenticated workspace access returns 401, and the then-existing `make staging-smoke` target passed. That persistent smoke target was later removed under the 2026-09-02 testing policy; the historical result remains evidence only. No stored/raw Situm secret was accessed.
+Current native Explore contract:
 
-The Docker base-image warning is addressed: both build stages use Node `22.22.0-bookworm-slim`, and clean production image builds complete without the Nuxt engine mismatch warning. Authenticated browser acceptance isolated the Viewer issue to immediate watcher timing before the DOM ref existed; `SitumViewer` now retries in `onMounted`, with a regression assertion and targeted test passing. Final browser acceptance through `https://situm.farismunir.my.id` (the local port-3005 tunnel) verified the two-key Workspace UI and rendered Map Viewer. A release arm64 APK `v1.0.2`/versionCode `3` also built successfully, but `adb devices` reports no Android device; the user explicitly waived physical Only Read positioning E2E on 2026-08-27. Full evidence is in `.agents/evidence/plan-038-runtime-acceptance-2026-08-27.md`.
+- 2D remains the default and owns live positioning, blue dot, app-owned routing, ETA, arrival/off-route state, and turn-by-turn guidance;
+- Digital Twin 3D is explicit opt-in and lazy;
+- native 3D uses Expo GL plus mobile-owned Three `0.162.0` and authenticated workspace/building-scoped GLB retrieval;
+- web/native share only runtime-neutral model-slot/view and semantic-room contracts;
+- native 3D owns room search/Go/reset/floor selection/touch look-walk and lifecycle/resource cleanup;
+- native 3D never fabricates blue-dot projection, route geometry, ETA, arrival/off-route, turn-by-turn guidance, or vertical transitions;
+- missing/unavailable 3D remains an explicit error with a manual `2D Map` action; there is no silent fallback.
 
-Latest **integrated** product work on `main` is Plan 046 through PR #44 at merge commit `9aad66f964f01b87815893a50e86fbf95236b815`. Plan 047 is closure-complete only on its dedicated branch and must not be treated as integrated until the user separately authorizes PR/merge. Plan 041 remains the latest integrated native-map milestone through PR #39 at merge commit `99318a608af24f036e1744d9e7e929b859fbe15e`. The previously separate Android 1.0.2 OTA history remains preserved on `main` in `.agents/evidence/android-release-1.0.2-2026-08-28.md` and `.agents/sessions/2026-08-28.md`.
+Physical Android feasibility rendered the real authenticated LT1/LT2 models. The user accepted the product E2E flow; the later mode-switch placement fix was source/layout validated without falsely claiming a second physical retest of only that final layout change.
 
-Plan 041 — App-Owned Indoor Map + Navigation UI is complete/integrated through PR #39 at merge commit `99318a608af24f036e1744d9e7e929b859fbe15e`. React Native now owns the visible floorplan, POI, bluedot, heading/accuracy, route rendering, and app route graph while authenticated Situm cartography/path data remains the source of truth and the native Situm runtime remains headless positioning only. Physical POS acceptance covered real indoor fixes, POI selection, same/cross-floor routing, floor switching, fullscreen/back state preservation, recenter/stop, and bounded crash checks; the branded same-logo cold-launch animation and final arm64 release packaging/checksum also passed. Pixel-level map polish and movement-dependent arrival/off-route reproduction remain truthful optional follow-ups rather than claimed PASS. The 2026-09-02 repository testing policy removed all persistent unit/regression suites; durable validation now uses lint/typecheck/build plus appropriate runtime/browser/device evidence.
+Closure evidence: `.agents/evidence/plan-047-closure-2026-09-11.md`.
 
-Plan 042 — Repository Engineering Governance is complete and integrated locally into `main`. The Sensio-style component Engineering Guard, environment/policy checks, agent-workspace validation, and maintainability ratchets exist for `web` and `mobile`, with closure-only semantics and no hidden implementation-time automation.
+### Situm Path research preservation
 
-Plan 043 — Map Marker & Interaction Polish and the Blender/Situm asset pipeline are closure-complete and being integrated locally into `main`. The final state preserves compact map interactions plus reproducible 2D floorplan and floor-scoped GLB exporters. Local building photos and generated `.tools/` artifacts remain excluded from repository distribution.
+Sanitized Path investigation artifacts were preserved through **PR #47** at merge commit `653d80cb7116256ab63065b15073fd483fa7fcad`.
 
-Do not start dependent product work from Plan 047 until it is integrated into updated `main` under the normal user-gated PR/merge lifecycle. Otherwise continue future work from a fresh dedicated plan branch based on updated `main`. Historical plans, sessions, evidence, and retired branches are context only unless explicitly re-opened.
+Human-readable research now lives under `docs/research/`; the guarded post-provisioning uploader lives at `scripts/situm/upload-paths.sh`. The current evidence for building `19954` remains **BLOCKED BY SITUM BACKEND** because the building Path aggregate is missing and no supported create/bootstrap endpoint was found. This research is evidence, not a product capability contract.
 
-## Last completed work
+### Web Digital Twin workspace/building isolation
 
-Plan 035 closed the Realtime/foreground-positioning lifecycle defect and Android release/distribution polish. Recorded evidence includes:
+The previously uncommitted web isolation/favicon/title work was reconciled on top of Plan 047 and integrated through **PR #48** at merge commit `4de87b602ea595d873c0c5235a3e807753349eef`.
 
-- shared shell-scoped foreground positioning ownership;
-- Android runtime permission gate before Positioning credential use;
-- physical POS sensor-backed positioning and own-device server-mediated Realtime PASS for the bounded Plan 035 scope;
-- standardized arm64 Android release artifact generation;
-- public MinIO Android distribution and logged-out web download;
-- final validation captured in `.agents/evidence/plan-035-realtime-remediation-2026-08-18.md`.
+Current web Digital Twin contract:
 
-Product/runtime details belong in `README.md`, `ARCHITECTURE.md`, `DESIGN.md`, `design/IMPLEMENTATION.md`, `design/data-source-matrix.md`, and `docs/mobile-distribution.md`. Do not duplicate those contracts here unless a temporary work item changes them.
+- browser Explore remains 2D-primary with verified same-floor static route rendering;
+- Digital Twin 3D is explicit opt-in;
+- GLB identity and storage are scoped by application workspace + Situm building + floor/model slot;
+- switching workspace/building cannot silently reuse another context's model;
+- there is no flat/global GLB fallback;
+- missing model, WebGL failure, and semantic-room failure remain explicit 3D errors;
+- favicon/static assets are included in the production container context and tab titles use the Situm Explore product title.
 
-## Historical limitations
+The web branch passed `web full` Engineering Guard, production build, lint, typecheck, dependency audit with 0 findings, maintainability, and agent-workspace validation before integration.
 
-Plan 034 was administratively closed without fabricating full acceptance. Plan 035 later proved the specific physical positioning/Realtime path it remediated, but unrelated Plan 034 items that were never exercised remain historical limitations rather than implicit PASS.
+## Earlier integrated milestones
 
-These historical limitations are **not an active backlog by default**. A future scoped plan must explicitly reopen any of them.
+- Plan 046 — Web Explore 2D Routing Foundation: integrated through PR #44 (`9aad66f964f01b87815893a50e86fbf95236b815`). Browser 2D uses real Situm POIs and wayfinding paths for app-owned same-floor static routing; tagged graphs and cross-floor browser routing remain explicit unsupported cases until semantics are proven.
+- Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening: integrated through PR #43 (`7782e7d`). Established the current 2D-primary / explicit-3D web direction and deterministic shared floor-view semantics.
+- Plan 044 — Web / Native Map UI Parity: historical predecessor integrated through PR #42 (`420f399`). Its 3D-only web direction was superseded by Plan 045.
+- Plan 041 — App-Owned Indoor Map + Navigation UI: integrated through PR #39 (`99318a6`). Native 2D owns the visible floorplan/POI/blue-dot/route experience while Situm remains cartography/path/positioning authority.
+- Plan 042 — Repository Engineering Governance and Plan 043 — map/asset-pipeline polish are complete/integrated historical work, not active plans.
 
-Other recorded external/deferred items include Google OAuth runtime acceptance, iOS/macOS device/build delivery, and store/association gates. Revalidate current conditions before treating any historical note as a new blocker.
+## Current product/runtime authority
 
-## Security maintenance note
+Human-facing current product truth lives in:
 
-Historical dependency remediation evidence is in `.agents/evidence/security-dependency-remediation.md`. Do not infer current vulnerability status from that snapshot; run a fresh scan for new security work.
+- `README.md`;
+- `ARCHITECTURE.md`;
+- `DESIGN.md`;
+- `design/IMPLEMENTATION.md`;
+- `design/data-source-matrix.md`;
+- `docs/README.md` and the relevant operator/developer docs under `docs/`.
+
+Agent-facing execution/governance truth lives in:
+
+- `AGENTS.md`;
+- this file;
+- `.agents/memory/decisions.md`;
+- `.agents/protocols/`;
+- an explicitly active future plan when one exists.
+
+Historical `.agents/evidence/`, `.agents/sessions/`, reviews, old execution briefs, and completed `plans/*.md` files remain immutable evidence unless a factual metadata correction is required. They do not override current architecture/state.
+
+## Known truthful limitations / external gates
+
+- Google OAuth wiring exists but real provider runtime acceptance remains external/user-owned.
+- iOS/macOS build/device/store delivery remains gated by the required Apple environment/signing setup.
+- Mobile npm audit still reports aggregate findings for the known `image-size` advisories even though the relevant parser behaviors are locally remediated through the repository's documented `patch-package`; scanner residuals must remain visible until upstream resolution.
+- Situm Wayfinding Path persistence for building `19954` remains blocked by the missing upstream Path aggregate; see `docs/research/situm-path-investigation.md`.
+- Browser cross-floor routing, generic tagged-path routing semantics, and 3D route projection are not current product claims.
 
 ## Current execution authority
 
-For future work read:
+For future work read, in order:
 
 1. `AGENTS.md`;
 2. this file;
-3. `.agents/memory/decisions.md` when durable implementation decisions matter;
+3. `.agents/memory/decisions.md` when durable decisions matter;
 4. `.agents/protocols/git-workflow.md`;
-5. current product docs relevant to the task;
+5. the relevant current human product docs;
 6. an explicitly created active plan.

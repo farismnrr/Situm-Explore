@@ -1,106 +1,114 @@
 # Knowledge Index
 
-This store contains reusable verified project/domain knowledge. It must not compete with current state or durable decisions.
+This store contains reusable verified project/domain knowledge for agents. It must not compete with current state or human product documentation.
 
-Current `.agents/state.md`, active durable decisions, roadmap addenda, and the active plan override older observations. Historical findings remain useful only when their scope/date is clear.
+Current `.agents/state.md`, active durable decisions, `ARCHITECTURE.md`, `DESIGN.md`, `design/IMPLEMENTATION.md`, the capability matrix, and any explicitly active plan override older observations. Historical findings remain useful only when their scope/date is clear.
+
+## Documentation authority
+
+- Human current product/operations truth: `README.md`, `ARCHITECTURE.md`, `DESIGN.md`, `design/`, and `docs/`.
+- Agent current execution/governance truth: `AGENTS.md`, `.agents/state.md`, `.agents/memory/decisions.md`, `.agents/protocols/`, and an explicitly active plan.
+- Historical evidence: completed `plans/`, `.agents/evidence/`, `.agents/sessions/`, reviews, and old execution briefs. Do not rewrite historical snapshots merely to make them sound current.
+
+Source: user direction on 2026-09-11 plus repository documentation policy.
 
 ## PostgreSQL application boundary
 
 - Situm Explore uses PostgreSQL through `DATABASE_URL`.
 - Application-owned Drizzle objects live in the dedicated `situm_explore` schema.
-- Do not introduce schema variability or touch unrelated schemas/databases.
-- Plans 021–022 add concrete app-owned relational persistence for users, provider identities, workspaces, and protected workspace configuration.
-- External Situm resources are not automatically cached in PostgreSQL unless a concrete product requirement owns that persistence.
+- The active staging database was migrated from the earlier `public.*` compatibility state into `situm_explore.*`; the old public-schema worktree overlay is obsolete and must not be resurrected.
+- Application persistence owns users, provider identities, workspaces, and encrypted workspace Situm configuration metadata/envelopes.
+- External Situm resources are not automatically cached in PostgreSQL without a concrete product requirement.
 
-Source: current architecture + roadmap 021–025.
+Source: current architecture + Plan 045 staging migration evidence.
 
-## Authentication transition
+## Authentication and workspace model
 
-- Current pre-refactor runtime still has an env-defined single-user login.
-- Plan 021 replaces that authority with database-backed application users while retaining the sealed Nuxt session mechanism.
-- Email/password register/login is required.
-- Google OAuth plumbing is prepared in Plan 021, but real provider acceptance is user-owned/manual for now.
-- Provider IDs are not application user IDs; app users keep stable application-owned identity.
+- Application users are PostgreSQL-backed; email/password registration/login is the verified path.
+- Nuxt sealed sessions remain the application session mechanism; native transports the same sealed app session through `x-nuxt-session` and persists it only in SecureStore.
+- Google OAuth plumbing exists, but real provider runtime acceptance remains external/user-owned.
+- One application user may own many private workspaces; a workspace has one application owner in the current model.
+- Client-provided user/workspace identity is context only. Nitro verifies authority server-side.
 
-Source: Plan 021 / roadmap durable decisions.
+Source: current architecture and integrated Plans 021–029.
 
-## Workspace model
+## Situm credential boundary
 
-- One application user may own many private workspaces.
-- A workspace has one owner in Plans 021–025; no invite/member/team tenancy is introduced.
-- Different app users may independently configure workspaces that refer to the same external Situm account/organization.
-- Situm organization identity is external metadata and must not be treated as application tenancy.
+- The current workspace model has exactly two user-managed Situm credentials: **Only Read** and **Read & Write**.
+- Only Read is encrypted at rest, powers server read paths, and may be issued only through bounded authenticated owner-scoped endpoints to native positioning or a concrete verified direct Viewer caller.
+- Read & Write is encrypted at rest and server-only; it must never enter browser/mobile/public config/logs/docs.
+- The app-owned browser Map itself consumes server-mediated cartography/paths and does not receive a raw Situm key.
+- Native remote Realtime remains server-mediated.
 
-Source: user-approved Plans 021–025 model.
+Source: Plan 038 and current durable decisions.
 
-## Situm credential/runtime transition
+## Browser Explore boundary
 
-- The historical baseline uses global Viewer/server Situm environment configuration.
-- Plans 021–025 replace that as the final architecture with workspace-managed server-side configuration.
-- Stored long-lived workspace credentials must not be returned to browser code.
-- Product modes are `VIEW_ONLY` and `VIEW_WRITE`; verified upstream permission remains authoritative.
-- Browser Viewer authentication is a separate evidence gate. Current official Situm material supports JWT-based auth, but Plan 022 must verify exact behavior against the installed `@situm/sdk-js` version and the configured account before changing the Viewer path.
-- Never persist or print real API key/JWT/token values in repository docs, sessions, logs, or tests.
+- `/app/map` is 2D-primary and app-owned.
+- 2D consumes authenticated workspace cartography, POIs, floor images, and Situm wayfinding paths through Nitro.
+- Same-floor static POI-to-POI routing is app-owned over the real Situm graph. Endpoint snapping, verified link directionality, path-object identity, and generation-owned async state are part of the durable route contract.
+- Tagged generic graphs and cross-floor browser routing remain explicit unsupported cases until semantics are proven; no straight-line fallback or invented route metrics/guidance.
+- Digital Twin 3D is explicit opt-in and lazy. It uses workspace + Situm building + floor/model-slot identity and no flat/global GLB fallback.
+- Web 3D initial/reset orientation comes from the shared deterministic view descriptor; semantic rooms are discovery/travel targets only.
+- Explicit 3D failures stay explicit and never silently switch to 2D.
 
-Source: roadmap 021–025 + current official Situm evidence gate.
+Source: Plans 045–046 plus PR #48 integration.
 
-## Situm web vs native boundary
+## Native Explore boundary
 
-- The Nuxt app is an operations/admin/exploration web product, not the device positioning engine.
-- Web may consume realtime positions produced by devices and may use verified browser Viewer behavior.
-- Sensor-generated indoor blue dot, positioning permission/runtime management, handset live navigation, and movement-aware rerouting remain outside this roadmap.
-- UI labels or prototype behavior do not prove Situm capability.
+- Native 2D remains the authority for live indoor positioning, blue dot, app-owned route rendering, ETA, arrival/off-route state, and turn-by-turn guidance.
+- Digital Twin 3D is explicit opt-in and lazy; before entry there is no GLB request or GL context startup.
+- Native 3D uses Expo GL + mobile-owned Three `0.162.0`, authenticated workspace/building model retrieval, and shared runtime-neutral model-slot/view + semantic-room contracts.
+- Native 3D owns room search/Go/reset/floor selection/touch look-walk and renderer lifecycle cleanup only.
+- Native 3D must not fabricate blue-dot projection, 2D route geometry, ETA, arrival/off-route state, turn-by-turn guidance, or vertical navigation.
+- The renderer is deliberately frame-limited for the target Android POS.
 
-Source: current product boundary.
+Source: integrated Plan 047 / PR #46.
+
+## Situm Path persistence research
+
+- Building `19954` / floor `70557` is missing its server-side Situm Path aggregate.
+- Current and historical public contracts expose organization/building GET plus building-scoped PUT, but no supported create/bootstrap operation.
+- Authenticated Map Editor and direct scoped PUT reach the same `404 entity_not_found`; broader Read & Write auth does not reveal a hidden POST creation route.
+- Current state is **BLOCKED BY SITUM BACKEND** until Situm provisions the aggregate or documents an official target-safe create/upsert endpoint.
+- Human-readable sanitized evidence is in `docs/research/situm-path-investigation.md`; `scripts/situm/upload-paths.sh` is a guarded post-provisioning uploader, not a current working fix.
+
+Source: PR #47 research preservation.
 
 ## Situm external evidence rule
 
 - Model recollection, old plan wording, fixture shapes, and prototype labels are not implementation evidence.
-- Verify exact current official endpoint/SDK method, installed-version compatibility, browser/server owner, web/native owner, auth/permission, consumed fields/events, and failure semantics before implementing a new Situm behavior.
+- Verify exact current official endpoint/SDK method, installed-version compatibility, browser/server owner, web/native owner, auth/permission, consumed fields/events, and failure semantics before implementing changed Situm behavior.
 - Missing material evidence means `UNRESOLVED`; do not guess or fabricate a successful fallback.
 
 Source: active durable decision.
 
-## Situm SDK JS Viewer evidence
+## Current SDK/runtime baselines
 
-- Installed `@situm/sdk-js` baseline observed in the completed roadmap is version `0.25.0`.
-- Existing integrated Viewer work verified realtime overlay and static directions behavior used by the product.
-- Trajectory remains unresolved/omitted because full hydrated runtime semantics were not established.
-- Static directions remain limited to the verified typed surface; no raw Viewer/generic invoke escape hatch.
-- Re-verify installed version/contracts during a future plan when exact SDK behavior materially matters.
+- Web: Nuxt `^4.5.2`, Three `^0.180.0`, `@situm/sdk-js` `^0.25.0`.
+- Mobile: Expo `~57.0.14`, React Native `0.86.2`, React `19.2.3`, `@situm/react-native` `3.19.2`, `expo-gl ~57.0.2`, mobile Three `0.162.0`.
+- The Situm React Native package still requires a narrow local TypeScript/source compatibility boundary because its published package metadata references missing `lib/` artifacts.
+- Re-verify current installed versions/contracts whenever a future task materially changes SDK behavior.
 
-Source: completed Plans 019/019A/020 evidence.
+Source: current package manifests and integrated Plan 047.
 
 ## ClickHouse analytics boundary
 
-- Reuse the user's existing local ClickHouse instance; do not provision a second one.
-- ClickHouse remains server-side analytics storage; PostgreSQL remains application relational storage.
-- Plans 021–025 must make analytics reads/writes workspace-isolated before multi-workspace behavior is complete.
-- Legacy pre-workspace rows have no proven owner and must not be assigned to a workspace arbitrarily.
+- Reuse the existing ClickHouse instance; do not provision another one.
+- ClickHouse remains server-side analytics storage while PostgreSQL remains application relational storage.
+- Analytics reads/writes are workspace-isolated.
+- Legacy pre-workspace rows have no proven owner and must not be assigned arbitrarily.
 
-Source: completed Plan 017 + roadmap 021–025.
+Source: current architecture and completed analytics roadmap.
 
-## Observability discovery rule
+## Observability and safe errors
 
-- The user already has local observability infrastructure.
-- Plan 023 must inspect `docker ps` plus runtime/repository configuration and reuse the existing stack/protocols.
-- Do not install duplicate logging/metrics/tracing infrastructure by assumption.
-- Correlation/tracing must avoid sensitive values, and detailed internal failures stay server-side.
+- Reuse existing observability infrastructure and supported protocols.
+- Correlation/trace context may cross meaningful request boundaries, but credentials, cookies, passwords, tokens, sensitive bodies, and location streams must not be dumped into normal telemetry.
+- Client responses expose sanitized product errors; detailed critical/internal diagnostics remain server-side.
 
-Source: user-approved Plan 023 direction.
-
-## UI reference translation boundary
-
-- `design/reference/situm-explore-interactive-prototype.html` remains visual/interaction guidance.
-- Production remains Nuxt 4 + Vue + Nuxt UI.
-- Visual fidelity cannot override current capability/security truth.
-
-Source: current design contract.
+Source: current architecture and durable decisions.
 
 ## Historical knowledge files
 
-Dedicated knowledge files with an older plan/phase in their title are scoped evidence from that plan. They remain reusable when the exact external contract is still relevant, but they do not reactivate the old roadmap or its execution state.
-
-## When this grows
-
-Split substantial verified topics into focused files and keep this index short enough to act as a router.
+Focused `.agents/knowledge/*.md` files with older plan/phase names are scoped evidence from those plans. Reuse them when the exact external contract is still relevant, but they do not reactivate old roadmaps or override the current sources above.

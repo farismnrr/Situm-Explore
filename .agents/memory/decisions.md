@@ -11,6 +11,16 @@ This file contains **currently active durable decisions**. Completed execution h
 
 Status: active.
 
+## Documentation audience boundary (2026-09-11)
+
+- Human-facing current product/operations documentation lives in `README.md`, `ARCHITECTURE.md`, `DESIGN.md`, `design/`, and `docs/`.
+- Agent-facing execution/governance/history lives in `AGENTS.md`, `.agents/`, and `plans/`.
+- Current product behavior must be reconciled in human docs when runtime/operating contracts change; agent state/decisions must be reconciled when execution authority changes.
+- Historical plans, evidence, sessions, and reviews remain truthful snapshots and should not be rewritten merely to sound current. They do not override current state/architecture/design.
+
+Source: user-stated on 2026-09-11.
+Status: active durable documentation policy.
+
 ## Closure-only engineering governance (2026-09-02)
 
 - Situm Explore adopts a Sensio-style component governance model with two explicit codebases: `web` and `mobile`.
@@ -89,7 +99,7 @@ Status: active product boundary. Plans 028–035 are closed/integrated; no nativ
 - Plan 045 supersedes Plan 044's 3D-only product direction: the primary `/app/map` experience is the app-owned 2D floorplan renderer over authenticated workspace cartography.
 - Digital Twin 3D is explicit opt-in, lazy-mounts the Three.js/WebGL walkthrough, and preserves active building/floor context when switching modes. Default 2D must not initialize WebGL or request a GLB.
 - The 3D initial/reset camera uses one deterministic canonical floor-view contract shared by LT1 and LT2. Semantic destinations remain search/travel targets and never define model orientation.
-- Floor-scoped GLB assets remain authenticated workspace resources and the renderer receives no Situm credential. An explicitly requested 3D failure remains an explicit 3D error; the app does not silently fall back to 2D.
+- Floor model files are delivered as authenticated workspace + Situm-building scoped resources and the renderer receives no Situm credential. Model identity includes workspace/building/floor/model slot so context changes cannot reuse another workspace/building's model. An explicitly requested 3D failure remains an explicit 3D error; the app does not silently fall back to 2D.
 - 2D POIs and 3D semantic-room destinations are separate authorities; selection is not silently carried across modes through fuzzy name matching.
 - Sensor-backed blue-dot positioning, heading/accuracy, ETA, rerouting, arrival, and turn-by-turn guidance remain native-owned unless a future browser runtime source is proven.
 
@@ -107,7 +117,7 @@ Status: active; supersedes the Plan 044 3D-only web Explore direction while pres
 - The current live proof venue requires the established authenticated unscoped Situm path read despite the installed SDK's typed building filter, because the scoped runtime request returned `404 entity_not_found` for that venue.
 
 Source: Plan 046 implementation and authenticated production-preview acceptance on 2026-09-11.
-Status: active durable browser routing contract; 3D route rendering remains deferred to separately authorized Plan 047.
+Status: active durable browser routing contract; 3D route rendering remains deferred to a future explicitly scoped plan. Plan 047 was Native Explore Digital Twin parity and did not implement 3D route projection.
 
 ## Native companion technology and credential direction (Plans 028–035)
 
@@ -115,11 +125,11 @@ Status: active durable browser routing contract; 3D route rendering remains defe
 - Expo Go is not the runtime target for Situm native code; native development builds are required by the current official integration model.
 - Mobile reuses the same application users/workspaces and Nitro authorization boundary; no second backend or mobile-only identity database.
 - The workspace Read & Write Situm credential remains server-only and must never be embedded, returned, or persisted in the mobile app.
-- Plan 028 must choose the least-privilege mobile Situm auth contract from evidence: prefer a proven short-lived token if the current React Native wrapper exposes it; otherwise use a dedicated Positioning-permission workspace credential, encrypted server-side and handled with approved OS secure storage when persistence is required.
+- Historical Plan 028 evaluated the least-privilege mobile Situm auth contract. The current integrated decision supersedes that spike: native positioning receives the workspace Only Read credential through the authenticated owner-scoped Nitro boundary; no dedicated Positioning credential is part of current workspace configuration.
 - Read-only Realtime authority should remain server-mediated unless the native product requirement and current SDK contract prove a narrower safe direct path.
 - Deep links may carry only non-secret navigation context. Application sessions, Situm credentials and tokens must never be placed in URLs/QR codes.
 
-Status: active durable native technology/security direction. The roadmap execution is closed through Plan 035/PR #32.
+Status: active durable native technology/security direction as superseded by the current two-key credential model and later integrated native plans.
 
 ### Plan 028 Phase 1 native build matrix (2026-08-17)
 
@@ -129,7 +139,7 @@ Status: active durable native technology/security direction. The roadmap executi
 - Use a standalone future `mobile/` package rather than npm workspaces. Plan 029 owns production project creation.
 - Effective iOS app baseline is 16.4 with Xcode 26.4+; wrapper iOS dependency is SitumSDK 3.41.0 through CocoaPods. Linux source/package evidence is available, but iOS compile/runtime remain macOS/device-gated.
 
-Status: historical Plan 028 evidence; the frozen compatibility selections remain the current baseline unless future proof explicitly supersedes them.
+Status: historical Plan 028 evidence. The current mobile manifest now carries Expo `~57.0.14`; re-verify exact current package versions from `mobile/package.json` for future dependency work.
 
 ### Plan 028 Phase 2 wrapper capability boundary (2026-08-17)
 
@@ -247,14 +257,15 @@ Status: active.
 
 Status: active durable runtime decision.
 
-## Static directions boundary
+## Static browser route boundary
 
-- Static routes use real known Situm POIs/endpoints and numeric POI IDs already proven by the completed directions work.
-- Viewer owns route calculation/rendering.
+- Static routes use real known Situm POIs/endpoints and authenticated real Situm wayfinding paths.
+- The app-owned renderer-independent route core owns same-floor calculation; the custom 2D map owns route rendering. Situm Viewer is an acceptance/topology oracle only and is not the product route renderer.
+- Tagged generic graphs and cross-floor browser routing fail explicitly until their semantics are proven.
 - No `startNavigation`, browser `My location`, indoor positioning, live rerouting, or synthetic route distance/duration/steps/geometry/ETA.
-- Unresolved route lifecycle/result contracts remain absent until exact evidence exists.
+- 3D route projection is not implemented and requires a future explicitly scoped plan.
 
-Status: active product boundary.
+Status: active product boundary; supersedes the historical Viewer-owned static-directions implementation.
 
 ## Git workflow default
 
@@ -377,7 +388,7 @@ Status: active durable closeout/distribution decision.
 ## Plan 035 foreground positioning ownership (2026-08-18)
 
 - `@situm/react-native` positioning callbacks and running state are process-global; the authenticated shell owns one `ForegroundPositioningSession`, while Explore is only a consumer/presentation surface.
-- The session starts only after explicit Locate me, uses the dedicated workspace POSITIONING credential, persists across Explore/Realtime tab changes, and stops on explicit stop, workspace switch, logout, background, native error/stopped, or teardown. It does not auto-restart after background or process restart.
+- The session starts only after explicit Locate me, receives the owner-authorized workspace Only Read credential through Nitro, persists across Explore/Realtime tab changes, and stops on explicit stop, workspace switch, logout, background, native error/stopped, or teardown. It does not auto-restart after background or process restart.
 - Server-mediated Realtime remains unchanged and maps coordinate-bearing `features`; `devicesInfo` is never converted into a fabricated position.
 
 Status: active durable positioning/Realtime lifecycle architecture; Plan 035 execution itself is historical/complete and integrated via PR #32.
@@ -393,4 +404,4 @@ Status: active durable positioning/Realtime lifecycle architecture; Plan 035 exe
 - The native renderer is intentionally frame-limited to keep the target Android POS responsive.
 - Closure security truth preserves the existing `image-size` local parser remediation and visible scanner residual. Compatible transitive fixes may be taken, but audit/Dependabot findings must not be suppressed or dismissed merely to make closure green.
 
-Status: active durable Native Explore / Digital Twin architecture decision; Plan 047 is closure-complete on its branch and not integrated until user-authorized PR/merge.
+Status: active durable Native Explore / Digital Twin architecture decision; Plan 047 is complete/integrated through PR #46 at merge commit `21fd074532af6db93db9996fc9acdf175d541ea2`.

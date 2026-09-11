@@ -20,7 +20,7 @@ Keep this file short. Current authority lives in `.agents/state.md`.
 12. the relevant plan
 13. `DESIGN.md` / `design/IMPLEMENTATION.md` for presentation changes
 
-Historical plans/sessions/branches are evidence only and do not override current state, durable decisions, architecture, or a future explicitly activated plan.
+Historical plans/sessions/branches are evidence only and do not override current state, durable decisions, current human product documentation, architecture, or a future explicitly activated plan.
 
 ## Current roadmap
 
@@ -36,7 +36,7 @@ Completed implementation roadmap:
 Plan 021 -> Plan 022 -> Plan 023 -> Plan 024 -> Plan 025 [complete on stacked branch]
 ```
 
-Plans 026–041 are closed/integrated. Plans 028–035 delivered and closed the native companion roadmap, Plans 036–040 completed the follow-up reliability/workspace/fullscreen work, and Plan 041 shipped the app-owned indoor map/navigation experience through PR #39 at merge commit `99318a608af24f036e1744d9e7e929b859fbe15e`. Plan 042 — Repository Engineering Governance is currently active on `plan/042-repository-engineering-governance`. Google OAuth runtime remains user-owned and deferred.
+Plans 026–047 are closed/integrated historical work. Plan 041 shipped the app-owned native indoor map/navigation experience, Plans 045–046 established the current web 2D-primary + explicit Digital Twin 3D + static same-floor routing direction, and Plan 047 integrated native Digital Twin 3D parity through PR #46. PR #48 then integrated the web workspace/building-scoped Digital Twin model boundary. No implementation plan is currently active. Google OAuth runtime remains user-owned and deferred.
 
 ## Backend-refactor direction
 

@@ -71,14 +71,17 @@ Either key may be configured independently. Configuration UI should explain thes
 
 Native Explore is map-first and uses real Situm cartography.
 
+- 2D is the default and remains the only surface that owns live positioning, blue dot, route geometry, ETA, arrival/off-route state, and turn-by-turn guidance;
 - search and selection operate on real current-building POIs;
 - building/floor/selected-place context comes from real cartography;
 - location intent uses end-user language such as finding/centering location rather than SDK lifecycle jargon;
 - permission/sensor failures leave non-positioning map exploration usable where possible;
-- navigation actions use actual supported Situm behavior and do not invent ETA, route steps, or geometry fields that are not available;
+- navigation actions use actual supported Situm behavior and do not invent unsupported route fields;
+- an explicit **Digital Twin 3D** action may switch into the native GL walkthrough for the active workspace/building/floor; native 3D owns room search, Go, reset, floor selection, drag-to-look, and touch walking only;
+- native 3D errors remain explicit and require a manual **2D Map** action; there is no silent fallback;
 - positioning, follow, floor, and guidance states must remain tied to real runtime state.
 
-Web Explore is map-first: `/app/map` opens the app-owned 2D floorplan by default with real authenticated cartography, POIs, search, floor switching, pan/zoom, reset, and destination interactions. A visible **Digital Twin 3D** action explicitly enters the perspective/eye-level Three.js walkthrough; **2D Map** returns to the primary renderer while preserving building/floor context. The 3D camera uses a deterministic canonical orientation/spawn contract rather than room semantics. If GLB, WebGL, or discoverable semantic-room loading fails after 3D was explicitly selected, show a truthful 3D error and a manual path back to 2D rather than silently switching modes. Sensor-backed blue-dot positioning and turn-by-turn guidance remain native-only.
+Web Explore is map-first: `/app/map` opens the app-owned 2D floorplan by default with real authenticated cartography, POIs, search, floor switching, pan/zoom, reset, destination interactions, and the verified same-floor static route surface. A visible **Digital Twin 3D** action explicitly enters the perspective/eye-level Three.js walkthrough; **2D Map** returns to the primary renderer while preserving building/floor context. The 3D camera uses a deterministic canonical orientation/spawn contract rather than room semantics. GLB identity is scoped to the authenticated application workspace plus Situm building, floor, and model slot, so switching workspace/building cannot reuse another context's model. If GLB, WebGL, or discoverable semantic-room loading fails after 3D was explicitly selected, show a truthful 3D error and a manual path back to 2D rather than silently switching modes. Sensor-backed blue-dot positioning and turn-by-turn guidance remain native-only.
 
 ## Realtime UX
 

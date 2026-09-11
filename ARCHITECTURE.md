@@ -149,7 +149,7 @@ Use the existing versioned authenticated-encryption implementation; do not inven
 
 ## Browser indoor Map
 
-`app/pages/app/map.vue` owns the responsive browser Explore workspace and route state, `app/components/map/IndoorMapCanvas.vue` owns the visible 2D floorplan/route projection, and `app/components/map/IndoorWalkCanvas.vue` owns the visible Three.js/WebGL walkthrough. The browser loads floor-scoped GLB assets through authenticated workspace routes and consumes Situm cartography plus wayfinding paths through authenticated Nitro reads; it does not receive a Situm credential.
+`app/pages/app/map.vue` owns the responsive browser Explore workspace and route state, `app/components/map/IndoorMapCanvas.vue` owns the visible 2D floorplan/route projection, and `app/components/map/IndoorWalkCanvas.vue` owns the visible Three.js/WebGL walkthrough. The browser loads workspace-and-building-scoped floor GLBs through authenticated workspace routes and consumes Situm cartography plus wayfinding paths through authenticated Nitro reads; it does not receive a Situm credential. Model identity includes workspace, building, floor, and model slot so a context switch cannot silently reuse another workspace/building's Digital Twin.
 
 Browser Explore is 2D-primary. The default `/app/map` surface is the app-owned top-down floorplan renderer using authenticated workspace cartography, real `floor.mapUrl`, building dimensions, floors, and POIs. Static same-floor POI-to-POI routes are app-owned over the venue's real Situm wayfinding graph: endpoints snap to eligible same-floor path edges, verified link directionality is preserved, and the resulting renderer-independent route is drawn by the 2D map. Tagged path graphs fail explicitly until their route-filter semantics are proven; cross-floor route calculation, route metrics, ETA, rerouting, arrival, and turn-by-turn guidance are not browser claims. Digital Twin 3D is an explicit opt-in mode that lazy-mounts the app-owned Three.js/WebGL walkthrough for the active floor. Its initial/reset camera pose follows one deterministic canonical floor-view contract shared across supported floors rather than semantic-room geometry. Active static route state may survive mode switching, but 3D route projection remains absent until separately implemented and accepted. If the user explicitly enters 3D and GLB/WebGL/semantic-room loading fails, the 3D mode shows an explicit error and does not silently fall back. Sensor-backed blue-dot state and indoor positioning remain native responsibilities.
 
@@ -269,8 +269,8 @@ The native companion is a **separate client** while Nitro remains the single app
 
 Current ownership:
 
-- web Explore uses an app-owned responsive Three.js/WebGL renderer with floor-scoped GLB digital-twin assets and an eye-level perspective camera on desktop, tablet, and phone-sized browser layouts;
-- web Explore defaults to the app-owned 2D floorplan renderer; Digital Twin 3D is explicit opt-in, and 3D failures remain explicit instead of silently changing modes;
+- web Explore defaults to the app-owned 2D floorplan renderer on desktop, tablet, and phone-sized browser layouts; Digital Twin 3D is explicit opt-in and uses workspace/building-scoped floor GLBs with an eye-level Three.js/WebGL camera;
+- web 3D model identity is workspace + building + floor + model slot; missing assets, WebGL failure, and semantic-room failure remain explicit 3D errors instead of silently changing modes or reusing another context's model;
 - web static same-floor POI-to-POI routing is computed by the app over authenticated real Situm wayfinding paths and rendered in 2D; tagged graphs and cross-floor routing remain explicit unsupported cases until their semantics are proven, and no route metrics/guidance are synthesized;
 - browser destination discovery may use canonical semantic room objects embedded in the trusted GLB asset when Situm returns no POIs; these are model-derived destinations, not fabricated Situm POIs;
 - web exposes native-app handoff for sensor-backed positioning/navigation instead of blocking small browser layouts;
@@ -318,7 +318,8 @@ The standalone `mobile/` application is React Native + Expo and reuses the same 
 - foreground positioning begins only after explicit user action and runtime permission success;
 - native Realtime reads remote positions through the authenticated workspace Nitro route, not through a broad mobile Situm credential;
 - app backgrounding, workspace change, logout, explicit stop, native stop/error, and teardown invalidate positioning state according to the foreground-only lifecycle contract;
-- unsupported remote-map marker, presence, invented freshness, and synthetic route semantics remain absent.
+- unsupported remote-map marker, presence, invented freshness, and synthetic route semantics remain absent;
+- native Explore remains 2D-first for sensor-backed positioning/navigation and exposes Digital Twin 3D only as an explicit lazy opt-in. Native 3D loads the same owner-authorized workspace/building-scoped GLB boundary through Nitro, shares only runtime-neutral view/semantic contracts with web, and does not fabricate blue-dot projection, route geometry, ETA, arrival/off-route state, turn-by-turn guidance, or vertical transitions inside 3D.
 
 ## Distribution boundary
 

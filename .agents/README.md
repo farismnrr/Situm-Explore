@@ -5,18 +5,20 @@
 Root `AGENTS.md` is the router. `.agents/state.md` owns current focus/blockers; durable decisions own current project decisions; sessions/completed plans are chronological evidence and may become stale. With no active plan, new implementation work must first create explicit scope from updated `main`.
 
 
-## Boundary with project documentation
+## Boundary with human documentation
 
-`.agents/` documents **the work**, not the product manual. Keep branch/plan state, execution decisions, evidence, reviews, sessions, protocols, and handoff context here.
+`.agents/` is **agent documentation**. It records the work: current execution state, durable decisions, evidence, reviews, sessions, protocols, handoffs, and reusable technical knowledge.
 
-Current product/runtime documentation belongs outside `.agents/`:
+Human-facing current product/runtime documentation lives outside `.agents/`:
 
 - `README.md` — project overview, setup, capabilities, and entry points;
 - `ARCHITECTURE.md` — current runtime/security architecture;
 - `DESIGN.md` + `design/` — current product UI/UX and implementation contracts;
-- `docs/` — developer/operator procedures such as mobile release/distribution.
+- `docs/README.md` + `docs/` — developer/operator procedures and human-readable research.
 
-Agent files may link to those documents and record why/when they changed, but should not become duplicate product documentation.
+`plans/` is also agent/execution documentation. Completed plans are historical implementation records, not the human product manual.
+
+Agent files may link to human docs and record why/when they changed, but must not become a competing duplicate product contract. When current product behavior changes, update the human docs; when execution state/decisions change, update the agent docs.
 
 ## Mandatory implementation reads
 
@@ -52,7 +54,7 @@ Plans 017–020 are complete/integrated into `main` by PR #12.
 
 Plans 026–035 are closed/integrated. Plans 028–034 delivered and closed the native companion roadmap; Plan 035 separately remediated Realtime/foreground-positioning lifecycle and was integrated through PR #32 at merge commit `840c0f9`.
 
-Plans 021–041 are historical execution. Plan 042 — Repository Engineering Governance is currently active. `plans/028-034-native-mobile-roadmap.md` and prior plan evidence remain historical authority for why the current runtime looks the way it does; current execution authority is Plan 042 plus current state/decisions.
+Plans 021–047 are historical execution and are closed/integrated. Plan 047 integrated Native Explore Digital Twin 3D parity through PR #46; PR #47 preserved the Situm Path investigation, and PR #48 integrated the web workspace/building-scoped Digital Twin boundary. No implementation plan is currently active. `plans/028-034-native-mobile-roadmap.md` and prior plan evidence remain historical context for why the current runtime looks the way it does; current execution authority is `.agents/state.md`, durable decisions, current human product docs, and any future explicitly activated plan.
 
 The roadmap moves the product from the pre-refactor env-defined user/global Situm runtime to DB-backed users, private workspaces, protected workspace configuration, workspace-scoped Situm/analytics context, reused observability, end-to-end correlation, and safe client errors.
 
