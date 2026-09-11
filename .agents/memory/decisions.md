@@ -78,23 +78,23 @@ Status: active.
 - The Nuxt web product remains the operations/admin/exploration/analytics client; Nitro remains the single application backend.
 - Plans 028–035 established a separate React Native companion client rather than turning the Nuxt application into a hybrid/mobile wrapper.
 - Device indoor positioning, sensor/permission handling, handset blue-dot positioning, mobile navigation/rerouting, and the product's mobile Realtime experience belong to the native companion roadmap.
-- Web Explore uses an app-owned responsive 3D-only digital-twin walkthrough across desktop, tablet, and phone-sized browser layouts; native handoff remains the action for sensor-backed positioning/navigation rather than a small-screen gate.
+- Web Explore uses an app-owned responsive 2D-primary map across desktop, tablet, and phone-sized browser layouts, with Digital Twin 3D as an explicit opt-in; native handoff remains the action for sensor-backed positioning/navigation rather than a small-screen gate.
 - Web Realtime intentionally hands off to native on desktop/tablet/phone. This is a product policy, not a claim that Situm web APIs are technically incapable of realtime reads.
 - Situm-domain UI without a truthful owner is removed or left unresolved rather than faked.
 
 Status: active product boundary. Plans 028–035 are closed/integrated; no native roadmap plan is currently active.
 
-### App-owned 3D-only web Explore (2026-09-10)
+### App-owned 2D-primary web Explore + explicit Digital Twin 3D (2026-09-10)
 
-- The primary `/app/map` experience is an app-owned Three.js/WebGL digital-twin walkthrough rather than the embedded Situm Viewer or a top-down floorplan renderer.
-- The browser view is perspective/eye-level and may own mouse-look, WASD/arrow/touch movement, floor switching, destination search, reset/fullscreen, and deterministic camera travel to a selected room.
-- There is intentionally no 2D or Viewer fallback. Missing GLB, WebGL, or discoverable semantic-room data must surface an explicit error.
-- Floor-scoped GLB assets are served only through authenticated workspace scope; the renderer does not receive a Situm API key. Runtime deployment may mount generated GLBs read-only while durable distribution uses an external asset source.
-- When the current Situm workspace returns no POIs, browser destination discovery may use canonical semantic-room objects embedded in the trusted GLB model. These are digital-twin room destinations and must not be represented as upstream Situm POIs.
+- Plan 045 supersedes Plan 044's 3D-only product direction: the primary `/app/map` experience is the app-owned 2D floorplan renderer over authenticated workspace cartography.
+- Digital Twin 3D is explicit opt-in, lazy-mounts the Three.js/WebGL walkthrough, and preserves active building/floor context when switching modes. Default 2D must not initialize WebGL or request a GLB.
+- The 3D initial/reset camera uses one deterministic canonical floor-view contract shared by LT1 and LT2. Semantic destinations remain search/travel targets and never define model orientation.
+- Floor-scoped GLB assets remain authenticated workspace resources and the renderer receives no Situm credential. An explicitly requested 3D failure remains an explicit 3D error; the app does not silently fall back to 2D.
+- 2D POIs and 3D semantic-room destinations are separate authorities; selection is not silently carried across modes through fuzzy name matching.
 - Sensor-backed blue-dot positioning, heading/accuracy, ETA, rerouting, arrival, and turn-by-turn guidance remain native-owned unless a future browser runtime source is proven.
 
-Source: explicit user direction on 2026-09-10 during Plan 044.
-Status: active; supersedes the 2026-09-09 2D floorplan/POI web Map decision while preserving native ownership of sensor-backed positioning/navigation.
+Source: explicit user direction and Plan 045 on 2026-09-10.
+Status: active; supersedes the Plan 044 3D-only web Explore direction while preserving native ownership of sensor-backed positioning/navigation.
 
 ## Native companion technology and credential direction (Plans 028–035)
 

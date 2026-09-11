@@ -151,7 +151,7 @@ Use the existing versioned authenticated-encryption implementation; do not inven
 
 `app/pages/app/map.vue` owns the responsive browser Explore workspace and `app/components/map/IndoorWalkCanvas.vue` owns the visible Three.js/WebGL walkthrough. The browser loads floor-scoped GLB assets through authenticated workspace routes and consumes Situm cartography only for real building/floor context; it does not receive a Situm credential.
 
-Browser Explore is intentionally 3D-only. It owns eye-level perspective rendering, room discovery from canonical semantic objects embedded in the active GLB, floor switching, mouse-look, keyboard/touch walking, deterministic camera travel, reset, and fullscreen. Missing GLB/WebGL/semantic-room capability is an explicit error; there is no 2D floorplan or Viewer fallback. It must not fabricate sensor-backed blue-dot state, indoor positioning, ETA, rerouting, or turn-by-turn guidance. Those remain native responsibilities.
+Browser Explore is 2D-primary. The default `/app/map` surface is the app-owned top-down floorplan renderer using authenticated workspace cartography, real `floor.mapUrl`, building dimensions, floors, and POIs. Digital Twin 3D is an explicit opt-in mode that lazy-mounts the app-owned Three.js/WebGL walkthrough for the active floor. Its initial/reset camera pose follows one deterministic canonical floor-view contract shared across supported floors rather than semantic-room geometry. If the user explicitly enters 3D and GLB/WebGL/semantic-room loading fails, the 3D mode shows an explicit error and does not silently fall back. Browser Explore must not fabricate sensor-backed blue-dot state, indoor positioning, ETA, rerouting, or turn-by-turn guidance; those remain native responsibilities.
 
 `app/components/situm/SitumViewer.vue` may remain as an isolated verified SDK utility while it has a concrete caller, but it is no longer the primary `/app/map` renderer. Any direct Viewer use must keep the small typed command surface, use only the verified Only Read credential boundary, and never expose Read & Write.
 
@@ -270,7 +270,7 @@ The native companion is a **separate client** while Nitro remains the single app
 Current ownership:
 
 - web Explore uses an app-owned responsive Three.js/WebGL renderer with floor-scoped GLB digital-twin assets and an eye-level perspective camera on desktop, tablet, and phone-sized browser layouts;
-- web Explore has no 2D floorplan/Viewer fallback: unavailable GLB/WebGL/semantic-room data is an explicit error state;
+- web Explore defaults to the app-owned 2D floorplan renderer; Digital Twin 3D is explicit opt-in, and 3D failures remain explicit instead of silently changing modes;
 - browser destination discovery may use canonical semantic room objects embedded in the trusted GLB asset when Situm returns no POIs; these are model-derived destinations, not fabricated Situm POIs;
 - web exposes native-app handoff for sensor-backed positioning/navigation instead of blocking small browser layouts;
 - web Realtime entry points hand off to native on desktop/tablet/phone;

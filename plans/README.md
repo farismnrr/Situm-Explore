@@ -74,7 +74,7 @@ Roadmap history: `plans/028-034-native-mobile-roadmap.md`. Plan 036 — Realtime
 
 ## Active plan
 
-- Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening: proposed/planning-complete, implementation not started. It supersedes Plan 044 only as the next execution authority; Plan 044 remains historical evidence. Plan 045 makes app-owned 2D the default browser Explore surface, makes Digital Twin 3D explicit opt-in, removes semantic-room inference as 3D orientation authority, and treats the reported LT1 top/bottom reversal as a runtime presentation/orientation-contract defect unless new evidence proves an asset transform is wrong. Arbitrary LT1 mirror/180-degree corrective transforms are prohibited by the current diagnostic evidence.
+- Plan 045 — Web Explore 2D Primary + Digital Twin 3D Orientation Hardening: implementation, authenticated production-browser acceptance, user visual checkpoint, Leader Review remediation, and explicit web closure governance are complete. It supersedes Plan 044 as the current product direction while Plan 044 remains historical evidence. App-owned 2D is the default browser Explore surface, Digital Twin 3D is explicit opt-in, and semantic-room inference no longer owns 3D orientation. LT1/LT2 share the deterministic canonical view contract; arbitrary LT1 mirror/180-degree corrective transforms remain prohibited. Integration is not yet authorized or claimed.
 
 ## Completed recent work
 

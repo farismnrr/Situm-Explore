@@ -88,7 +88,7 @@ The exact Situm editor translation/rotation values are deployment data and shoul
 
 ## Runtime boundary
 
-The primary web `/app/map` experience is now an app-owned Three.js/WebGL walkthrough. It consumes floor-scoped GLBs through an authenticated workspace route and uses a perspective eye-level camera. Web Explore is deliberately 3D-only: a missing/unreadable GLB, unavailable WebGL runtime, or model without discoverable semantic-room objects is an explicit error and does not fall back to a 2D floorplan or Situm Viewer.
+The primary web `/app/map` experience is the app-owned 2D floorplan renderer. Digital Twin 3D is an explicit opt-in mode that consumes floor-scoped GLBs through an authenticated workspace route and uses a perspective eye-level camera. The 3D renderer is lazy-mounted, so default 2D does not initialize WebGL or request a GLB. Its initial/reset camera pose follows the same canonical floor-to-GLB orientation contract on LT1 and LT2 rather than deriving orientation from semantic rooms. A missing/unreadable GLB, unavailable WebGL runtime, or model without discoverable semantic-room objects remains an explicit 3D error after opt-in; the app does not silently switch back to 2D.
 
 Generated GLBs remain excluded from Git. The current staging runtime mounts `.data/3d-models` read-only into the container and serves the selected floor asset through the authenticated Nitro workspace boundary. A durable production distribution should move those versioned GLBs to object storage without changing the browser auth boundary.
 
