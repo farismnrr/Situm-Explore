@@ -96,6 +96,17 @@ Status: active product boundary. Plans 028–035 are closed/integrated; no nativ
 Source: explicit user direction and Plan 045 on 2026-09-10.
 Status: active; supersedes the Plan 044 3D-only web Explore direction while preserving native ownership of sensor-backed positioning/navigation.
 
+### Shared app-owned web static route foundation (Plan 046, 2026-09-11)
+
+- Web static POI-to-POI routing is app-owned over authenticated workspace Situm path data; Situm Viewer remains an acceptance oracle only and is not a product renderer.
+- The normalized `IndoorRoute` is renderer-independent, carries floor identity for every point, preserves real graph node IDs where applicable, and is owned above the 2D/3D renderers so future 3D projection must reuse the same route rather than solve again.
+- Endpoint attachment uses nearest eligible same-floor path-edge projection with virtual edge splitting; shortest-path traversal uses verified link directionality and Cartesian segment length, with no straight-line fallback and no arbitrary floor-transition penalty.
+- Plan 046 proves same-floor routing only. Cross-floor weighting/profile behavior remains unresolved for web routing and must fail explicitly rather than be guessed.
+- The current live proof venue requires the established authenticated unscoped Situm path read despite the installed SDK's typed building filter, because the scoped runtime request returned `404 entity_not_found` for that venue.
+
+Source: Plan 046 implementation and authenticated production-preview acceptance on 2026-09-11.
+Status: active durable browser routing contract; 3D route rendering remains deferred to separately authorized Plan 047.
+
 ## Native companion technology and credential direction (Plans 028–035)
 
 - Target stack: React Native + Expo development builds + `@situm/react-native`, subject to Plan 028 freezing the exact supported dependency/platform matrix from current evidence.

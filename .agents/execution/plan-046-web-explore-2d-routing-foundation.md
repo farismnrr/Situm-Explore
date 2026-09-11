@@ -1,7 +1,7 @@
 # Plan 046 — Web Explore 2D Routing Foundation
 
 Repository: `/home/farismnrr/Documents/Projects/situm-explore`
-Status: execution active; Phases 0–4 complete, Phase 5 authenticated production acceptance underway
+Status: implementation and focused production-preview acceptance complete; stopped at Leader Review Gate
 Expected branch: `plan/046-web-explore-2d-routing-foundation`
 Codebase: web only
 Dependency: Plan 045 / PR #43 already integrated into `main`
