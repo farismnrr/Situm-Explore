@@ -19,6 +19,10 @@ The release-proof graph for building `19870` / floor `69907` contains 29 links a
 
 ## Routing boundary
 
-Plan 046 computes a renderer-independent static route over real path edges. POI endpoints project to the nearest eligible same-floor edge and that edge is virtually split for traversal. Link cost is Cartesian segment length. No direct-line fallback is allowed.
+Plan 046 computes a renderer-independent static route over real path edges. POI endpoints project to the nearest eligible same-floor edge and that edge is virtually split for traversal. Link cost is Cartesian segment length. Path-object identity participates in graph-node keys so separately returned path objects cannot accidentally collide through repeated node IDs. No direct-line fallback is allowed.
+
+Non-empty path tags are a fail-closed boundary for the generic browser solver until their route-filter/profile semantics are proven for the intended venue. Do not silently traverse tagged links as ordinary links.
+
+Route requests are generation-owned. Any endpoint replacement, Clear, workspace/building change, or newer route request invalidates older in-flight results before they may mutate active route state.
 
 Cross-floor routing remains outside Plan 046 because transition cost/selection semantics have not been proven for the web route core. The Plan 046 solver therefore fails explicitly for endpoints on different floors rather than guessing a transition weighting.

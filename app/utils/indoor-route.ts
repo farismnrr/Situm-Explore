@@ -17,7 +17,7 @@ export interface IndoorRoute {
   points: IndoorRoutePoint[]
 }
 
-export type IndoorRouteFailureReason = 'invalid-endpoints' | 'unsupported-floor-transition' | 'no-path-data' | 'no-snap-edge' | 'unroutable'
+export type IndoorRouteFailureReason = 'invalid-endpoints' | 'unsupported-floor-transition' | 'unsupported-route-tags' | 'no-path-data' | 'no-snap-edge' | 'unroutable'
 
 export type IndoorRouteResult =
   | { ok: true, route: IndoorRoute }
@@ -25,11 +25,16 @@ export type IndoorRouteResult =
 
 type GraphPoint = IndoorRoutePoint & { key: string }
 type GraphEdge = { to: string, weight: number }
-type Snap = {
-  point: GraphPoint
+type PathEdge = {
+  key: string
+  pathIndex: number
+  link: SitumPathLink
   source: SitumPathNode
   target: SitumPathNode
-  link: SitumPathLink
+}
+type Snap = {
+  point: GraphPoint
+  edge: PathEdge
   t: number
 }
 
@@ -60,23 +65,18 @@ function projectToSegment(poi: SitumCartographyPoi, source: SitumPathNode, targe
   }
 }
 
-function chooseSnap(poi: SitumCartographyPoi, links: SitumPathLink[], nodes: Map<number, SitumPathNode>, key: string): Snap | null {
+function chooseSnap(poi: SitumCartographyPoi, edges: PathEdge[], key: string): Snap | null {
   let best: Snap | null = null
   let bestDistance = Number.POSITIVE_INFINITY
 
-  for (const link of links) {
-    const source = nodes.get(link.source)
-    const target = nodes.get(link.target)
-    if (!source || !target || source.floorId !== poi.floorId || target.floorId !== poi.floorId) continue
-    const projected = projectToSegment(poi, source, target)
+  for (const edge of edges) {
+    const projected = projectToSegment(poi, edge.source, edge.target)
     const candidateDistance = Math.hypot(poi.location.x - projected.x, poi.location.y - projected.y)
     if (candidateDistance + EPSILON >= bestDistance) continue
     bestDistance = candidateDistance
     best = {
       point: { key, floorId: poi.floorId, x: projected.x, y: projected.y, kind: 'snap' },
-      source,
-      target,
-      link,
+      edge,
       t: projected.t
     }
   }
@@ -171,46 +171,46 @@ export function calculateIndoorRoute(
   if (fromPoi.floorId !== toPoi.floorId) return { ok: false, reason: 'unsupported-floor-transition' }
   if (!paths.paths.length) return { ok: false, reason: 'no-path-data' }
 
-  const nodes = new Map<number, SitumPathNode>()
-  const links: SitumPathLink[] = []
-  for (const path of paths.paths) {
-    for (const node of path.nodes) nodes.set(node.id, node)
-    links.push(...path.links)
-  }
-
-  const validLinks = links.filter((link) => {
-    const source = nodes.get(link.source)
-    const target = nodes.get(link.target)
-    return source?.floorId === fromPoi.floorId && target?.floorId === fromPoi.floorId
+  const validEdges: PathEdge[] = []
+  paths.paths.forEach((path, pathIndex) => {
+    const nodesById = new Map(path.nodes.map(node => [node.id, node]))
+    path.links.forEach((link, linkIndex) => {
+      const source = nodesById.get(link.source)
+      const target = nodesById.get(link.target)
+      if (!source || !target || source.floorId !== fromPoi.floorId || target.floorId !== fromPoi.floorId) return
+      validEdges.push({ key: `path:${pathIndex}:link:${linkIndex}`, pathIndex, link, source, target })
+    })
   })
-  if (!validLinks.length) return { ok: false, reason: 'no-path-data' }
+  if (!validEdges.length) return { ok: false, reason: 'no-path-data' }
+  if (validEdges.some(edge => edge.link.tags.length > 0)) return { ok: false, reason: 'unsupported-route-tags' }
 
-  const fromSnap = chooseSnap(fromPoi, validLinks, nodes, 'snap:from')
-  const toSnap = chooseSnap(toPoi, validLinks, nodes, 'snap:to')
+  const fromSnap = chooseSnap(fromPoi, validEdges, 'snap:from')
+  const toSnap = chooseSnap(toPoi, validEdges, 'snap:to')
   if (!fromSnap || !toSnap) return { ok: false, reason: 'no-snap-edge' }
 
   const points = new Map<string, GraphPoint>()
-  for (const node of nodes.values()) {
-    points.set(`node:${node.id}`, { key: `node:${node.id}`, floorId: node.floorId, x: node.x, y: node.y, nodeId: node.id, kind: 'graph' })
+  for (const edge of validEdges) {
+    for (const node of [edge.source, edge.target]) {
+      const key = `path:${edge.pathIndex}:node:${node.id}`
+      if (!points.has(key)) points.set(key, { key, floorId: node.floorId, x: node.x, y: node.y, nodeId: node.id, kind: 'graph' })
+    }
   }
   points.set(fromSnap.point.key, fromSnap.point)
   points.set(toSnap.point.key, toSnap.point)
 
   const adjacency = new Map<string, GraphEdge[]>()
-  const snapByLink = new Map<SitumPathLink, Snap[]>()
+  const snapByEdge = new Map<string, Snap[]>()
   for (const snap of [fromSnap, toSnap]) {
-    const entries = snapByLink.get(snap.link) ?? []
+    const entries = snapByEdge.get(snap.edge.key) ?? []
     entries.push(snap)
-    snapByLink.set(snap.link, entries)
+    snapByEdge.set(snap.edge.key, entries)
   }
 
-  for (const link of validLinks) {
-    const sourceNode = nodes.get(link.source)!
-    const targetNode = nodes.get(link.target)!
-    const source = points.get(`node:${sourceNode.id}`)!
-    const target = points.get(`node:${targetNode.id}`)!
-    const direction = directions(link)
-    const edgePoints = orderedEdgePoints(source, target, snapByLink.get(link) ?? [])
+  for (const edge of validEdges) {
+    const source = points.get(`path:${edge.pathIndex}:node:${edge.source.id}`)!
+    const target = points.get(`path:${edge.pathIndex}:node:${edge.target.id}`)!
+    const direction = directions(edge.link)
+    const edgePoints = orderedEdgePoints(source, target, snapByEdge.get(edge.key) ?? [])
     for (let index = 0; index < edgePoints.length - 1; index += 1) {
       addDirectedSegment(adjacency, edgePoints[index]!.point, edgePoints[index + 1]!.point, direction.sourceToTarget, direction.targetToSource)
     }

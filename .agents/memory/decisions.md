@@ -100,7 +100,9 @@ Status: active; supersedes the Plan 044 3D-only web Explore direction while pres
 
 - Web static POI-to-POI routing is app-owned over authenticated workspace Situm path data; Situm Viewer remains an acceptance oracle only and is not a product renderer.
 - The normalized `IndoorRoute` is renderer-independent, carries floor identity for every point, preserves real graph node IDs where applicable, and is owned above the 2D/3D renderers so future 3D projection must reuse the same route rather than solve again.
-- Endpoint attachment uses nearest eligible same-floor path-edge projection with virtual edge splitting; shortest-path traversal uses verified link directionality and Cartesian segment length, with no straight-line fallback and no arbitrary floor-transition penalty.
+- Endpoint attachment uses nearest eligible same-floor path-edge projection with virtual edge splitting; shortest-path traversal uses verified link directionality and Cartesian segment length, with no straight-line fallback and no arbitrary floor-transition penalty. Path-object identity is retained in graph keys so independent path objects cannot collide through repeated node IDs.
+- Route-filter tag semantics remain unresolved for generic web routing, so any eligible same-floor graph containing non-empty Situm path tags fails explicitly instead of silently treating tagged links as ordinary edges.
+- Route requests are generation-owned: Clear, endpoint replacement, workspace/building changes, or a newer request invalidate older in-flight results so stale responses cannot restore obsolete route geometry.
 - Plan 046 proves same-floor routing only. Cross-floor weighting/profile behavior remains unresolved for web routing and must fail explicitly rather than be guessed.
 - The current live proof venue requires the established authenticated unscoped Situm path read despite the installed SDK's typed building filter, because the scoped runtime request returned `404 entity_not_found` for that venue.
 
