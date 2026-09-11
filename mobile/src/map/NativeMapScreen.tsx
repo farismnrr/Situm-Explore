@@ -1,6 +1,6 @@
 import type { Location } from '@situm/react-native'
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import { ActivityIndicator, BackHandler, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import { ActivityIndicator, BackHandler, Keyboard, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 import type { SitumCartographyPoi, SitumCartographyResponse } from '../../../shared/situm-cartography'
 import type { SitumPathsResponse } from '../../../shared/situm-paths'
 import { ApiError } from '../api/errors'
@@ -9,10 +9,13 @@ import { layoutForWidth, type LayoutMode } from '../ui/layout'
 import { colors, radii } from '../ui/theme'
 import type { WorkspaceContext } from '../workspaces/context'
 import { CustomIndoorMap, type CustomIndoorLocation } from './CustomIndoorMap'
+import { NativeDigitalTwin } from './NativeDigitalTwin'
+import { NativeMapBrowseOverlay } from './NativeMapBrowseOverlay'
 import { calculateIndoorRoute, nearestRoutePointIndex, nextRouteInstruction, remainingRouteDistance, type IndoorRoute } from './customRoute'
-import { filterPois, formatNavigationDistance, formatNavigationEta, locationFreshnessWindowMs, resolveFloorDisplay } from './state'
+import { filterPois, formatNavigationDistance, formatNavigationEta, locationFreshnessWindowMs } from './state'
 
 type NavigationState = 'idle' | 'active' | 'outside-route' | 'arrived' | 'cancelled' | 'error'
+type ExploreViewMode = '2d' | '3d'
 
 function locationFromSitum(location: Location | null): CustomIndoorLocation | null {
   const cartesian = location?.position?.cartesianCoordinate
@@ -97,7 +100,7 @@ export function NativeMapScreen({ workspaces, lifecycle, positioning, layout, fu
   )
 }
 
-function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecycle, workspaces, positioning, initialBuildingId, layout: suppliedLayout, fullscreen, onFullscreenChange, onNavigationFocusChange }: { workspaceId: string, cartography: SitumCartographyResponse, paths: SitumPathsResponse, lifecycle: string, workspaces: WorkspaceContext, positioning: ForegroundPositioningSession, initialBuildingId: number | null, layout?: LayoutMode, fullscreen: boolean, onFullscreenChange?: (fullscreen: boolean) => void, onNavigationFocusChange?: (active: boolean) => void }) {
+function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle, workspaces, positioning, initialBuildingId, layout: suppliedLayout, fullscreen, onFullscreenChange, onNavigationFocusChange }: { workspaceId: string, cartography: SitumCartographyResponse, paths: SitumPathsResponse, lifecycle: string, workspaces: WorkspaceContext, positioning: ForegroundPositioningSession, initialBuildingId: number | null, layout?: LayoutMode, fullscreen: boolean, onFullscreenChange?: (fullscreen: boolean) => void, onNavigationFocusChange?: (active: boolean) => void }) {
   const { width, height } = useWindowDimensions()
   const layout = suppliedLayout || layoutForWidth(width).mode
   const isPhone = layout === 'phone'
@@ -128,6 +131,7 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
   const buildingFloors = useMemo(() => cartography.floors.filter(floor => floor.buildingId === buildingId).sort((a, b) => b.level - a.level), [buildingId, cartography.floors])
   const [activeFloorId, setActiveFloorId] = useState<number>(() => buildingFloors[0]?.id ?? -1)
   const activeFloor = buildingFloors.find(floor => floor.id === activeFloorId) ?? buildingFloors[0] ?? null
+  const [viewMode, setViewMode] = useState<ExploreViewMode>('2d')
   const [selectedPoi, setSelectedPoi] = useState<SitumCartographyPoi | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
@@ -264,7 +268,31 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
     setRecenterNonce(value => value + 1)
   }, [buildingFloors, indoorLocation])
 
+  const enterDigitalTwin = useCallback(() => {
+    if (isGuidanceActive) return
+    Keyboard.dismiss()
+    setSelectedPoi(null)
+    setSearchQuery('')
+    setSearchFocused(false)
+    setFloorMenuOpen(false)
+    setRoute(null)
+    setNavigationState('idle')
+    setNavigationMessage('Choose a place to see directions.')
+    setViewMode('3d')
+  }, [isGuidanceActive])
+
+  const selectDigitalTwinFloor = useCallback((floorId: number) => {
+    if (!buildingFloors.some(floor => floor.id === floorId)) return
+    setActiveFloorId(floorId)
+    setSelectedPoi(null)
+    setRoute(null)
+  }, [buildingFloors])
+
   if (!activeFloor) return <StateCard title="Floor plan unavailable" body="This building has no floor plan that can be rendered." />
+
+  if (viewMode === '3d') {
+    return <NativeDigitalTwin workspaceId={workspaceId} building={building} floor={activeFloor} floors={buildingFloors} lifecycle={lifecycle} workspaces={workspaces} onFloorSelect={selectDigitalTwinFloor} onExit2D={() => setViewMode('2d')} />
+  }
 
   const showGuidanceHud = isGuidanceActive || navigationState === 'arrived' || navigationState === 'cancelled' || navigationState === 'error'
   const isBrowseMode = !showGuidanceHud
@@ -288,76 +316,40 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
 
       {!fullscreen ? (
         <View pointerEvents="box-none" style={styles.overlay}>
-          {!showGuidanceHud ? (
-            <View style={[styles.searchDock, isPhone ? styles.searchDockPhone : styles.searchDockLarge]}>
-              <View style={styles.searchCard}>
-                <View style={styles.searchRow}>
-                  <View style={styles.searchIconWrap}><Text style={styles.searchIcon}>⌕</Text></View>
-                  <TextInput
-                    accessibilityLabel="Search places"
-                    autoCorrect={false}
-                    placeholder="Where do you want to go?"
-                    placeholderTextColor={colors.muted}
-                    returnKeyType="search"
-                    style={styles.searchInput}
-                    value={searchQuery}
-                    onFocus={() => setSearchFocused(true)}
-                    onChangeText={(value) => {
-                      setSearchQuery(value)
-                      setSearchFocused(true)
-                      if (selectedPoi && value !== selectedPoi.name) {
-                        setSelectedPoi(null)
-                        setRoute(null)
-                      }
-                    }}
-                    onSubmitEditing={() => { if (visibleSearchResults[0]) selectPoi(visibleSearchResults[0]) }}
-                  />
-                  {searchQuery ? <TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear destination search" hitSlop={8} onPress={clearDestination} style={styles.searchClear}><Text style={styles.searchClearText}>×</Text></TouchableOpacity> : null}
-                </View>
-
-                <View style={styles.contextRow}>
-                  <View style={styles.contextBuilding}><Text numberOfLines={1} style={styles.contextBuildingText}>{building.name}</Text></View>
-                  <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Choose floor, current ${currentFloorLabel}`} onPress={() => setFloorMenuOpen(value => !value)} style={styles.floorTrigger}>
-                    <Text style={styles.floorTriggerIcon}>▱</Text>
-                    <Text numberOfLines={1} style={styles.floorTriggerText}>{currentFloorLabel}</Text>
-                    <Text style={styles.floorTriggerChevron}>{floorMenuOpen ? '⌃' : '⌄'}</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {floorMenuOpen ? (
-                  <ScrollView accessibilityLabel="Floor choices" contentContainerStyle={styles.floorChoices} horizontal showsHorizontalScrollIndicator={false}>
-                    {buildingFloors.map(floor => (
-                      <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Floor ${floor.name}`} accessibilityState={{ selected: floor.id === activeFloor.id }} key={floor.id} onPress={() => { setActiveFloorId(floor.id); setFloorMenuOpen(false) }} style={[styles.floorChip, floor.id === activeFloor.id && styles.floorChipActive]}>
-                        <Text style={[styles.floorChipText, floor.id === activeFloor.id && styles.floorChipTextActive]}>{floor.name || `Level ${floor.level}`}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                ) : null}
-
-                {searchOpen ? (
-                  <ScrollView accessibilityLabel="Place search results" keyboardShouldPersistTaps="handled" style={styles.searchResults}>
-                    {visibleSearchResults.length ? visibleSearchResults.map(result => (
-                      <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Select place ${result.name}`} key={result.id} onPress={() => selectPoi(result)} style={styles.searchResult}>
-                        <View style={styles.resultPin}><Text style={styles.resultPinText}>•</Text></View>
-                        <View style={styles.resultCopy}>
-                          <Text numberOfLines={1} style={styles.resultTitle}>{result.name}</Text>
-                          <Text numberOfLines={1} style={styles.resultMeta}>{result.categoryName || 'Place'}{resolveFloorDisplay(cartography.floors, result.floorId, result.buildingId) ? ` · ${resolveFloorDisplay(cartography.floors, result.floorId, result.buildingId)}` : ''}</Text>
-                        </View>
-                        <Text style={styles.resultArrow}>›</Text>
-                      </TouchableOpacity>
-                    )) : <View style={styles.searchEmpty}><Text style={styles.searchEmptyText}>No matching places in this building.</Text></View>}
-                  </ScrollView>
-                ) : null}
-              </View>
-            </View>
-          ) : null}
-
-          {isBrowseMode ? (
-            <View style={styles.mapControls}>
-              <MapControlButton label="Enter fullscreen map" visibleLabel={isPhone ? undefined : 'Full screen'} symbol="⛶" onPress={() => onFullscreenChange?.(true)} />
-              {positionState === 'fresh' ? <MapControlButton label="Recenter on my location" visibleLabel={isPhone ? undefined : 'Recenter'} symbol="⌖" tone="primary" onPress={recenter} /> : <MapControlButton label="Find my location" visibleLabel={isPhone ? undefined : (positionState === 'starting' ? 'Locating…' : 'Locate me')} symbol="⌖" disabled={positionState === 'starting'} onPress={startPositioning} />}
-            </View>
-          ) : isGuidanceActive ? (
+          {isBrowseMode ? <NativeMapBrowseOverlay
+            activeFloorId={activeFloor.id}
+            buildingId={buildingId}
+            buildingName={building.name}
+            canNavigate={canNavigate}
+            currentFloorLabel={currentFloorLabel}
+            floorMenuOpen={floorMenuOpen}
+            floors={buildingFloors}
+            isPhone={isPhone}
+            positionState={positionState}
+            searchOpen={searchOpen}
+            searchQuery={searchQuery}
+            selectedPoi={selectedPoi}
+            showDestinationSheet={Boolean(showDestinationSheet)}
+            visibleSearchResults={visibleSearchResults}
+            onClearDestination={clearDestination}
+            onEnterDigitalTwin={enterDigitalTwin}
+            onFloorMenuToggle={() => setFloorMenuOpen(value => !value)}
+            onFloorSelect={floorId => { setActiveFloorId(floorId); setFloorMenuOpen(false) }}
+            onFullscreen={() => onFullscreenChange?.(true)}
+            onQueryChange={value => {
+              setSearchQuery(value)
+              setSearchFocused(true)
+              if (selectedPoi && value !== selectedPoi.name) {
+                setSelectedPoi(null)
+                setRoute(null)
+              }
+            }}
+            onRecenter={recenter}
+            onSearchFocus={() => setSearchFocused(true)}
+            onSelectPoi={selectPoi}
+            onStartGuidance={startGuidance}
+            onStartPositioning={startPositioning}
+          /> : isGuidanceActive ? (
             <TouchableOpacity accessibilityRole="button" accessibilityLabel="Recenter navigation" onPress={recenter} style={[styles.guidanceRecenter, { borderRadius: guidanceUi.recenterSize / 2, bottom: 16 + guidanceUi.actionHeight + guidanceUi.cardPadY * 2 + 12, height: guidanceUi.recenterSize, width: guidanceUi.recenterSize }]}>
               <Text style={[styles.guidanceRecenterText, { fontSize: guidanceUi.recenterSize * 0.46 }]}>⌖</Text>
             </TouchableOpacity>
@@ -367,26 +359,6 @@ function NativeMapRuntime({ workspaceId, cartography, paths, lifecycle: _lifecyc
             <View style={[styles.locationStatus, isPhone ? styles.locationStatusPhone : styles.locationStatusLarge]}>
               <ActivityIndicator color={positionState === 'error' ? colors.danger : colors.action} size="small" />
               <Text numberOfLines={2} style={styles.locationStatusText}>{positioningSnapshot.message || 'Finding your indoor position…'}</Text>
-            </View>
-          ) : null}
-
-          {showDestinationSheet ? (
-            <View style={[styles.poiSheet, isPhone ? styles.poiSheetPhone : styles.poiSheetLarge]}>
-              <View style={styles.sheetHandle} />
-              <View style={styles.destinationHeader}>
-                <View style={styles.destinationIcon}><Text style={styles.destinationIconText}>●</Text></View>
-                <View style={styles.destinationCopy}>
-                  <Text style={styles.sheetEyebrow}>DESTINATION</Text>
-                  <Text numberOfLines={1} style={styles.sheetTitle}>{selectedPoi.name}</Text>
-                  <Text numberOfLines={1} style={styles.sheetMeta}>{selectedPoi.categoryName || 'Place'}{resolveFloorDisplay(cartography.floors, selectedPoi.floorId, buildingId) ? ` · ${resolveFloorDisplay(cartography.floors, selectedPoi.floorId, buildingId)}` : ''}</Text>
-                </View>
-                <TouchableOpacity accessibilityRole="button" accessibilityLabel="Clear destination" onPress={clearDestination} style={styles.destinationClose}><Text style={styles.destinationCloseText}>×</Text></TouchableOpacity>
-              </View>
-              <View style={styles.sheetActions}>
-                {canNavigate ? <TouchableOpacity accessibilityRole="button" accessibilityLabel="Start navigation" onPress={startGuidance} style={styles.primaryButton}><Text style={styles.primaryButtonText}>Start</Text></TouchableOpacity> : <TouchableOpacity accessibilityRole="button" accessibilityLabel="Locate me for directions" disabled={positionState === 'starting'} onPress={startPositioning} style={[styles.primaryButton, positionState === 'starting' && styles.disabled]}><Text style={styles.primaryButtonText}>{positionState === 'starting' ? 'Locating…' : 'Locate me'}</Text></TouchableOpacity>}
-                <TouchableOpacity accessibilityRole="button" accessibilityLabel="Search another place" onPress={() => setSearchFocused(true)} style={styles.secondaryButton}><Text style={styles.secondaryButtonText}>Change</Text></TouchableOpacity>
-              </View>
-              <Text style={styles.sheetHint}>{canNavigate ? 'Route geometry is calculated from the venue path graph and drawn by this app.' : 'A fresh indoor position is required before route calculation can start.'}</Text>
             </View>
           ) : null}
 

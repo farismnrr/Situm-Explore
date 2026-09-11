@@ -381,3 +381,16 @@ Status: active durable closeout/distribution decision.
 - Server-mediated Realtime remains unchanged and maps coordinate-bearing `features`; `devicesInfo` is never converted into a fabricated position.
 
 Status: active durable positioning/Realtime lifecycle architecture; Plan 035 execution itself is historical/complete and integrated via PR #32.
+
+## Plan 047 native Digital Twin parity (2026-09-11)
+
+- Native Explore remains 2D-first. The existing app-owned Situm positioning, blue dot, routing, ETA, arrival/off-route handling, and turn-by-turn guidance stay 2D-owned.
+- Digital Twin 3D is explicit opt-in and lazy. Before entering 3D there must be no GLB request and no native GL context startup; a selected 3D failure remains an explicit 3D error with a manual `2D Map` action rather than silent fallback.
+- Native 3D uses Expo GL with mobile-owned Three `0.162.0`; it does not use a WebView renderer or `expo-three`. Web keeps its own Three dependency line. The narrow native Three compatibility adapter owns Expo GL/browser-host gaps.
+- Web and native share only runtime-neutral deterministic model-slot/view and semantic-room contracts. Renderer traversal and platform lifecycle stay platform-owned.
+- Native GLB bytes must come through the existing authenticated owner-scoped workspace endpoint. Session/request-id/timeout/abort behavior remains in the mobile API client; no Situm Read & Write credential or public model route is introduced.
+- 3D v1 owns walkthrough discovery only: semantic room search, Go, reset, floor switching, touch look/walk, and lifecycle/resource cleanup. It must not fabricate blue-dot projection, route geometry, turn-by-turn guidance, or cross-floor navigation.
+- The native renderer is intentionally frame-limited to keep the target Android POS responsive.
+- Closure security truth preserves the existing `image-size` local parser remediation and visible scanner residual. Compatible transitive fixes may be taken, but audit/Dependabot findings must not be suppressed or dismissed merely to make closure green.
+
+Status: active durable Native Explore / Digital Twin architecture decision; Plan 047 is closure-complete on its branch and not integrated until user-authorized PR/merge.

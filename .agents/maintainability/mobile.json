@@ -3,7 +3,7 @@
   "codebase": "mobile",
   "directories": {},
   "files": {
-    "src/map/NativeMapScreen.tsx": 481,
+    "src/map/NativeMapScreen.tsx": 453,
     "src/map/CustomIndoorMap.tsx": 369
   },
   "functions": {
@@ -11,7 +11,7 @@
       273
     ],
     "src/map/NativeMapScreen.tsx": [
-      314
+      285
     ]
   },
   "limits": {

@@ -18,9 +18,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { IndoorWalkDestination } from '#shared/indoor-walk'
 import { extractIndoorWalkDestinations } from '~/utils/indoor-walk-destinations'
 import { disposeIndoorWalkObject, disposeIndoorWalkRenderer, updateIndoorWalkDiagnostics } from '~/utils/indoor-walk-renderer'
-import { indoorWalkViews, type IndoorWalkModelSlot } from '~/utils/indoor-walk-view'
+import { INDOOR_WALK_EYE_HEIGHT, indoorWalkViews, type IndoorWalkModelSlot } from '~/utils/indoor-walk-view'
 
-const EYE_HEIGHT = 1.62
+const EYE_HEIGHT = INDOOR_WALK_EYE_HEIGHT
 const MOVE_SPEED = 2.35
 const LOOK_SENSITIVITY = 0.0042
 
