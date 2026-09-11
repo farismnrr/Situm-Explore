@@ -1,6 +1,6 @@
 # Plan 047 — Native Explore Digital Twin 3D Parity
 
-Status: implementation complete; user physical E2E accepted for the product flow; final mode-switch layout remediation complete; closure governance pending/in progress; integration pending user authorization
+Status: closure complete on branch; implementation commit `61fd329`; user physical E2E accepted for the product flow; final mode-switch layout remediation complete; integration pending user authorization
 Owner: repository implementation under user authorization
 Scope: native Explore plus the narrow runtime-neutral web/native Digital Twin contracts required for parity
 Depends on: Plan 046 integrated on `main`
@@ -130,6 +130,6 @@ Required before branch closeout:
 - [x] Physical Android rendering feasibility passed for LT1/LT2.
 - [x] User accepted the product E2E flow apart from the final reported button-placement issue.
 - [x] Final mode-switch controls were relocated into existing control clusters.
-- [ ] Closure governance passes.
-- [ ] Commit/push complete.
+- [x] Closure governance passes with the documented mobile `image-size` scanner residual remaining visible under the existing local parser remediation policy.
+- [x] Implementation commit `61fd329` created; branch push is part of this explicit closeout sequence.
 - [ ] PR/integration authorized separately by the user.
