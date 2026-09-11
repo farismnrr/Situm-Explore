@@ -49,7 +49,7 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64
-          tags: ghcr.io/farismnrr/situm-explore:${{ steps.meta.outputs.runtime_tag }}
+          tags: ghcr.io/farismnrr/situm-explore-prod:${{ steps.meta.outputs.runtime_tag }}
           build-args: |
             OCI_REVISION=${{ steps.meta.outputs.full_sha }}
             OCI_VERSION=${{ steps.meta.outputs.runtime_tag }}
@@ -62,7 +62,7 @@ jobs:
           target: migration
           push: true
           platforms: linux/amd64
-          tags: ghcr.io/farismnrr/situm-explore:${{ steps.meta.outputs.migration_tag }}
+          tags: ghcr.io/farismnrr/situm-explore-prod:${{ steps.meta.outputs.migration_tag }}
           build-args: |
             OCI_REVISION=${{ steps.meta.outputs.full_sha }}
             OCI_VERSION=${{ steps.meta.outputs.migration_tag }}
