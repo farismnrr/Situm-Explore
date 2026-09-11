@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SitumCartographyBuilding, SitumCartographyFloor, SitumCartographyPoi } from '#shared/situm-cartography'
+import type { IndoorRoute, IndoorRoutePoint } from '~/utils/indoor-route'
 
 type Rect = { x: number; y: number; width: number; height: number }
 type Placement = {
@@ -16,6 +17,9 @@ const props = defineProps<{
   floor: SitumCartographyFloor
   pois: SitumCartographyPoi[]
   selectedPoi?: SitumCartographyPoi | null
+  route?: IndoorRoute | null
+  routeStartPoiId?: number | null
+  routeDestinationPoiId?: number | null
   resetNonce?: number
 }>()
 
@@ -73,6 +77,35 @@ const surfaceStyle = computed(() => ({
 }))
 
 const floorPois = computed(() => props.pois.filter(poi => poi.floorId === props.floor.id).slice(0, 100))
+
+function floorSurfacePoint(point: Pick<IndoorRoutePoint, 'x' | 'y'>) {
+  const { width, length } = props.building.dimensions
+  return {
+    x: (width > 0 ? point.x / width : 0) * frame.value.width,
+    y: (length > 0 ? (length - point.y) / length : 0) * frame.value.height
+  }
+}
+
+const routeSegments = computed(() => {
+  const segments: IndoorRoutePoint[][] = []
+  let current: IndoorRoutePoint[] = []
+  for (const point of props.route?.points ?? []) {
+    if (point.floorId !== props.floor.id) {
+      if (current.length > 1) segments.push(current)
+      current = []
+      continue
+    }
+    current.push(point)
+  }
+  if (current.length > 1) segments.push(current)
+  return segments.map(points => points.map(floorSurfacePoint).map(point => `${point.x},${point.y}`).join(' '))
+})
+
+function routeRole(poi: SitumCartographyPoi) {
+  if (poi.id === props.routeStartPoiId) return 'Start'
+  if (poi.id === props.routeDestinationPoiId) return 'Destination'
+  return ''
+}
 
 function poiPriority(poi: SitumCartographyPoi) {
   const category = poi.categoryName.toLowerCase()
@@ -239,18 +272,21 @@ defineExpose({ resetView })
     @wheel.prevent="onWheel"
   >
     <div class="map-grid" aria-hidden="true" />
-    <div v-if="frame.width && frame.height" class="floor-surface" :style="surfaceStyle" aria-hidden="true">
+    <div v-if="frame.width && frame.height" class="floor-surface" :style="surfaceStyle">
       <img v-if="floor.mapUrl && !imageFailed" :src="floor.mapUrl" :alt="`Floor plan ${floor.name}`" draggable="false" @error="imageFailed = true">
       <div v-else class="missing-plan">Floor plan unavailable</div>
+      <svg v-if="routeSegments.length" class="route-overlay" :viewBox="`0 0 ${frame.width} ${frame.height}`" preserveAspectRatio="none" aria-hidden="true">
+        <polyline v-for="(points, index) in routeSegments" :key="index" :points="points" />
+      </svg>
     </div>
 
     <template v-for="placement in placements" :key="placement.poi.id">
       <button
         type="button"
         class="poi-target"
-        :class="{ selected: placement.selected }"
+        :class="{ selected: placement.selected, start: routeRole(placement.poi) === 'Start', destination: routeRole(placement.poi) === 'Destination' }"
         :style="{ left: `${placement.x}px`, top: `${placement.y}px` }"
-        :aria-label="`Open ${placement.label}`"
+        :aria-label="routeRole(placement.poi) ? `${routeRole(placement.poi)}: ${placement.label}` : `Open ${placement.label}`"
         data-map-interactive
         @pointerdown.stop
         @click.stop="emit('poiSelect', placement.poi)"
@@ -261,14 +297,14 @@ defineExpose({ resetView })
         v-if="placement.labelRect"
         type="button"
         class="poi-label"
-        :class="{ selected: placement.selected }"
+        :class="{ selected: placement.selected, start: routeRole(placement.poi) === 'Start', destination: routeRole(placement.poi) === 'Destination' }"
         :style="{
           left: `${placement.labelRect.x}px`,
           top: `${placement.labelRect.y}px`,
           width: `${placement.labelRect.width}px`,
           height: `${placement.labelRect.height}px`
         }"
-        :aria-label="`Open ${placement.label}`"
+        :aria-label="routeRole(placement.poi) ? `${routeRole(placement.poi)}: ${placement.label}` : `Open ${placement.label}`"
         data-map-interactive
         @pointerdown.stop
         @click.stop="emit('poiSelect', placement.poi)"
