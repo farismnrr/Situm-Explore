@@ -1,0 +1,33 @@
+.map-workspace { border-radius: 1rem; background: #e8edf1; }
+.map-workspace.is-3d { background: #101722; }
+.map-workspace:fullscreen { width: 100vw; height: 100vh; margin: 0 !important; border: 0; border-radius: 0; }
+.view-mode-switch {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 18;
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid rgb(255 255 255 / 88%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 6px 18px rgb(15 23 42 / 14%);
+  color: #10233f;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+}
+.view-mode-switch:hover { background: white; }
+.view-mode-switch :deep(svg) { width: 18px; height: 18px; color: #246bfd; }
+@media (max-width: 760px) {
+  .view-mode-switch { top: 116px; right: 12px; min-height: 40px; }
+}
+@media (max-width: 640px) {
+  .map-workspace { border-radius: 0; }
+  .view-mode-switch span { display: none; }
+  .view-mode-switch { width: 42px; padding: 0; justify-content: center; }
+}

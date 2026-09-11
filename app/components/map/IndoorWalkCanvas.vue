@@ -17,6 +17,8 @@ import {
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { IndoorWalkDestination } from '#shared/indoor-walk'
 import { extractIndoorWalkDestinations } from '~/utils/indoor-walk-destinations'
+import { disposeIndoorWalkObject, disposeIndoorWalkRenderer, updateIndoorWalkDiagnostics } from '~/utils/indoor-walk-renderer'
+import { indoorWalkViews, type IndoorWalkModelSlot } from '~/utils/indoor-walk-view'
 
 const EYE_HEIGHT = 1.62
 const MOVE_SPEED = 2.35
@@ -24,7 +26,9 @@ const LOOK_SENSITIVITY = 0.0042
 
 const props = defineProps<{
   floorId: number
+  floorLevel: number
   floorName: string
+  modelSlot: IndoorWalkModelSlot
   modelUrl: string
 }>()
 
@@ -46,6 +50,7 @@ let resizeObserver: ResizeObserver | null = null
 let animationFrame = 0
 let modelRoot: Object3D | null = null
 let modelBounds = new Box3()
+let disposed = false
 const spawnPosition = new Vector3()
 let spawnYaw = 0
 let spawnPitch = 0
@@ -57,13 +62,23 @@ const pressedKeys = new Set<string>()
 const clock = new Clock()
 let travel: { from: Vector3; to: Vector3; startedAt: number; duration: number } | null = null
 
+function disposeRenderer() {
+  disposeIndoorWalkRenderer(renderer)
+  renderer = null
+}
+
 function updateCanvasDiagnostics() {
   if (!renderer || !camera) return
-  const canvas = renderer.domElement
-  canvas.dataset.cameraX = camera.position.x.toFixed(3)
-  canvas.dataset.cameraY = camera.position.y.toFixed(3)
-  canvas.dataset.cameraZ = camera.position.z.toFixed(3)
-  canvas.dataset.modelReady = modelRoot ? 'true' : 'false'
+  updateIndoorWalkDiagnostics({
+    renderer,
+    camera,
+    yaw,
+    floorId: props.floorId,
+    floorLevel: props.floorLevel,
+    modelSlot: props.modelSlot,
+    modelBounds,
+    modelReady: Boolean(modelRoot)
+  })
 }
 
 function applyCameraRotation() {
@@ -81,24 +96,28 @@ function clampCameraPosition() {
   camera.position.y = EYE_HEIGHT
 }
 
-function setSpawn(destinations: IndoorWalkDestination[]) {
+function normalizedBoundsPoint(x: number, z: number) {
+  return new Vector3(
+    MathUtils.lerp(modelBounds.min.x, modelBounds.max.x, x),
+    EYE_HEIGHT,
+    MathUtils.lerp(modelBounds.min.z, modelBounds.max.z, z)
+  )
+}
+
+function setSpawn() {
   if (!camera) return
-  const center = modelBounds.getCenter(new Vector3())
-  const entry = destinations.find(destination => destination.category === 'Entrance')
-  const base = entry
-    ? new Vector3(entry.position.x, EYE_HEIGHT, entry.position.z)
-    : new Vector3(modelBounds.max.x - 1.1, EYE_HEIGHT, center.z)
-  const towardCenter = center.clone().setY(EYE_HEIGHT).sub(base).setY(0)
-  if (towardCenter.lengthSq() > 0.01) base.add(towardCenter.normalize().multiplyScalar(0.55))
+  const view = indoorWalkViews[props.modelSlot]
+  const base = normalizedBoundsPoint(view.spawn.x, view.spawn.z)
+  const target = normalizedBoundsPoint(view.lookAt.x, view.lookAt.z)
   camera.position.copy(base)
-  camera.lookAt(center.x, EYE_HEIGHT, center.z)
+  camera.lookAt(target)
   camera.rotation.order = 'YXZ'
   yaw = camera.rotation.y
   pitch = camera.rotation.x
+  clampCameraPosition()
   spawnPosition.copy(camera.position)
   spawnYaw = yaw
   spawnPitch = pitch
-  clampCameraPosition()
 }
 
 function resize() {
@@ -239,13 +258,17 @@ async function initialise() {
     scene.add(fillLight)
 
     const gltf = await new GLTFLoader().loadAsync(props.modelUrl)
+    if (disposed) {
+      disposeIndoorWalkObject(gltf.scene)
+      return
+    }
     modelRoot = gltf.scene
     scene.add(modelRoot)
     modelBounds = new Box3().setFromObject(modelRoot)
     if (modelBounds.isEmpty()) throw new Error('The 3D model contains no renderable geometry.')
     const destinations = extractIndoorWalkDestinations(modelRoot, props.floorId, EYE_HEIGHT)
     if (!destinations.length) throw new Error('The 3D model contains no discoverable rooms.')
-    setSpawn(destinations)
+    setSpawn()
     resizeObserver = new ResizeObserver(resize)
     resizeObserver.observe(host.value)
     resize()
@@ -255,9 +278,15 @@ async function initialise() {
     updateCanvasDiagnostics()
     emit('ready', destinations)
   } catch (error) {
+    if (disposed) return
     loading.value = false
     const message = error instanceof Error ? error.message : '3D walkthrough failed to initialise.'
     errorMessage.value = message
+    if (modelRoot) {
+      disposeIndoorWalkObject(modelRoot)
+      modelRoot = null
+    }
+    disposeRenderer()
     emit('error', message)
   }
 }
@@ -269,12 +298,18 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  disposed = true
   cancelAnimationFrame(animationFrame)
   resizeObserver?.disconnect()
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('keyup', onKeyUp)
-  renderer?.dispose()
-  renderer?.domElement.remove()
+  pressedKeys.clear()
+  touchKeys.clear()
+  if (modelRoot) disposeIndoorWalkObject(modelRoot)
+  disposeRenderer()
+  modelRoot = null
+  scene = null
+  camera = null
 })
 
 defineExpose({ resetView, goToDestination })

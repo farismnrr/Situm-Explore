@@ -12,7 +12,7 @@ This is the current product capability and runtime-owner matrix. Detailed techni
 | Situm mutation/admin authority | Verified Read & Write credential; server-only and never returned to browser/mobile |
 | App-owned browser Map authority | Authenticated workspace cartography through Nitro; no Situm credential is issued to the Map renderer |
 | Native positioning authority | Workspace Only Read credential requested from Nitro after authenticated workspace-owner authorization |
-| Browser Explore / digital twin | App-owned Three.js/WebGL eye-level renderer over authenticated floor-scoped GLB assets; Situm cartography supplies real building/floor context |
+| Browser Explore / digital twin | App-owned 2D floorplan renderer is primary over authenticated workspace cartography; explicit Digital Twin 3D lazy-mounts the Three.js/WebGL eye-level renderer over authenticated floor-scoped GLB assets |
 | Buildings/Floors/POIs/Categories | Workspace-scoped Situm/cartography; web and native consume authorized real data |
 | Geofences/Paths | Workspace-scoped server Situm integration where implemented |
 | Web navigation | No sensor-backed guidance in browser Map; native app owns positioning/navigation handoff, and web must not synthesize route metrics |
@@ -32,9 +32,9 @@ This is the current product capability and runtime-owner matrix. Detailed techni
 
 ## Web/native routing policy
 
-- desktop/tablet/phone-sized web Explore: app-owned 3D-only Three.js/WebGL renderer over floor-scoped GLB digital-twin assets;
+- desktop/tablet/phone-sized web Explore: app-owned 2D floorplan renderer by default, with explicit Digital Twin 3D opt-in over floor-scoped GLB assets;
 - web Explore destinations: canonical semantic room objects from the active GLB when Situm POIs are empty; never synthetic POIs;
-- missing GLB/WebGL/semantic-room capability: explicit error, no 2D/Viewer fallback;
+- after explicit 3D opt-in, missing GLB/WebGL/semantic-room capability is an explicit 3D error; the mode never silently falls back to 2D;
 - sensor-backed positioning/navigation from web Explore: explicit native-app handoff;
 - web Realtime on desktop/tablet/phone: native handoff;
 - native positioning/navigation: native client only;

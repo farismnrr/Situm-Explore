@@ -1,0 +1,116 @@
+.indoor-map-canvas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #e8edf1;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.indoor-map-canvas:active { cursor: grabbing; }
+.map-grid {
+  position: absolute;
+  inset: 0;
+  background-color: #e8edf1;
+  background-image: radial-gradient(circle at 1px 1px, rgb(16 35 63 / 4%) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+.floor-surface {
+  position: absolute;
+  overflow: hidden;
+  transform-origin: center;
+  background: #f8fafc;
+  box-shadow: 0 5px 20px rgb(16 35 63 / 14%);
+  will-change: transform;
+}
+.floor-surface img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: fill;
+  pointer-events: none;
+}
+.missing-plan {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: #7b8794;
+  font-size: 0.75rem;
+}
+.poi-target {
+  position: absolute;
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+.poi-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border: 2px solid white;
+  border-radius: 999px;
+  background: #246bfd;
+  box-shadow: 0 1px 5px rgb(16 35 63 / 26%);
+  transform: translate(-50%, -50%);
+}
+.poi-target.selected .poi-dot {
+  width: 13px;
+  height: 13px;
+  background: #10233f;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 88%), 0 3px 10px rgb(16 35 63 / 24%);
+}
+.poi-label {
+  position: absolute;
+  z-index: 4;
+  overflow: hidden;
+  padding: 0 7px;
+  border: 1px solid rgb(16 35 63 / 10%);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 91%);
+  box-shadow: 0 2px 7px rgb(16 35 63 / 8%);
+  color: #10233f;
+  font-size: 10.5px;
+  font-weight: 650;
+  line-height: 1;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  backdrop-filter: blur(7px);
+}
+.poi-label.selected {
+  border-color: rgb(16 35 63 / 96%);
+  background: rgb(16 35 63 / 96%);
+  color: white;
+  font-size: 11px;
+  font-weight: 750;
+}
+.floor-badge {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 5;
+  max-width: min(220px, 50vw);
+  overflow: hidden;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgb(16 35 63 / 78%);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  .floor-badge { bottom: 10px; right: 10px; }
+}

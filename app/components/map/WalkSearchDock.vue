@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import type { SitumCartographyFloor, SitumCartographyPoi } from '#shared/situm-cartography'
+import type { IndoorWalkDestination } from '#shared/indoor-walk'
+import type { SitumCartographyFloor } from '#shared/situm-cartography'
 
 const props = defineProps<{
   buildingName: string
   floors: SitumCartographyFloor[]
   activeFloorId: number
-  pois: SitumCartographyPoi[]
-  selectedPoi?: SitumCartographyPoi | null
+  destinations: IndoorWalkDestination[]
+  selectedDestination?: IndoorWalkDestination | null
 }>()
 
 const emit = defineEmits<{
   floorSelect: [floorId: number]
-  poiSelect: [poi: SitumCartographyPoi]
+  destinationSelect: [destination: IndoorWalkDestination]
   clearDestination: []
 }>()
 
@@ -25,31 +26,31 @@ const activeFloor = computed(() => props.floors.find(floor => floor.id === props
 const visibleResults = computed(() => {
   const normalized = query.value.trim().toLowerCase()
   const matches = normalized
-    ? props.pois.filter((poi) => {
-        const haystack = `${poi.name} ${poi.categoryName} ${poi.info}`.toLowerCase()
+    ? props.destinations.filter((destination) => {
+        const haystack = `${destination.name} ${destination.category}`.toLowerCase()
         return haystack.includes(normalized)
       })
-    : props.pois
-  return matches.slice(0, 7)
+    : props.destinations
+  return matches.slice(0, 10)
 })
 
-watch(() => props.selectedPoi?.id, () => {
-  if (props.selectedPoi) query.value = props.selectedPoi.name
+watch(() => props.selectedDestination?.id, () => {
+  if (props.selectedDestination) query.value = props.selectedDestination.name
 })
 
 function onInput(event: Event) {
   query.value = (event.target as HTMLInputElement).value
   searchOpen.value = true
   floorOpen.value = false
-  if (props.selectedPoi && query.value !== props.selectedPoi.name) emit('clearDestination')
+  if (props.selectedDestination && query.value !== props.selectedDestination.name) emit('clearDestination')
 }
 
-function selectPoi(poi: SitumCartographyPoi) {
-  query.value = poi.name
+function selectDestination(destination: IndoorWalkDestination) {
+  query.value = destination.name
   searchOpen.value = false
   floorOpen.value = false
   inputElement.value?.blur()
-  emit('poiSelect', poi)
+  emit('destinationSelect', destination)
 }
 
 function selectFloor(floorId: number) {
@@ -60,7 +61,7 @@ function selectFloor(floorId: number) {
 function clearSearch() {
   query.value = ''
   searchOpen.value = true
-  if (props.selectedPoi) emit('clearDestination')
+  if (props.selectedDestination) emit('clearDestination')
   nextTick(() => inputElement.value?.focus())
 }
 
@@ -89,7 +90,7 @@ function onFocusOut(event: FocusEvent) {
 
 function submitFirstResult() {
   const first = visibleResults.value[0]
-  if (first) selectPoi(first)
+  if (first) selectDestination(first)
 }
 
 defineExpose({ dismiss, focusSearch, clearSearch, clearQuery })
@@ -107,7 +108,7 @@ defineExpose({ dismiss, focusSearch, clearSearch, clearQuery })
           autocomplete="off"
           spellcheck="false"
           placeholder="Where do you want to go?"
-          aria-label="Search places"
+          aria-label="Search 3D rooms"
           @focus="searchOpen = true; floorOpen = false"
           @input="onInput"
           @keydown.enter.prevent="submitFirstResult"
@@ -145,23 +146,23 @@ defineExpose({ dismiss, focusSearch, clearSearch, clearQuery })
         >{{ floor.name || `Level ${floor.level}` }}</button>
       </div>
 
-      <div v-if="searchOpen" class="search-results" aria-label="Place search results">
+      <div v-if="searchOpen" class="search-results" aria-label="3D room search results">
         <button
           v-for="result in visibleResults"
           :key="result.id"
           type="button"
           class="search-result"
           @mousedown.prevent
-          @click="selectPoi(result)"
+          @click="selectDestination(result)"
         >
-          <span class="result-icon" aria-hidden="true"><UIcon name="i-lucide-map-pin" /></span>
+          <span class="result-icon" aria-hidden="true"><UIcon name="i-lucide-door-open" /></span>
           <span class="result-copy">
             <strong>{{ result.name }}</strong>
-            <span>{{ result.categoryName || 'Place' }} · {{ floors.find(floor => floor.id === result.floorId)?.name || `Floor ${result.floorId}` }}</span>
+            <span>{{ result.category }} · {{ activeFloor?.name || 'Current floor' }}</span>
           </span>
           <UIcon name="i-lucide-chevron-right" class="result-arrow" aria-hidden="true" />
         </button>
-        <div v-if="!visibleResults.length" class="search-empty">No matching places in this building.</div>
+        <div v-if="!visibleResults.length" class="search-empty">No discoverable rooms in this 3D floor model.</div>
       </div>
     </div>
   </div>
@@ -281,7 +282,7 @@ defineExpose({ dismiss, focusSearch, clearSearch, clearQuery })
 }
 .floor-chip.active { border-color: #246bfd; background: #246bfd; color: white; }
 .search-results {
-  max-height: 292px;
+  max-height: 330px;
   overflow-y: auto;
   border-top: 1px solid #e6e8ec;
 }
@@ -334,6 +335,6 @@ defineExpose({ dismiss, focusSearch, clearSearch, clearQuery })
 @media (max-width: 640px) {
   .map-search-dock { top: 12px; left: 12px; width: calc(100% - 24px); }
   .search-card { border-radius: 16px; }
-  .search-results { max-height: min(292px, 46vh); }
+  .search-results { max-height: min(330px, 46vh); }
 }
 </style>

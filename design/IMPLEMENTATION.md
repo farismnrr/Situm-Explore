@@ -58,7 +58,7 @@ Stored secret values are never returned by normal configuration reads and must n
 
 `app/pages/app/map.vue` composes the browser Explore workspace and `app/components/map/IndoorWalkCanvas.vue` owns the Three.js/WebGL eye-level walkthrough. Real building/floor context comes through authenticated workspace cartography, while floor-scoped GLB assets are served by authenticated Nitro routes from configured HTTPS object storage or the staging read-only asset mount. The renderer does not receive a Situm API key.
 
-The browser surface is 3D-only: room discovery comes from canonical semantic room objects embedded in the active GLB, and interaction includes floor switching, mouse-look, keyboard/touch walking, deterministic camera travel to a selected room, reset, and fullscreen. Missing GLB, WebGL, or semantic-room capability is an explicit error; do not add a 2D/Viewer fallback. The browser must not synthesize sensor-backed location, ETA, rerouting, or turn-by-turn guidance.
+The browser surface is 2D-primary. The default renderer consumes authenticated workspace cartography, real floor images, building dimensions, floors, and POIs and owns pan/zoom, search, selection, reset, and fullscreen. Digital Twin 3D is explicit opt-in and is lazy-mounted so default 2D does not initialize WebGL or request a GLB. In 3D, room discovery comes from canonical semantic room objects embedded in the active GLB, and interaction includes floor switching, mouse-look, keyboard/touch walking, deterministic camera travel, reset, and fullscreen. Initial/reset orientation comes from the explicit floor-view descriptor and never from semantic destination bounds. Missing GLB, WebGL, or semantic-room capability after explicit 3D selection is a truthful 3D error; do not silently change modes. The browser must not synthesize sensor-backed location, ETA, rerouting, or turn-by-turn guidance.
 
 Any retained `SitumViewer.vue` use is separate from the primary Map route and must preserve its narrow verified Only Read command/auth boundary. Read & Write must never be exposed to the browser.
 
@@ -106,7 +106,7 @@ Normalize validation, unauthenticated, forbidden, not-found, conflict, upstream,
 
 Web owns administration, analytics, responsive app-owned 3D digital-twin exploration, and static web operations. Native owns sensor-backed indoor positioning, turn-by-turn Map/navigation, and the native Realtime experience.
 
-Web Explore renders floor-scoped GLB assets through Three.js/WebGL with an eye-level camera on desktop/tablet/phone-sized browser layouts. There is no 2D fallback: missing GLB/WebGL/semantic-room data is an error. Model-derived semantic rooms may be used as browser destinations when Situm has no POIs. Web Realtime continues to use the integrated native handoff policy.
+Web Explore defaults to the app-owned 2D floorplan across desktop/tablet/phone-sized browser layouts. Digital Twin 3D explicitly mounts floor-scoped GLB assets through Three.js/WebGL with an eye-level camera; missing GLB/WebGL/semantic-room data remains an error inside that requested mode rather than triggering a silent fallback. Model-derived semantic rooms are 3D destinations only and are not fuzzily matched to Situm POIs across modes. Web Realtime continues to use the integrated native handoff policy.
 
 ## Android release
 
