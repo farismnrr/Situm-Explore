@@ -29,7 +29,7 @@ Replace the stale prototype-era public home page with a production-quality Situm
 - [x] Build the new public page in `app/pages/index.vue`.
 - [x] Keep copy aligned with `README.md`, `DESIGN.md`, `design/IMPLEMENTATION.md`, and `design/data-source-matrix.md`.
 - [x] Validate with `git diff --check`, lint, typecheck, and production build.
-- [ ] Record final persistence after the implementation commit is pushed.
+- [x] Record final persistence after the implementation commit is pushed.
 
 ## Acceptance
 
