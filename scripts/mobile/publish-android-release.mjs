@@ -8,8 +8,8 @@ import { HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s
 const repoRoot = resolve(import.meta.dirname, '../..')
 const mobileRoot = resolve(repoRoot, 'mobile')
 const activate = process.argv.includes('--activate')
-const version = process.env.EXPO_PUBLIC_APP_VERSION?.trim() || '0.1.0'
-const versionCode = Number(process.env.EXPO_PUBLIC_ANDROID_VERSION_CODE || '4')
+const version = process.env.EXPO_PUBLIC_APP_VERSION?.trim() || '0.1.1'
+const versionCode = Number(process.env.EXPO_PUBLIC_ANDROID_VERSION_CODE || '5')
 const semver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/
 
 if (!semver.test(version)) throw new Error(`Invalid Android release version: ${version}`)
@@ -78,6 +78,46 @@ async function sha256File(path) {
   return hash.digest('hex')
 }
 
+async function readExisting(client, bucket, key) {
+  try {
+    return await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
+  } catch (error) {
+    if (error?.$metadata?.httpStatusCode === 404) return null
+    throw error
+  }
+}
+
+function verifyImmutableObject(existing, size, sha256, key) {
+  if (existing.ContentLength !== size || existing.Metadata?.sha256 !== sha256) {
+    throw new Error(`Immutable Android release object already exists with different content: ${key}`)
+  }
+}
+
+async function writeObject(client, bucket, key, body, size, contentType, sha256, immutable) {
+  try {
+    await client.send(new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: body,
+      ContentLength: size,
+      ContentType: contentType,
+      Metadata: { sha256 },
+      ...(immutable ? { IfNoneMatch: '*', CacheControl: 'public, max-age=31536000, immutable' } : { CacheControl: 'no-cache' }),
+    }))
+  } catch (error) {
+    if (immutable && error?.$metadata?.httpStatusCode === 412) {
+      const existing = await readExisting(client, bucket, key)
+      if (existing) {
+        verifyImmutableObject(existing, size, sha256, key)
+        console.log(`Verified existing immutable object: ${key}`)
+        return
+      }
+    }
+    throw error
+  }
+  console.log(`Uploaded ${key}`)
+}
+
 async function readAndValidateRelease() {
   const [apkInfo, checksumText, manifestText, latestManifestText] = await Promise.all([
     stat(apkPath),
@@ -97,54 +137,27 @@ async function readAndValidateRelease() {
 async function putFile(client, bucket, key, path, contentType, sha256, immutable) {
   const info = await stat(path)
   if (immutable) {
-    try {
-      const existing = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
-      if (existing.ContentLength !== info.size || existing.Metadata?.sha256 !== sha256) {
-        throw new Error(`Immutable Android release object already exists with different content: ${key}`)
-      }
+    const existing = await readExisting(client, bucket, key)
+    if (existing) {
+      verifyImmutableObject(existing, info.size, sha256, key)
       console.log(`Verified existing immutable object: ${key}`)
       return
-    } catch (error) {
-      const status = error?.$metadata?.httpStatusCode
-      if (status && status !== 404) throw error
     }
   }
-  await client.send(new PutObjectCommand({
-    Bucket: bucket,
-    Key: key,
-    Body: createReadStream(path),
-    ContentLength: info.size,
-    ContentType: contentType,
-    Metadata: { sha256 },
-    ...(immutable ? { CacheControl: 'public, max-age=31536000, immutable' } : { CacheControl: 'no-cache' }),
-  }))
-  console.log(`Uploaded ${key}`)
+  await writeObject(client, bucket, key, createReadStream(path), info.size, contentType, sha256, immutable)
 }
 
 async function putText(client, bucket, key, text, contentType, sha256, immutable) {
   const body = Buffer.from(text)
   if (immutable) {
-    try {
-      const existing = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
-      if (existing.ContentLength !== body.length || existing.Metadata?.sha256 !== sha256) {
-        throw new Error(`Immutable Android release object already exists with different content: ${key}`)
-      }
+    const existing = await readExisting(client, bucket, key)
+    if (existing) {
+      verifyImmutableObject(existing, body.length, sha256, key)
       console.log(`Verified existing immutable object: ${key}`)
       return
-    } catch (error) {
-      const status = error?.$metadata?.httpStatusCode
-      if (status && status !== 404) throw error
     }
   }
-  await client.send(new PutObjectCommand({
-    Bucket: bucket,
-    Key: key,
-    Body: body,
-    ContentType: contentType,
-    Metadata: { sha256 },
-    ...(immutable ? { CacheControl: 'public, max-age=31536000, immutable' } : { CacheControl: 'no-cache' }),
-  }))
-  console.log(`Uploaded ${key}`)
+  await writeObject(client, bucket, key, body, body.length, contentType, sha256, immutable)
 }
 
 const release = await readAndValidateRelease()

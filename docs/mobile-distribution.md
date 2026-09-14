@@ -16,15 +16,15 @@ This document defines the Android release, OTA, naming, publishing, and verifica
 
 ## Version policy
 
-The current human release line starts at `v0.1.0`.
+The current production Android release is `0.1.0` / `versionCode 4`. The next release is `0.1.1` / `versionCode 5`, with the required upgrade path `0.1.0 (4) -> 0.1.1 (5)`.
 
-Android has a separate monotonic `versionCode`. Historical Situm Explore Android release evidence reached `versionCode 3`, so `v0.1.0` starts at `versionCode 4` even though its semantic version was reset.
+Android has a separate monotonic `versionCode`. Historical Situm Explore Android release evidence reached `versionCode 3`; `0.1.0` shipped at `versionCode 4`, and `0.1.1` increments it to `5`.
 
 Release inputs:
 
 ```text
-EXPO_PUBLIC_APP_VERSION=0.1.0
-EXPO_PUBLIC_ANDROID_VERSION_CODE=4
+EXPO_PUBLIC_APP_VERSION=0.1.1
+EXPO_PUBLIC_ANDROID_VERSION_CODE=5
 EXPO_PUBLIC_ENVIRONMENT=production
 EXPO_PUBLIC_API_BASE_URL=https://situm.devoutsys.com
 ```
@@ -73,12 +73,12 @@ The global shared Sensio Env project owns the S3 bucket/region/access configurat
 
 ## Canonical Android artifact names
 
-For `v0.1.0`:
+For `v0.1.1`:
 
 ```text
-situm-explore-v0.1.0-android-arm64.apk
-situm-explore-v0.1.0-android-arm64.apk.sha256
-situm-explore-v0.1.0-android-arm64.json
+situm-explore-v0.1.1-android-arm64.apk
+situm-explore-v0.1.1-android-arm64.apk.sha256
+situm-explore-v0.1.1-android-arm64.json
 ```
 
 Mutable aliases used only by the active feed are:
@@ -108,8 +108,8 @@ This exports `JAVA_HOME` (JDK 21), `ANDROID_HOME`, `ANDROID_SDK_ROOT` (Android 3
 From `mobile/`:
 
 ```bash
-EXPO_PUBLIC_APP_VERSION=0.1.0 \
-EXPO_PUBLIC_ANDROID_VERSION_CODE=4 \
+EXPO_PUBLIC_APP_VERSION=0.1.1 \
+EXPO_PUBLIC_ANDROID_VERSION_CODE=5 \
 EXPO_PUBLIC_ENVIRONMENT=production \
 EXPO_PUBLIC_API_BASE_URL=https://situm.devoutsys.com \
 npm run build:android:release
@@ -118,16 +118,16 @@ npm run build:android:release
 The script validates the release inputs, runs Expo Android prebuild, builds `arm64-v8a` only, and writes:
 
 ```text
-mobile/dist/situm-explore-v0.1.0-android-arm64.apk
-mobile/dist/situm-explore-v0.1.0-android-arm64.apk.sha256
-mobile/dist/situm-explore-v0.1.0-android-arm64.json
+mobile/dist/situm-explore-v0.1.1-android-arm64.apk
+mobile/dist/situm-explore-v0.1.1-android-arm64.apk.sha256
+mobile/dist/situm-explore-v0.1.1-android-arm64.json
 mobile/dist/situm-explore-latest-android.json
 ```
 
 The generated manifest points at the immutable version route on the production Situm origin:
 
 ```text
-https://situm.devoutsys.com/api/mobile/android/releases/0.1.0/apk
+https://situm.devoutsys.com/api/mobile/android/releases/0.1.1/apk
 ```
 
 `mobile/dist/` is ignored by Git.
@@ -140,8 +140,8 @@ First stage immutable versioned objects only:
 
 ```bash
 SENSIO_ENV_CONFIG_TOKEN_FILE=/secure/path/to/sensio_env_config_token \
-EXPO_PUBLIC_APP_VERSION=0.1.0 \
-EXPO_PUBLIC_ANDROID_VERSION_CODE=4 \
+EXPO_PUBLIC_APP_VERSION=0.1.1 \
+EXPO_PUBLIC_ANDROID_VERSION_CODE=5 \
 npm run mobile:android:publish
 ```
 
@@ -151,8 +151,8 @@ After production TLS, routing, API behavior, and the staged release are verified
 
 ```bash
 SENSIO_ENV_CONFIG_TOKEN_FILE=/secure/path/to/sensio_env_config_token \
-EXPO_PUBLIC_APP_VERSION=0.1.0 \
-EXPO_PUBLIC_ANDROID_VERSION_CODE=4 \
+EXPO_PUBLIC_APP_VERSION=0.1.1 \
+EXPO_PUBLIC_ANDROID_VERSION_CODE=5 \
 npm run mobile:android:publish -- --activate
 ```
 
@@ -168,14 +168,14 @@ Before staging any release:
 cd mobile
 npm run lint
 npm run typecheck
-EXPO_PUBLIC_APP_VERSION=0.1.0 \
-EXPO_PUBLIC_ANDROID_VERSION_CODE=4 \
+EXPO_PUBLIC_APP_VERSION=0.1.1 \
+EXPO_PUBLIC_ANDROID_VERSION_CODE=5 \
 EXPO_PUBLIC_ENVIRONMENT=production \
 EXPO_PUBLIC_API_BASE_URL=https://situm.devoutsys.com \
 npm run build:android:release
 
-sha256sum dist/situm-explore-v0.1.0-android-arm64.apk
-unzip -l dist/situm-explore-v0.1.0-android-arm64.apk \
+sha256sum dist/situm-explore-v0.1.1-android-arm64.apk
+unzip -l dist/situm-explore-v0.1.1-android-arm64.apk \
   | grep 'lib/.*\.so' \
   | sed -n 's#.*lib/\([^/]*\)/.*#\1#p' \
   | sort -u
@@ -189,10 +189,10 @@ Before activation, these production requests must work with normal TLS verificat
 
 ```text
 GET https://situm.devoutsys.com/api/mobile/android/latest
-GET https://situm.devoutsys.com/api/mobile/android/releases/0.1.0/apk
+GET https://situm.devoutsys.com/api/mobile/android/releases/0.1.1/apk
 ```
 
-The manifest response must contain `version: 0.1.0`, `versionCode: 4`, the locally verified SHA-256, and the Situm production download route. The APK route should redirect to a short-lived S3 URL and the downloaded bytes must match the manifest checksum.
+The manifest response must contain `version: 0.1.1`, `versionCode: 5`, the locally verified SHA-256, and the Situm production download route. The APK route should redirect to a short-lived S3 URL and the downloaded bytes must match the manifest checksum.
 
 ## Runtime update behavior
 

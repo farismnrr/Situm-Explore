@@ -10,7 +10,10 @@ Depends on: current integrated `main`; independent of pending Plan 048 landing-p
 Move Situm Explore Android self-update delivery off the legacy public MinIO URL and onto the production Situm origin while keeping S3 private and sourcing S3 credentials from Sensio Env.
 
 Production API origin: `https://situm.devoutsys.com`.
-Android semantic version line starts at `v0.1.0`. Because package `com.situm.explore` previously shipped through Android `versionCode 3`, the first `v0.1.0` build must use `versionCode 4`; Android version codes stay monotonic even when the human semantic version line is reset.
+Current production Android release: `0.1.0` / `versionCode 4`.
+Next release: `0.1.1` / `versionCode 5`.
+Required OTA path: `0.1.0 (4) -> 0.1.1 (5)`.
+Package `com.situm.explore` previously shipped through `versionCode 3`, so production `0.1.0` correctly started at `versionCode 4`. Android version codes remain monotonic.
 
 ## Evidence / current blockers
 
@@ -18,8 +21,8 @@ Android semantic version line starts at `v0.1.0`. Because package `com.situm.exp
 - Release tooling now generates versioned APK/checksum/manifest artifacts against the Situm production OTA routes.
 - Sensio Env internal configuration can provide protected global shared SMTP and S3 values to an authorized service token without exposing them to client bundles.
 - The shared S3 bucket is not anonymously readable for APK objects; publishing must not weaken its public-access policy.
-- As revalidated on 2026-09-14, `situm.devoutsys.com` now has matching TLS, serves Situm Explore, and reports healthy liveness. The deployed application is still older than this branch, however: the new OTA routes return HTTP 404 until this source and migration are deployed.
-- The current agent runtime does not have a Sensio Env service token, so live SMTP/S3 acceptance cannot be claimed from local source verification alone.
+- Previously collected evidence established matching production TLS, Situm Explore routing, and a healthy liveness endpoint. The production host is now observed running image tag `sha-ec9f99fb41da`; its runtime has `DATABASE_SCHEMA=public` and a configured Sensio Env service token. Preserve its current environment/schema when deploying the new source commit.
+- Earlier live route checks are historical evidence only. The required `/`, `/login`, `/register`, health, landing download, manifest, and APK checks must be performed after deploying this release commit.
 
 ## Product/security contract
 
@@ -29,6 +32,7 @@ Android semantic version line starts at `v0.1.0`. Because package `com.situm.exp
 - Public OTA manifest is served from Situm's production origin.
 - APK download endpoint returns a short-lived signed S3 redirect; it does not expose permanent S3 credentials.
 - Update discovery remains fail-open; OTA failure never blocks app login/use.
+- Immutable versioned objects use create-only writes; a conflicting existing object stops publication without overwrite.
 - Published release order is immutable/versioned objects first, stable manifest last.
 
 ## Phase 1 — Web runtime boundary (`web` codebase)
@@ -45,28 +49,38 @@ Android semantic version line starts at `v0.1.0`. Because package `com.situm.exp
 
 ## Phase 2 — Mobile/version contract (`mobile` codebase)
 
-- [ ] Default Android update manifest URL to `https://situm.devoutsys.com/api/mobile/android/latest`.
-- [ ] Reset user-facing mobile semantic baseline to `0.1.0` while keeping Android versionCode monotonic.
-- [ ] Update release artifact generation so manifest download URLs use the production Situm OTA endpoint rather than legacy MinIO.
-- [ ] Add a publisher that uploads release artifacts to private S3 using Sensio Env internal configuration; no secret values are printed or persisted.
-- [ ] Update mobile distribution documentation.
+- [x] Default Android update manifest URL to `https://situm.devoutsys.com/api/mobile/android/latest`.
+- [x] Advance Android release metadata from production `0.1.0` / code `4` to `0.1.1` / code `5`.
+- [x] Update release artifact generation so manifest download URLs use the production Situm OTA endpoint rather than legacy MinIO.
+- [x] Add a publisher that uploads release artifacts to private S3 using Sensio Env internal configuration; no secret values are printed or persisted.
+- [x] Make immutable S3 writes conditional and fail closed on conflicting content.
+- [x] Update mobile distribution documentation.
 - [ ] Run focused mobile lint/typecheck and release-script checks.
 
-## Phase 3 — v0.1.0 release attempt
+## Phase 3 — Production deployment and v0.1.1 release
 
-- [ ] Build arm64 production APK with `EXPO_PUBLIC_APP_VERSION=0.1.0`, `EXPO_PUBLIC_ANDROID_VERSION_CODE=4`, `EXPO_PUBLIC_ENVIRONMENT=production`, and `EXPO_PUBLIC_API_BASE_URL=https://situm.devoutsys.com`.
-- [ ] Verify checksum, arm64-only native libraries, embedded production URL, and generated manifest.
-- [ ] Upload immutable release objects and aliases to private S3 through Sensio Env-backed publisher.
-- [ ] Publish stable manifest last.
-- [ ] Verify stored S3 metadata/checksum without exposing credentials.
-- [ ] Verify production manifest/download through `https://situm.devoutsys.com` when TLS/vhost is correct; otherwise record the exact external blocker rather than claiming release acceptance.
+- [ ] Commit and push the landing-page hero change and Android `0.1.1` / versionCode `5` release source.
+- [ ] Publish/deploy the exact immutable web/backend image from that commit, preserving production `DATABASE_SCHEMA` and environment files.
+- [ ] Apply additive migration `0011_fine_tony_stark.sql` using the production schema already configured on the host.
+- [ ] Verify production `/`, `/login`, `/register`, `/api/health/liveness`, hero actions, and anonymous Android download route.
+- [ ] Build a fresh arm64 production APK with `EXPO_PUBLIC_APP_VERSION=0.1.1`, `EXPO_PUBLIC_ANDROID_VERSION_CODE=5`, `EXPO_PUBLIC_ENVIRONMENT=production`, and `EXPO_PUBLIC_API_BASE_URL=https://situm.devoutsys.com`.
+- [ ] Verify package, versionName, versionCode, ABI, production API/OTA configuration, APK size, SHA-256, and generated manifest.
+- [ ] Stage immutable versioned objects in private S3 without activation; stop if any existing immutable object differs.
+- [ ] Verify staged checksum, size, metadata, bucket privacy, and unchanged `0.1.0` objects.
+- [ ] Activate only after immutable staging and production feed/download verification; publish the stable manifest last.
+- [ ] Download through the public Situm backend route and verify its SHA-256 equals the local build.
+- [ ] Confirm device baseline `com.situm.explore` / `0.1.0` / code `4` and complete the actual in-app download/installer flow to `0.1.1` / code `5` without fatal/TLS/SSL/DNS errors.
+- [ ] If a safe fail-open device check exists, verify OTA/network failure does not block app launch without disturbing production endpoints.
 
 ## Definition of Done
 
 - [ ] OTA no longer depends on the legacy MinIO public URL.
 - [ ] S3 credentials come from Sensio Env and remain server/operator-only.
 - [ ] S3 bucket remains private.
-- [ ] Android `v0.1.0` / `versionCode 4` release artifacts are reproducible.
-- [ ] Production OTA endpoint is verifiably reachable with valid TLS and serves the published release, or the branch truthfully records the external TLS/vhost blocker.
+- [ ] Production deployment uses the exact immutable image from the pushed release commit and preserves its existing database schema.
+- [ ] Production pages and Android routes are reachable with valid TLS.
+- [ ] Android `0.1.1` / `versionCode 5` is a fresh arm64 APK whose SHA-256 matches private S3 and the public backend download.
+- [ ] The current production manifest advertises `0.1.1` / versionCode `5` and the correct immutable backend URL.
+- [ ] The physical app completes a real `0.1.0` / `4` to `0.1.1` / `5` update, or the final report explicitly limits its claim to feed verification.
 - [ ] No temporary test artifacts or secrets are committed.
-- [ ] No PR/merge occurs without explicit user authorization.
+- [ ] No PR or merge occurs.

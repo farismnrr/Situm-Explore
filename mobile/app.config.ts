@@ -3,8 +3,8 @@ import type { ExpoConfig } from 'expo/config'
 const environment = process.env.EXPO_PUBLIC_ENVIRONMENT || 'dev'
 const scheme = environment === 'production' ? 'situm-explore' : `situm-explore-${environment}`
 const universalLinkHost = process.env.EXPO_PUBLIC_UNIVERSAL_LINK_HOST?.trim()
-const version = process.env.EXPO_PUBLIC_APP_VERSION || '0.1.0'
-const androidVersionCode = Number(process.env.EXPO_PUBLIC_ANDROID_VERSION_CODE || '4')
+const version = process.env.EXPO_PUBLIC_APP_VERSION || '0.1.1'
+const androidVersionCode = Number(process.env.EXPO_PUBLIC_ANDROID_VERSION_CODE || '5')
 const iosBuildNumber = process.env.EXPO_PUBLIC_IOS_BUILD_NUMBER || '1'
 if (!Number.isSafeInteger(androidVersionCode) || androidVersionCode < 1) throw new Error('EXPO_PUBLIC_ANDROID_VERSION_CODE must be a positive integer.')
 
