@@ -1,12 +1,18 @@
 # Current State
 
-_Last reviewed: 2026-09-11_
+_Last reviewed: 2026-09-14_
 
 ## Current execution state
 
-No product implementation plan is active.
+Plan 049 — Android OTA via Sensio Env + S3 is active on `plan/049-android-ota-sensio-env`, branched from fetched `origin/main` at `9a569c5c8ca816904cca6699cdb1f27b47d17d9a`.
 
-New implementation work must start from updated `main` on a dedicated branch under the normal user-gated PR/merge lifecycle. Historical plans, sessions, evidence, and retired branches are context only unless explicitly reopened.
+The user authorized Android OTA remediation/release work using the existing Sensio Env global shared S3 configuration and production API origin `https://situm.devoutsys.com`. The new human release line begins at `v0.1.0`; Android `versionCode` remains monotonic and therefore starts this line at `4` because historical shipped evidence reached `versionCode 3`.
+
+The user subsequently expanded the active work to cover the public landing-page APK download path, Sensio-style email OTP registration, shared Sensio Env runtime configuration, and the Android OTA contract. Source now contains a stable public Android download endpoint, email OTP registration backed by hashed/expiring verification codes and Sensio Env SMTP configuration, plus the existing private-S3 OTA boundary.
+
+The original production TLS/vhost blocker is resolved as observed on 2026-09-14: `https://situm.devoutsys.com` now presents a matching Let's Encrypt certificate, serves Situm Explore, and its liveness endpoint returns 200. Production is nevertheless still running an older application build: the new `/api/mobile/android/latest` and `/api/mobile/android/download` routes currently return 404. Runtime acceptance therefore requires deploying the current backend/web build, applying migration `0011_fine_tony_stark.sql`, and supplying the server-side Sensio Env read credential before OTP SMTP and private-S3 OTA can be verified live.
+
+The shared cross-project Android toolchain was established at `/home/farismnrr/Services/android-toolchain/` (JDK 21, Android SDK 36, NDK 27.1.12297006), integrated across Sensio and Situm Explore, and verified via a successful Android release build producing `situm-explore-v0.1.0-android-arm64.apk` without JDK/NDK/license blockers. The artifact remains `arm64-v8a` only with the recorded release checksum, while production S3 activation/publishing has not been performed from this session.
 
 The latest integrated product baseline before this documentation refresh is `main` at PR #48 merge commit `4de87b602ea595d873c0c5235a3e807753349eef`.
 

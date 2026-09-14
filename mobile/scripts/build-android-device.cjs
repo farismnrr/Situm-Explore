@@ -20,9 +20,18 @@ if (!existsSync(gradlew)) {
   run('npx', ['expo', 'prebuild', '--platform', 'android', '--no-install'])
 }
 
+const jdkCandidates = [
+  process.env.JAVA_HOME,
+  '/home/farismnrr/Services/android-toolchain/jdk-21',
+  resolve(root, '../../.toolchains/android/jdk-21'),
+].filter(Boolean)
+const jdkDir = jdkCandidates.find(candidate => existsSync(candidate))
+
 const sdkCandidates = [
   process.env.ANDROID_HOME,
   process.env.ANDROID_SDK_ROOT,
+  '/home/farismnrr/Services/android-toolchain/sdk',
+  resolve(root, '../../.toolchains/android/sdk'),
   resolve(homedir(), 'Android/Sdk'),
   resolve(homedir(), 'Android/sdk'),
 ].filter(Boolean)
@@ -30,7 +39,12 @@ const sdkDir = sdkCandidates.find(candidate => existsSync(candidate))
 if (!sdkDir) throw new Error('Android SDK not found. Set ANDROID_HOME or ANDROID_SDK_ROOT.')
 writeFileSync(resolve(androidRoot, 'local.properties'), `sdk.dir=${sdkDir.replace(/\\/g, '\\\\')}\n`)
 
-const adbEnv = { ...process.env, ANDROID_HOME: sdkDir, ANDROID_SDK_ROOT: sdkDir }
+const adbEnv = {
+  ...process.env,
+  ANDROID_HOME: sdkDir,
+  ANDROID_SDK_ROOT: sdkDir,
+  ...(jdkDir ? { JAVA_HOME: jdkDir, PATH: `${resolve(jdkDir, 'bin')}:${process.env.PATH || ''}` } : {}),
+}
 const abiResult = spawnSync('adb', ['shell', 'getprop', 'ro.product.cpu.abi'], { cwd: root, env: adbEnv, encoding: 'utf8' })
 if (abiResult.status !== 0) {
   console.error('No usable Android device is connected. Set ANDROID_SERIAL if multiple devices are present.')

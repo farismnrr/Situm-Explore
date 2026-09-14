@@ -93,6 +93,7 @@ For Situm behavior: **no evidence, no implementation**. Verify current official 
 ## Android build safety
 
 - The physical acceptance POS is `arm64-v8a`; ordinary agent Android builds must not compile x86/x86_64/armeabi-v7a unless a task explicitly requires another ABI.
+- Shared Android toolchain lives at `/home/farismnrr/Services/android-toolchain/` (also symlinked at `/home/farismnrr/Documents/Projects/.toolchains/android/`). Sourcing `/home/farismnrr/Services/android-toolchain/env.sh` sets `JAVA_HOME`, `ANDROID_HOME`, `ANDROID_SDK_ROOT`, and PATH. Build scripts also auto-fallback to this path.
 - Prefer `cd mobile && npm run build:android:release` for release candidates; its script pins `-PreactNativeArchitectures=arm64-v8a`, uses non-clean Expo Prebuild plus the persistent Gradle build cache, and validates the public API origin. Do not replace its `--no-clean` prebuild with Expo's default clean prebuild during ordinary release iteration.
 - `expo-build-properties` also pins `android.buildArchs` to `arm64-v8a`, so `expo prebuild` must preserve the single-ABI default in `android/gradle.properties`.
 - Before a long physical-device build, verify the target ABI with `adb shell getprop ro.product.cpu.abi` and inspect the effective `reactNativeArchitectures` value. If the build starts CMake tasks for four ABIs, stop and correct the invocation/config instead of letting it burn CPU.

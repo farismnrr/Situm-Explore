@@ -15,7 +15,7 @@ services:
       NITRO_HOST: 0.0.0.0
       PORT: 3000
       NITRO_PORT: 3000
-      NUXT_PUBLIC_MOBILE_ANDROID_DOWNLOAD_URL: https://minio.farismunir.my.id/situm-explore/android/situm-explore-latest-android-arm64.apk
+      NUXT_PUBLIC_MOBILE_ANDROID_DOWNLOAD_URL: https://situm.devoutsys.com/api/mobile/android/download
       NUXT_SITUM3D_ASSET_DIR: /var/lib/situm-explore/3d
     volumes:
       - ../.data/3d-models:/var/lib/situm-explore/3d:ro

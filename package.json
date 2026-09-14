@@ -10,7 +10,8 @@
     "typecheck": "nuxt typecheck",
     "lint": "eslint .",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "mobile:android:publish": "node scripts/mobile/publish-android-release.mjs"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,8 @@
     "esbuild": "^0.28.2"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1131.0",
+    "@aws-sdk/s3-request-presigner": "^3.1131.0",
     "@clickhouse/client": "^1.23.1",
     "@iconify-json/lucide": "^1.2.123",
     "@nuxt/ui": "^4.11.1",
@@ -30,6 +33,7 @@
     "@situm/sdk-js": "^0.25.0",
     "@types/qrcode": "^1.5.6",
     "drizzle-orm": "^0.45.2",
+    "nodemailer": "^10.0.9",
     "nuxt": "^4.5.2",
     "nuxt-auth-utils": "^0.5.30",
     "pg": "^8.23.0",
@@ -39,6 +43,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",
+    "@types/nodemailer": "^8.0.1",
     "@types/pg": "^8.21.0",
     "@types/three": "^0.185.4",
     "drizzle-kit": "^0.31.10",

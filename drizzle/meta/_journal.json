@@ -78,6 +78,13 @@
       "when": 1789132313102,
       "tag": "0010_move_app_tables_to_configured_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789368882293,
+      "tag": "0011_fine_tony_stark",
+      "breakpoints": true
     }
   ]
 }
