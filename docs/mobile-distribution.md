@@ -16,7 +16,7 @@ This document defines the Android release, OTA, naming, publishing, and verifica
 
 ## Version policy
 
-The current production Android release is `0.1.1` / `versionCode 5`. The next release is `0.1.2` / `versionCode 6`, with the required upgrade path `0.1.1 (5) -> 0.1.2 (6)`.
+The current production Android release is `0.1.2` / `versionCode 6`. Any future Android release must increment the monotonic versionCode; the next normal release is `0.1.3` / `versionCode 7` or later.
 
 Android has a separate monotonic `versionCode`. Historical Situm Explore Android release evidence reached `versionCode 3`; `0.1.0` shipped at `versionCode 4`, `0.1.1` shipped at `versionCode 5`, and `0.1.2` increments it to `6`.
 
