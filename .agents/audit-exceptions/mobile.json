@@ -1,0 +1,16 @@
+{
+  "codebase": "mobile",
+  "expiresOn": "2026-09-30",
+  "advisorySources": [1138808, 1138809],
+  "advisories": [
+    "GHSA-w3rx-r6r6-pgpr",
+    "GHSA-5p2g-fcmc-qvqq"
+  ],
+  "packages": [
+    "image-size",
+    "metro",
+    "metro-config",
+    "metro-transform-worker"
+  ],
+  "reason": "Temporary exception for the Expo/React Native Metro build-tool chain while image-size has no published patched release. Review or remove no later than the expiry date."
+}

@@ -12,10 +12,10 @@ if [[ -f "$ROOT/AGENTS.md" ]] && ! grep -q 'Closure and Engineering Guard Lifecy
   errors+=("AGENTS.md is missing Closure and Engineering Guard Lifecycle")
 fi
 
-for folder in memory knowledge protocols scripts scripts/lib maintainability; do
+for folder in memory knowledge protocols scripts scripts/lib maintainability audit-exceptions; do
   [[ -d "$BASE/$folder" ]] || errors+=("missing .agents/$folder/")
 done
-for file in codebases.conf scripts/codebase-policy.sh scripts/engineering-guard.sh scripts/environment-guard.sh scripts/maintainability.py scripts/validate.sh; do
+for file in codebases.conf scripts/codebase-policy.sh scripts/engineering-guard.sh scripts/environment-guard.sh scripts/maintainability.py scripts/npm-audit-guard.py scripts/validate.sh audit-exceptions/mobile.json; do
   [[ -f "$BASE/$file" ]] || errors+=("missing governance file: .agents/$file")
 done
 
@@ -46,15 +46,27 @@ for script in "$BASE/scripts/"*.sh "$BASE/scripts/lib/"*.sh; do
   [[ -f "$script" ]] || continue
   if ! bash -n "$script"; then errors+=("shell syntax failed: ${script#$ROOT/}"); fi
 done
-if [[ -f "$BASE/scripts/maintainability.py" ]]; then
-  if ! python3 - "$BASE/scripts/maintainability.py" <<'PY'
+for python_script in "$BASE/scripts/maintainability.py" "$BASE/scripts/npm-audit-guard.py"; do
+  [[ -f "$python_script" ]] || continue
+  if ! python3 - "$python_script" <<'PY'
 from pathlib import Path
 import sys
 path = Path(sys.argv[1])
 compile(path.read_text(), str(path), 'exec')
 PY
   then
-    errors+=("Python syntax failed: .agents/scripts/maintainability.py")
+    errors+=("Python syntax failed: ${python_script#$ROOT/}")
+  fi
+done
+if [[ -f "$BASE/audit-exceptions/mobile.json" ]]; then
+  if ! python3 - "$BASE/audit-exceptions/mobile.json" <<'PY'
+import json
+from pathlib import Path
+import sys
+json.loads(Path(sys.argv[1]).read_text())
+PY
+  then
+    errors+=("JSON syntax failed: .agents/audit-exceptions/mobile.json")
   fi
 fi
 
