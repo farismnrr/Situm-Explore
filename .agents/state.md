@@ -4,17 +4,15 @@ _Last reviewed: 2026-09-14_
 
 ## Current execution state
 
-Plan 049 — Android OTA via Sensio Env + S3 is active on `plan/049-android-ota-sensio-env`, branched from fetched `origin/main` at `9a569c5c8ca816904cca6699cdb1f27b47d17d9a`.
+Plan 048 — Public Landing Page is integrated into `main` through PR #55 at merge commit `d4bee607663ab13b49e367945c0e031c61950cf4`. The stale prototype-era public page is replaced by the current capability-truthful landing page, including the conditional Android download CTA.
 
-Corrected release authority from the user: current production Android is `0.1.0` / versionCode `4`; next release is `0.1.1` / versionCode `5`; required OTA path is `0.1.0 (4) -> 0.1.1 (5)`. The earlier assumption that `0.1.2` existed was wrong. Previously collected production manifest, private S3 objects, Git history, and physical-device evidence remain authoritative; do not repeat Phase 0 without a focused need.
+Plan 049 — Android OTA via Sensio Env + S3 remains the active release work. Its source is validated and prepared for integration: current production Android authority is `0.1.0` / versionCode `4`; next release is `0.1.1` / versionCode `5`; required OTA path is `0.1.0 (4) -> 0.1.1 (5)`. The source adds the production-origin OTA/download boundary, Sensio Env-backed private S3/SMTP runtime, email OTP registration, and release tooling.
 
-The user subsequently expanded the active work to cover the public landing-page APK download path, Sensio-style email OTP registration, shared Sensio Env runtime configuration, and the Android OTA contract. Source now contains a stable public Android download endpoint, email OTP registration backed by hashed/expiring verification codes and Sensio Env SMTP configuration, plus the existing private-S3 OTA boundary.
+The Plan 049 source passed root lint/typecheck and mobile lint/typecheck after the `0.1.1` versioning/publisher updates. Production deployment, migration application, private-S3 staging/activation, fresh `0.1.1` APK build, and physical-device OTA verification are still operational release steps and must not be claimed complete until executed. Preserve production `DATABASE_SCHEMA=public`, S3 privacy, TLS validation, and server-only credentials.
 
-The user explicitly authorized committing/pushing the landing-page and Android release source, publishing/deploying the exact immutable image for that commit, staging and activating the private-S3 OTA release, and testing the physical Android device. The production host is observed running image `sha-ec9f99fb41da`, with `DATABASE_SCHEMA=public` and a configured Sensio Env token. Preserve that production schema and environment; never copy the laptop-only `DATABASE_SCHEMA=situm_explore` into production. Production routes and page behavior must be verified after deployment.
+The shared cross-project Android toolchain remains available at `/home/farismnrr/Services/android-toolchain/` (JDK 21, Android SDK 36, NDK 27.1.12297006). The previous `0.1.0` APK remains baseline evidence and must not be renamed or reused.
 
-The shared cross-project Android toolchain remains available at `/home/farismnrr/Services/android-toolchain/` (JDK 21, Android SDK 36, NDK 27.1.12297006). A previous `0.1.0` APK exists as baseline evidence and must not be renamed or reused; build a fresh `0.1.1` / code `5` APK. Release source push, production deployment, private-S3 staging/activation, and real in-app OTA verification remain open until completed and recorded.
-
-The latest integrated product baseline before this documentation refresh is `main` at PR #48 merge commit `4de87b602ea595d873c0c5235a3e807753349eef`.
+The latest integrated product baseline is `main` at `d4bee607663ab13b49e367945c0e031c61950cf4` before Plan 049 integration.
 
 ## Latest integrated work
 

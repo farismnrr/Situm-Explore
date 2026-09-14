@@ -74,9 +74,9 @@ Roadmap history: `plans/028-034-native-mobile-roadmap.md`. Plan 036 — Realtime
 
 ## Active plan
 
-No implementation plan is active.
+Plan 048 — Public Landing Page has completed implementation on `plan/048-public-landing-page` and is awaiting user review / explicit PR or integration authorization. It replaces the prototype-era public home page with current capability-truthful product positioning; it does not change authenticated product behavior, backend APIs, Situm capability, or mobile code.
 
-Future work starts from updated `main` under a newly created explicit plan. In particular, browser/native 3D route projection is **not** Plan 047 and remains unplanned until separately scoped.
+No follow-on implementation work is authorized by Plan 048. Future work still starts from updated `main` under a newly created explicit plan. In particular, browser/native 3D route projection is **not** Plan 047 or Plan 048 and remains unplanned until separately scoped.
 
 ## Completed recent work
 
