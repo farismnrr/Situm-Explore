@@ -6,13 +6,13 @@ _Last reviewed: 2026-09-14_
 
 Plan 048 — Public Landing Page is integrated into `main` through PR #55 at merge commit `d4bee607663ab13b49e367945c0e031c61950cf4`. The stale prototype-era public page is replaced by the current capability-truthful landing page, including the conditional Android download CTA.
 
-Plan 049 — Android OTA via Sensio Env + S3 remains the active release work. Its source is validated and prepared for integration: current production Android authority is `0.1.0` / versionCode `4`; next release is `0.1.1` / versionCode `5`; required OTA path is `0.1.0 (4) -> 0.1.1 (5)`. The source adds the production-origin OTA/download boundary, Sensio Env-backed private S3/SMTP runtime, email OTP registration, and release tooling.
+Plan 049 — Android OTA via Sensio Env + S3 source is integrated into `main` through PR #56 at merge commit `4b28819fbdf490db1248ca4f74edd3aa56ce800f`. Current production Android authority remains `0.1.0` / versionCode `4`; next release is `0.1.1` / versionCode `5`; required OTA path is `0.1.0 (4) -> 0.1.1 (5)`. The integrated source adds the production-origin OTA/download boundary, Sensio Env-backed private S3/SMTP runtime, email OTP registration, and release tooling.
 
 The Plan 049 source passed root lint/typecheck and mobile lint/typecheck after the `0.1.1` versioning/publisher updates. Production deployment, migration application, private-S3 staging/activation, fresh `0.1.1` APK build, and physical-device OTA verification are still operational release steps and must not be claimed complete until executed. Preserve production `DATABASE_SCHEMA=public`, S3 privacy, TLS validation, and server-only credentials.
 
 The shared cross-project Android toolchain remains available at `/home/farismnrr/Services/android-toolchain/` (JDK 21, Android SDK 36, NDK 27.1.12297006). The previous `0.1.0` APK remains baseline evidence and must not be renamed or reused.
 
-The latest integrated product baseline is `main` at `d4bee607663ab13b49e367945c0e031c61950cf4` before Plan 049 integration.
+The latest integrated product baseline is `main` at Plan 049 merge commit `4b28819fbdf490db1248ca4f74edd3aa56ce800f`; remaining Plan 049 work is operational release execution on `main`, not a feature branch.
 
 ## Latest integrated work
 

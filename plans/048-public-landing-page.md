@@ -1,7 +1,7 @@
 # Plan 048 — Public Landing Page
 
-Status: implementation complete; awaiting user review / PR authorization
-Branch: `plan/048-public-landing-page`
+Status: integrated through PR #55 on 2026-09-14
+Branch: retired after integration; `main` is authoritative
 Depends on: current integrated `main`
 
 ## Goal

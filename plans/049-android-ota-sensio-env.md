@@ -1,9 +1,9 @@
 # Plan 049 — Android OTA via Sensio Env + S3
 
-Status: active
+Status: source integrated through PR #56; production release execution pending on `main`
 Owner: repository implementation under user authorization
 Scope: public Android OTA delivery boundary, landing-page APK download, Sensio-style email OTP registration, Sensio Env-backed shared SMTP/S3 configuration, Android release tooling/versioning
-Depends on: current integrated `main`; independent of pending Plan 048 landing-page work
+Depends on: current integrated `main` including Plan 048
 
 ## Goal
 
@@ -59,7 +59,7 @@ Package `com.situm.explore` previously shipped through `versionCode 3`, so produ
 
 ## Phase 3 — Production deployment and v0.1.1 release
 
-- [ ] Commit and push the landing-page hero change and Android `0.1.1` / versionCode `5` release source.
+- [x] Commit, push, and integrate the landing-page/Android `0.1.1` / versionCode `5` release source through PR #56.
 - [ ] Publish/deploy the exact immutable web/backend image from that commit, preserving production `DATABASE_SCHEMA` and environment files.
 - [ ] Apply additive migration `0011_fine_tony_stark.sql` using the production schema already configured on the host.
 - [ ] Verify production `/`, `/login`, `/register`, `/api/health/liveness`, hero actions, and anonymous Android download route.
@@ -83,4 +83,4 @@ Package `com.situm.explore` previously shipped through `versionCode 3`, so produ
 - [ ] The current production manifest advertises `0.1.1` / versionCode `5` and the correct immutable backend URL.
 - [ ] The physical app completes a real `0.1.0` / `4` to `0.1.1` / `5` update, or the final report explicitly limits its claim to feed verification.
 - [ ] No temporary test artifacts or secrets are committed.
-- [ ] No PR or merge occurs.
+- [x] Source integration is complete through PR #56; remaining production release steps execute from `main`.
