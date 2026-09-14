@@ -1,16 +1,18 @@
 # Current State
 
-_Last reviewed: 2026-09-12_
+_Last reviewed: 2026-09-14_
 
 ## Current execution state
 
-Plan 048 — Public Landing Page implementation is complete on `plan/048-public-landing-page` and pushed at `56ce2a64c1122fe335d0f76a917fa170129e89ec`. It is awaiting user review and any explicit PR/integration authorization.
+Plan 048 — Public Landing Page is integrated into `main` through PR #55 at merge commit `d4bee607663ab13b49e367945c0e031c61950cf4`. The stale prototype-era public page is replaced by the current capability-truthful landing page, including the conditional Android download CTA.
 
-The stale prototype-era public home page has been replaced with a current, capability-truthful Situm Explore landing page. Scope remains limited to the web presentation surface; authenticated product behavior, backend APIs, Situm capability, and mobile code are unchanged. `git diff --check`, full lint, Nuxt typecheck, and production build passed; the build emitted only existing non-fatal chunk-size/plugin-timing warnings.
+Plan 049 — Android OTA via Sensio Env + S3 remains the active release work. Its source is validated and prepared for integration: current production Android authority is `0.1.0` / versionCode `4`; next release is `0.1.1` / versionCode `5`; required OTA path is `0.1.0 (4) -> 0.1.1 (5)`. The source adds the production-origin OTA/download boundary, Sensio Env-backed private S3/SMTP runtime, email OTP registration, and release tooling.
 
-The branch was created from fetched `origin/main` at `9a569c5c8ca816904cca6699cdb1f27b47d17d9a`. PR creation and integration remain user-gated. Historical plans, sessions, evidence, and retired branches are context only unless explicitly reopened.
+The Plan 049 source passed root lint/typecheck and mobile lint/typecheck after the `0.1.1` versioning/publisher updates. Production deployment, migration application, private-S3 staging/activation, fresh `0.1.1` APK build, and physical-device OTA verification are still operational release steps and must not be claimed complete until executed. Preserve production `DATABASE_SCHEMA=public`, S3 privacy, TLS validation, and server-only credentials.
 
-The latest integrated product baseline before Plan 048 is `main` at `9a569c5c8ca816904cca6699cdb1f27b47d17d9a`.
+The shared cross-project Android toolchain remains available at `/home/farismnrr/Services/android-toolchain/` (JDK 21, Android SDK 36, NDK 27.1.12297006). The previous `0.1.0` APK remains baseline evidence and must not be renamed or reused.
+
+The latest integrated product baseline is `main` at `d4bee607663ab13b49e367945c0e031c61950cf4` before Plan 049 integration.
 
 ## Latest integrated work
 

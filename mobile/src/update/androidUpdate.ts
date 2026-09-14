@@ -1,4 +1,4 @@
-export const DEFAULT_ANDROID_UPDATE_MANIFEST_URL = 'https://minio.farismunir.my.id/situm-explore/android/situm-explore-latest-android.json'
+export const DEFAULT_ANDROID_UPDATE_MANIFEST_URL = 'https://situm.devoutsys.com/api/mobile/android/latest'
 
 export function isSafeAndroidUpdateUrl(value: string): boolean {
   try {

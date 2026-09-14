@@ -18,6 +18,19 @@ export const users = pgTable('users', {
   check('users_email_normalized_check', sql`${table.email} = lower(${table.email})`),
 ])
 
+export const registrationVerificationCodes = pgTable('registration_verification_codes', {
+  email: varchar('email', { length: 320 }).primaryKey(),
+  codeHash: varchar('code_hash', { length: 255 }).notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  resendAvailableAt: timestamp('resend_available_at').notNull(),
+  failedAttempts: integer('failed_attempts').default(0).notNull(),
+  consumedAt: timestamp('consumed_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, table => [
+  check('registration_verification_codes_email_normalized_check', sql`${table.email} = lower(${table.email})`),
+  check('registration_verification_codes_failed_attempts_check', sql`${table.failedAttempts} >= 0`),
+])
+
 export const providerIdentities = pgTable('provider_identities', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull(),

@@ -28,13 +28,24 @@ export default defineNuxtConfig({
       assetDir: process.env.NUXT_SITUM3D_ASSET_DIR || '',
       modelBaseUrl: process.env.NUXT_SITUM3D_MODEL_BASE_URL || ''
     },
+    sensioEnv: {
+      baseUrl: process.env.SENSIO_ENV_URL || process.env.SENSIO_ENV_BASE_URL || 'http://100.99.88.53:3002',
+      configToken: process.env.SENSIO_ENV_TOKEN || process.env.SENSIO_ENV_CONFIG_TOKEN || '',
+      configTokenFile: process.env.SENSIO_ENV_CONFIG_TOKEN_FILE || '',
+      workspaceId: process.env.SENSIO_ENV_WORKSPACE || process.env.SENSIO_ENV_WORKSPACE_ID || 'berjaya-inovasi-global',
+      projectId: process.env.SENSIO_ENV_PROJECT || process.env.SENSIO_ENV_PROJECT_ID || 'shared'
+    },
+    mobileRelease: {
+      s3Prefix: process.env.NUXT_MOBILE_RELEASE_S3_PREFIX || 'situm-explore/android',
+      publicBaseUrl: process.env.NUXT_MOBILE_RELEASE_PUBLIC_BASE_URL || 'https://situm.devoutsys.com'
+    },
     public: {
       mobile: {
         appScheme: process.env.NUXT_PUBLIC_MOBILE_APP_SCHEME || 'situm-explore',
         universalLinkBaseUrl: process.env.NUXT_PUBLIC_MOBILE_UNIVERSAL_LINK_BASE_URL || '',
         androidStoreUrl: process.env.NUXT_PUBLIC_MOBILE_ANDROID_STORE_URL || '',
         iosStoreUrl: process.env.NUXT_PUBLIC_MOBILE_IOS_STORE_URL || '',
-        androidDownloadUrl: process.env.NUXT_PUBLIC_MOBILE_ANDROID_DOWNLOAD_URL || '',
+        androidDownloadUrl: process.env.NUXT_PUBLIC_MOBILE_ANDROID_DOWNLOAD_URL || 'https://situm.devoutsys.com/api/mobile/android/download',
         iosDownloadUrl: process.env.NUXT_PUBLIC_MOBILE_IOS_DOWNLOAD_URL || ''
       }
     }

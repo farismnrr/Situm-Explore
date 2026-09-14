@@ -1,6 +1,6 @@
 services:
   situm-explore:
-    image: ${IMAGE_REPOSITORY:-ghcr.io/farismnrr/situm-explore}:${PRODUCTION_TAG:?set PRODUCTION_TAG to an immutable sha tag}
+    image: ${IMAGE_REPOSITORY:-ghcr.io/farismnrr/situm-explore-prod}:${PRODUCTION_TAG:?set PRODUCTION_TAG to an immutable sha tag}
     container_name: situm-explore
     ports:
       - "0.0.0.0:${SITUM_PORT:-3002}:3000"

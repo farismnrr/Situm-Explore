@@ -14,7 +14,7 @@ if (!version) throw new Error('EXPO_PUBLIC_APP_VERSION is required for release b
 if (!versionCode) throw new Error('EXPO_PUBLIC_ANDROID_VERSION_CODE is required for release builds.')
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim()
 const environment = process.env.EXPO_PUBLIC_ENVIRONMENT?.trim() || 'staging'
-const releaseBaseUrl = (process.env.EXPO_PUBLIC_ANDROID_RELEASE_BASE_URL || 'https://minio.farismunir.my.id/situm-explore/android').trim().replace(/\/$/, '')
+const releaseBaseUrl = (process.env.EXPO_PUBLIC_ANDROID_RELEASE_BASE_URL || 'https://situm.devoutsys.com/api/mobile/android/releases').trim().replace(/\/$/, '')
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version)) throw new Error(`Invalid EXPO_PUBLIC_APP_VERSION: ${version}`)
 if (!/^[1-9]\d*$/.test(versionCode)) throw new Error(`Invalid EXPO_PUBLIC_ANDROID_VERSION_CODE: ${versionCode}`)
 if (!apiBaseUrl) throw new Error('EXPO_PUBLIC_API_BASE_URL is required for release builds; do not rely on mobile/.env.')
@@ -39,24 +39,41 @@ const latestManifestFile = resolve(distDir, 'situm-explore-latest-android.json')
 
 const releaseEnv = { ...process.env, NODE_ENV: process.env.NODE_ENV || 'production', EXPO_PUBLIC_API_BASE_URL: apiBaseUrl, EXPO_PUBLIC_ENVIRONMENT: environment, EXPO_PUBLIC_APP_VERSION: version, EXPO_PUBLIC_ANDROID_VERSION_CODE: versionCode }
 
-const prebuild = spawnSync('npx', ['expo', 'prebuild', '--platform', 'android', '--no-install', '--no-clean'], {
-  cwd: root,
-  env: releaseEnv,
-  stdio: 'inherit',
-})
-if (prebuild.status !== 0) process.exit(prebuild.status || 1)
+const jdkCandidates = [
+  process.env.JAVA_HOME,
+  '/home/farismnrr/Services/android-toolchain/jdk-21',
+  resolve(root, '../../.toolchains/android/jdk-21'),
+].filter(Boolean)
+const jdkDir = jdkCandidates.find(candidate => existsSync(candidate))
 
 const sdkCandidates = [
   process.env.ANDROID_HOME,
   process.env.ANDROID_SDK_ROOT,
+  '/home/farismnrr/Services/android-toolchain/sdk',
+  resolve(root, '../../.toolchains/android/sdk'),
   resolve(homedir(), 'Android/Sdk'),
   resolve(homedir(), 'Android/sdk'),
 ].filter(Boolean)
 const sdkDir = sdkCandidates.find(candidate => existsSync(candidate))
 if (!sdkDir) throw new Error('Android SDK not found. Set ANDROID_HOME or ANDROID_SDK_ROOT.')
+
+const effectiveEnv = {
+  ...releaseEnv,
+  ANDROID_HOME: sdkDir,
+  ANDROID_SDK_ROOT: sdkDir,
+  ...(jdkDir ? { JAVA_HOME: jdkDir, PATH: `${resolve(jdkDir, 'bin')}:${process.env.PATH || ''}` } : {}),
+}
+
+const prebuild = spawnSync('npx', ['expo', 'prebuild', '--platform', 'android', '--no-install', '--no-clean'], {
+  cwd: root,
+  env: effectiveEnv,
+  stdio: 'inherit',
+})
+if (prebuild.status !== 0) process.exit(prebuild.status || 1)
+
 writeFileSync(resolve(root, 'android/local.properties'), `sdk.dir=${sdkDir.replace(/\\/g, '\\\\')}\n`)
 
-const gradleEnv = { ...releaseEnv, ANDROID_HOME: sdkDir, ANDROID_SDK_ROOT: sdkDir, GRADLE_USER_HOME: gradleUserHome }
+const gradleEnv = { ...effectiveEnv, GRADLE_USER_HOME: gradleUserHome }
 console.log(`Gradle cache: ${gradleUserHome}`)
 const gradle = spawnSync('./gradlew', ['assembleRelease', '-PreactNativeArchitectures=arm64-v8a', '--build-cache', '--console=plain'], {
   cwd: resolve(root, 'android'),
@@ -74,7 +91,7 @@ const manifest = {
   platform: 'android',
   version,
   versionCode: Number(versionCode),
-  downloadUrl: `${releaseBaseUrl}/${artifactBase}.apk`,
+  downloadUrl: `${releaseBaseUrl}/${encodeURIComponent(version)}/apk`,
   sha256,
   publishedAt: new Date().toISOString(),
 }
