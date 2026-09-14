@@ -14,6 +14,8 @@ The shared cross-project Android toolchain documentation still references `/home
 
 Closure governance for the OTA remediation is green: web full guard and maintainability pass; mobile full guard and maintainability pass; agent workspace validation and diff checks pass. The web maintainability baseline was reconciled to exact pre-existing `origin/main` debt (`app/pages/index.vue=1567`, `server/utils=15`) without changing global limits. Mobile dependency audit carries a temporary exact exception through 2026-09-30 for the two current `image-size` high-severity advisories in the Metro build-tool chain because no patched npm release is available; new high findings, critical findings, package expansion, advisory-ID changes, or expiry still fail closed.
 
+Android release `0.1.2` / versionCode `6` execution is active on `release/android-0.1.2`, based on integrated `main` commit `c9fdc86536a3579d3ac6a25249c229f8f545cd0e`. Release authority is consistent: the live production feed and physical POS both remain on immutable `0.1.1` / versionCode `5`. A pre-publication release-guard build for `0.1.2` passed with the explicit repo-local JDK + `/home/farismnrr/Android/Sdk`; package identity, arm64-only ABI, production API origin, APK Signature Scheme v2, and the production signing certificate were verified. Immutable S3 staging and production backend cutover remain pending until the release source is committed and the final artifact is rebuilt from that exact commit.
+
 ## Latest integrated work
 
 ### Plan 047 — Native Explore Digital Twin 3D Parity
