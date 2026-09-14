@@ -198,9 +198,9 @@ The manifest response must contain `version: 0.1.1`, `versionCode: 5`, the local
 
 The installed Android app checks the manifest on foreground activation and again after successful login. It compares native Android `versionCode` with the feed and shows the update modal only when the feed is newer.
 
-Update discovery is fail-open: an unavailable/malformed feed, failed download, or installer handoff must never block login or normal app use.
+Update discovery is fail-open: an unavailable/malformed feed or failure to open the APK download must never block login or normal app use.
 
-The app downloads the APK to its cache and hands the content URI to the Android package installer. `REQUEST_INSTALL_PACKAGES` remains part of the Android app configuration for this direct-distribution model.
+The app does not download APK bytes itself and does not invoke the Android package installer directly. The update action opens the immutable production APK route in the device browser; the backend redirects to a short-lived private-S3 URL with `Content-Disposition: attachment`, so Android/browser download handling owns the transfer. After the download finishes, the user opens the APK from Downloads to install it. Situm Explore therefore does not request `REQUEST_INSTALL_PACKAGES` for this flow.
 
 ## Migration note for older builds
 

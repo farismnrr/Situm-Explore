@@ -47,7 +47,7 @@ run_full() {
       ;;
     mobile)
       step 'mobile Expo config' bash -lc "cd '$CODEBASE_ROOT' && npx expo config --type public >/dev/null"
-      step 'mobile dependency audit' bash -lc "cd '$CODEBASE_ROOT' && npm audit --audit-level=high"
+      step 'mobile dependency audit' python3 ./.agents/scripts/npm-audit-guard.py "$CODEBASE_ROOT" "$ROOT/.agents/audit-exceptions/mobile.json"
       ;;
   esac
 }

@@ -89,7 +89,12 @@ export async function getAndroidReleaseApkRedirect(version: string) {
   await storage.client.send(new HeadObjectCommand({ Bucket: storage.bucket, Key: key }))
   return getSignedUrl(
     storage.client,
-    new GetObjectCommand({ Bucket: storage.bucket, Key: key, ResponseContentType: 'application/vnd.android.package-archive' }),
+    new GetObjectCommand({
+      Bucket: storage.bucket,
+      Key: key,
+      ResponseContentType: 'application/vnd.android.package-archive',
+      ResponseContentDisposition: `attachment; filename="situm-explore-v${version}-android-arm64.apk"`,
+    }),
     { expiresIn: storage.signedUrlTtlSeconds },
   )
 }

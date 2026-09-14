@@ -3,9 +3,11 @@
   "codebase": "web",
   "directories": {
     "app/pages/app": 14,
-    "server/utils": 14
+    "server/utils": 15
   },
-  "files": {},
+  "files": {
+    "app/pages/index.vue": 1567
+  },
   "functions": {},
   "limits": {
     "directCodeFilesPerDirectory": 12,
