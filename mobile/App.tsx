@@ -15,7 +15,6 @@ import { colors, radii } from './src/ui/theme'
 import { layoutForWidth, navigationDestinations, shouldRenderTopbarBrand } from './src/ui/layout'
 import { ForegroundPositioningSession } from './src/positioning/session'
 import { fetchAndroidReleaseManifest, isAndroidUpdateAvailable, isSafeAndroidUpdateUrl, type AndroidReleaseManifest } from './src/update/androidUpdate'
-import { downloadAndInstallAndroidUpdate, type AndroidInstallStatus } from './src/update/androidInstaller'
 import { loginKeyboardAvoidingBehavior, shouldUseCompactLoginLayout } from './src/loginKeyboardStrategy'
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined)
@@ -133,36 +132,30 @@ function EyeIcon({ hidden }: { hidden: boolean }) {
 }
 
 function AndroidUpdateModal({ release, dismissed, onLater }: { release: AndroidReleaseManifest | null, dismissed: boolean, onLater: () => void }) {
-  const [installStatus, setInstallStatus] = useState<AndroidInstallStatus | null>(null)
-  const [installError, setInstallError] = useState('')
+  const [openingDownload, setOpeningDownload] = useState(false)
+  const [downloadOpened, setDownloadOpened] = useState(false)
+  const [downloadError, setDownloadError] = useState('')
   useEffect(() => {
-    setInstallStatus(null)
-    setInstallError('')
+    setOpeningDownload(false)
+    setDownloadOpened(false)
+    setDownloadError('')
   }, [release?.versionCode])
   if (!release) return null
   const installedVersion = Application.nativeApplicationVersion || 'current version'
-  const busy = installStatus !== null
-  const progressLabel = installStatus?.phase === 'downloading'
-    ? installStatus.progress === undefined
-      ? 'Downloading update…'
-      : `Downloading update… ${Math.round(installStatus.progress * 100)}%`
-    : installStatus?.phase === 'permission'
-      ? 'Waiting for install permission…'
-      : installStatus?.phase === 'installing'
-        ? 'Opening Android installer…'
-        : ''
-  const downloadAndInstall = async () => {
-    if (busy || !isSafeAndroidUpdateUrl(release.downloadUrl)) return
-    setInstallError('')
+  const openDownload = async () => {
+    if (openingDownload || !isSafeAndroidUpdateUrl(release.downloadUrl)) return
+    setOpeningDownload(true)
+    setDownloadError('')
     try {
-      await downloadAndInstallAndroidUpdate(release, setInstallStatus)
-      setInstallStatus(null)
+      await Linking.openURL(release.downloadUrl)
+      setDownloadOpened(true)
     } catch (error) {
-      setInstallStatus(null)
-      setInstallError(error instanceof Error ? error.message : 'The update could not be installed. Please try again.')
+      setDownloadError(error instanceof Error ? error.message : 'The APK download could not be opened. Please try again.')
+    } finally {
+      setOpeningDownload(false)
     }
   }
-  return <Modal animationType="fade" transparent visible={!dismissed} onRequestClose={busy ? undefined : onLater}><View style={styles.updateBackdrop}><View accessibilityViewIsModal style={styles.updateCard}><View style={styles.updateIcon}><Text style={styles.updateIconText}>↑</Text></View><Text style={styles.updateEyebrow}>APP UPDATE</Text><Text style={styles.updateTitle}>A newer Situm Explore is ready</Text><Text style={styles.updateBody}>Version {release.version} is available. You have {installedVersion}. Update now to stay on the latest Android build.</Text>{progressLabel ? <Text accessibilityLiveRegion="polite" style={styles.updateProgress}>{progressLabel}</Text> : null}{installError ? <Text accessibilityRole="alert" style={styles.updateError}>{installError}</Text> : null}<TouchableOpacity accessibilityRole="button" accessibilityLabel={installError ? 'Try update again' : 'Download update'} accessibilityState={{ disabled: busy }} disabled={busy} style={[styles.primaryButton, busy && styles.disabled]} onPress={() => void downloadAndInstall()}><Text style={styles.primaryText}>{busy ? 'Working…' : installError ? 'Try again' : 'Download update'}</Text></TouchableOpacity><TouchableOpacity accessibilityRole="button" accessibilityState={{ disabled: busy }} disabled={busy} style={[styles.updateLaterButton, busy && styles.disabled]} onPress={onLater}><Text style={styles.updateLaterText}>Later</Text></TouchableOpacity></View></View></Modal>
+  return <Modal animationType="fade" transparent visible={!dismissed} onRequestClose={openingDownload ? undefined : onLater}><View style={styles.updateBackdrop}><View accessibilityViewIsModal style={styles.updateCard}><View style={styles.updateIcon}><Text style={styles.updateIconText}>↑</Text></View><Text style={styles.updateEyebrow}>APP UPDATE</Text><Text style={styles.updateTitle}>A newer Situm Explore is ready</Text><Text style={styles.updateBody}>Version {release.version} is available. You have {installedVersion}. The APK will download through your browser. After it finishes, open the APK from Downloads to install the update.</Text>{downloadOpened ? <Text accessibilityLiveRegion="polite" style={styles.updateProgress}>Download opened in your browser. Install the downloaded APK when it finishes.</Text> : null}{downloadError ? <Text accessibilityRole="alert" style={styles.updateError}>{downloadError}</Text> : null}<TouchableOpacity accessibilityRole="button" accessibilityLabel={downloadError ? 'Try update download again' : 'Download update'} accessibilityState={{ disabled: openingDownload }} disabled={openingDownload} style={[styles.primaryButton, openingDownload && styles.disabled]} onPress={() => void openDownload()}><Text style={styles.primaryText}>{openingDownload ? 'Opening download…' : downloadOpened ? 'Open download again' : downloadError ? 'Try again' : 'Download update'}</Text></TouchableOpacity><TouchableOpacity accessibilityRole="button" accessibilityState={{ disabled: openingDownload }} disabled={openingDownload} style={[styles.updateLaterButton, openingDownload && styles.disabled]} onPress={onLater}><Text style={styles.updateLaterText}>Later</Text></TouchableOpacity></View></View></Modal>
 }
 
 function AuthenticatedShell({ auth, workspaces, activeTab, setActiveTab, lifecycle, pendingLink, clearPendingLink, onLogout }: { auth: AuthSession, workspaces: WorkspaceContext, activeTab: Tab, setActiveTab: (tab: Tab) => void, lifecycle: string, pendingLink: NativeDeepLink | null, clearPendingLink: () => void, onLogout: () => void }) {
