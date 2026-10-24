@@ -67,7 +67,7 @@ export const cartographyBuildings: readonly PrototypeBuilding[] = [
   {
     id: 'building-warehouse-demo',
     name: 'Warehouse Demo',
-    organization: 'Situm Explore Demo',
+    organization: 'Senar Demo',
     status: 'Ready',
     floors: [
       { id: 'floor-warehouse-0', name: 'Ground floor', poiCount: 7, geofenceCount: 1, mapStatus: 'Ready', floorplan: 'Georeferenced' },
@@ -79,7 +79,7 @@ export const cartographyBuildings: readonly PrototypeBuilding[] = [
   {
     id: 'building-training-demo',
     name: 'Training Venue',
-    organization: 'Situm Explore Demo',
+    organization: 'Senar Demo',
     status: 'Partial',
     floors: [{ id: 'floor-training-0', name: 'Event floor', poiCount: 5, geofenceCount: 2, mapStatus: 'Partial', floorplan: 'Unavailable' }],
     poiCount: 5,

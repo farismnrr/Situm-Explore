@@ -37,13 +37,15 @@ export async function sendRegistrationVerificationCode(to: string, code: string)
   })
 
   await transport.sendMail({
-    from: { name: 'Situm Explore', address: smtp.from },
+    from: { name: 'Senar', address: smtp.from },
     to,
-    subject: 'Verify your Situm Explore email',
+    subject: 'Verify your Senar email',
     text: [
+      'Senar · sentuh dan antar',
+      '',
       'Verify your email',
       '',
-      'Enter this code in Situm Explore to finish creating your account:',
+      'Enter this code in Senar to finish creating your account:',
       '',
       code,
       '',
@@ -51,6 +53,6 @@ export async function sendRegistrationVerificationCode(to: string, code: string)
       '',
       "If you didn't request this code, you can safely ignore this email.",
     ].join('\n'),
-    html: `<div style="font-family:Arial,sans-serif;color:#111827;line-height:1.6"><h2 style="margin-bottom:8px">Verify your email</h2><p>Enter this code in Situm Explore to finish creating your account:</p><p style="font-size:30px;font-weight:700;letter-spacing:6px;margin:24px 0">${code}</p><p>This code expires in 5 minutes.</p><p style="color:#6b7280">If you didn't request this code, you can safely ignore this email.</p></div>`,
+    html: `<div style="font-family:Arial,sans-serif;color:#111827;line-height:1.6"><p style="color:#6b7280">Senar · sentuh dan antar</p><h2 style="margin-bottom:8px">Verify your email</h2><p>Enter this code in Senar to finish creating your account:</p><p style="font-size:30px;font-weight:700;letter-spacing:6px;margin:24px 0">${code}</p><p>This code expires in 5 minutes.</p><p style="color:#6b7280">If you didn't request this code, you can safely ignore this email.</p></div>`,
   })
 }

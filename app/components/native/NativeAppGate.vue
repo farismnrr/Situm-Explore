@@ -65,9 +65,9 @@ watch(deepLink, () => { void generateQr() })
       <div class="flex items-start gap-4">
         <div class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-info/10 text-info" aria-hidden="true"><UIcon name="i-lucide-smartphone" class="size-5" /></div>
         <div class="max-w-2xl space-y-2">
-          <p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Situm Explore Mobile</p>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Senar Mobile</p>
           <h2 :id="`native-gate-${feature}-title`" class="text-base font-semibold text-highlighted">{{ title || `${destinationLabel} is ready in the mobile app` }}</h2>
-          <p class="text-sm leading-6 text-muted">{{ description || `Open Situm Explore Mobile for the native ${destinationLabel.toLowerCase()} experience.` }}</p>
+          <p class="text-sm leading-6 text-muted">{{ description || `Open Senar Mobile for the native ${destinationLabel.toLowerCase()} experience.` }}</p>
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2 lg:justify-end">
@@ -77,7 +77,7 @@ watch(deepLink, () => { void generateQr() })
     </div>
     <div class="mt-7 flex flex-col gap-5 border-t border-default pt-5 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p class="text-xs font-semibold text-highlighted">Open or install Situm Explore Mobile</p>
+        <p class="text-xs font-semibold text-highlighted">Open or install Senar Mobile</p>
         <p v-if="hasInstallFallback" class="mt-1 text-xs leading-5 text-muted">On another device? Scan the code or use the configured install link.</p>
         <p v-else class="mt-1 text-xs leading-5 text-muted">The app link is configured. Store and download destinations will appear when distribution is published.</p>
         <div class="mt-3 flex flex-wrap gap-2">
@@ -85,7 +85,7 @@ watch(deepLink, () => { void generateQr() })
           <code class="max-w-full overflow-x-auto rounded-md bg-elevated px-2 py-1.5 text-[11px] text-muted">{{ deepLink }}</code>
         </div>
       </div>
-      <div v-if="qrCode" class="shrink-0 rounded-lg border border-default bg-white p-2" aria-label="QR code for the non-secret Situm Explore app link"><img :src="qrCode" alt="Scan to open Situm Explore Mobile" width="144" height="144"></div>
+      <div v-if="qrCode" class="shrink-0 rounded-lg border border-default bg-white p-2" aria-label="QR code for the non-secret Senar app link"><img :src="qrCode" alt="Scan to open Senar Mobile" width="144" height="144"></div>
     </div>
   </section>
 </template>

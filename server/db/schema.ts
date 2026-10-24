@@ -1,65 +1,72 @@
 import { sql } from 'drizzle-orm'
-import { check, foreignKey, integer, pgTable, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
+import { check, foreignKey, integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
 
-export const appSettings = pgTable('app_settings', {
-  key: varchar('key', { length: 100 }).primaryKey(),
-  value: varchar('value', { length: 500 }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+const createdAt = () => integer('created_at', { mode: 'timestamp_ms' })
+  .default(sql`(unixepoch() * 1000)`)
+  .notNull()
+const updatedAt = () => integer('updated_at', { mode: 'timestamp_ms' })
+  .default(sql`(unixepoch() * 1000)`)
+  .notNull()
+
+export const appSettings = sqliteTable('app_settings', {
+  key: text('key').primaryKey(),
+  value: text('value'),
+  createdAt: createdAt(),
 })
 
-export const users = pgTable('users', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  email: varchar('email', { length: 320 }).notNull().unique(),
-  passwordHash: varchar('password_hash', { length: 255 }),
+export const users = sqliteTable('users', {
+  id: text('id').$defaultFn(() => crypto.randomUUID()).primaryKey(),
+  email: text('email').notNull().unique(),
+  passwordHash: text('password_hash'),
   sessionVersion: integer('session_version').default(0).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 }, table => [
   check('users_email_normalized_check', sql`${table.email} = lower(${table.email})`),
 ])
 
-export const registrationVerificationCodes = pgTable('registration_verification_codes', {
-  email: varchar('email', { length: 320 }).primaryKey(),
-  codeHash: varchar('code_hash', { length: 255 }).notNull(),
-  expiresAt: timestamp('expires_at').notNull(),
-  resendAvailableAt: timestamp('resend_available_at').notNull(),
+export const registrationVerificationCodes = sqliteTable('registration_verification_codes', {
+  email: text('email').primaryKey(),
+  codeHash: text('code_hash').notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
+  resendAvailableAt: integer('resend_available_at', { mode: 'timestamp_ms' }).notNull(),
   failedAttempts: integer('failed_attempts').default(0).notNull(),
-  consumedAt: timestamp('consumed_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  consumedAt: integer('consumed_at', { mode: 'timestamp_ms' }),
+  createdAt: createdAt(),
 }, table => [
   check('registration_verification_codes_email_normalized_check', sql`${table.email} = lower(${table.email})`),
   check('registration_verification_codes_failed_attempts_check', sql`${table.failedAttempts} >= 0`),
 ])
 
-export const providerIdentities = pgTable('provider_identities', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull(),
-  provider: varchar('provider', { length: 50 }).notNull(),
-  providerAccountId: varchar('provider_account_id', { length: 255 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+export const providerIdentities = sqliteTable('provider_identities', {
+  id: text('id').$defaultFn(() => crypto.randomUUID()).primaryKey(),
+  userId: text('user_id').notNull(),
+  provider: text('provider').notNull(),
+  providerAccountId: text('provider_account_id').notNull(),
+  createdAt: createdAt(),
 }, table => [
   foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete('cascade'),
   unique('provider_account_unique').on(table.provider, table.providerAccountId),
 ])
 
-export const workspaces = pgTable('workspaces', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  ownerId: uuid('owner_id').notNull(),
-  name: varchar('name', { length: 120 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+export const workspaces = sqliteTable('workspaces', {
+  id: text('id').$defaultFn(() => crypto.randomUUID()).primaryKey(),
+  ownerId: text('owner_id').notNull(),
+  name: text('name').notNull(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 }, table => [
   foreignKey({ columns: [table.ownerId], foreignColumns: [users.id] }).onDelete('cascade'),
 ])
 
-export const workspaceSitumConfigs = pgTable('workspace_situm_configs', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  workspaceId: uuid('workspace_id').notNull().unique(),
-  situmAccountId: varchar('situm_account_id', { length: 255 }).notNull(),
-  encryptedApiKey: varchar('encrypted_api_key', { length: 2048 }),
-  encryptedViewerApiKey: varchar('encrypted_viewer_api_key', { length: 2048 }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+export const workspaceSitumConfigs = sqliteTable('workspace_situm_configs', {
+  id: text('id').$defaultFn(() => crypto.randomUUID()).primaryKey(),
+  workspaceId: text('workspace_id').notNull().unique(),
+  situmAccountId: text('situm_account_id').notNull(),
+  encryptedApiKey: text('encrypted_api_key'),
+  encryptedViewerApiKey: text('encrypted_viewer_api_key'),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 }, table => [
   foreignKey({ columns: [table.workspaceId], foreignColumns: [workspaces.id] }).onDelete('cascade'),
 ])

@@ -17,7 +17,11 @@ const googleHandler = defineOAuthGoogleEventHandler({
     if (!account) {
       const existing = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.email, email)).limit(1)
       if (existing[0]) account = existing[0]
-      else [account] = await db.insert(users).values({ email }).returning({ id: users.id, email: users.email })
+      else [account] = await db
+        .insert(users)
+        .values({ email })
+        .returning({ id: users.id, email: users.email })
+        .all()
       if (!account) throw createError({ statusCode: 500, statusMessage: 'Unable to create account.' })
       await db.insert(providerIdentities).values({ userId: account.id, provider: 'google', providerAccountId }).onConflictDoNothing()
     }

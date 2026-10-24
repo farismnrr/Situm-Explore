@@ -1,3 +1,0 @@
-ALTER TABLE "situm_explore"."workspace_situm_configs" ALTER COLUMN "access_mode" SET DATA TYPE varchar(20);--> statement-breakpoint
-ALTER TABLE "situm_explore"."workspace_situm_configs" ADD CONSTRAINT "workspace_situm_configs_access_mode_check" CHECK ("situm_explore"."workspace_situm_configs"."access_mode" in ('VIEW_ONLY', 'VIEW_WRITE'));--> statement-breakpoint
-DROP TYPE "public"."workspace_access_mode";

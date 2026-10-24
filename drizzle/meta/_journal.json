@@ -1,89 +1,12 @@
 {
   "version": "7",
-  "dialect": "postgresql",
+  "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
-      "version": "7",
-      "when": 1786508387113,
-      "tag": "0000_silent_stick",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1786665404579,
-      "tag": "0001_cloudy_joystick",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1786665453903,
-      "tag": "0002_dazzling_raider",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1786667935638,
-      "tag": "0003_hot_supernaut",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1786668220223,
-      "tag": "0004_slippery_pestilence",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1786668270709,
-      "tag": "0005_classy_vivisector",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1786675613657,
-      "tag": "0006_thin_bucky",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1786688031361,
-      "tag": "0007_fantastic_roland_deschain",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1786956846898,
-      "tag": "0008_glorious_metal_master",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1787812040031,
-      "tag": "0009_unusual_wrecking_crew",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1789132313102,
-      "tag": "0010_move_app_tables_to_configured_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1789368882293,
-      "tag": "0011_fine_tony_stark",
+      "version": "6",
+      "when": 1792857969878,
+      "tag": "0000_initial_sqlite",
       "breakpoints": true
     }
   ]

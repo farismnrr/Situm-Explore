@@ -12,6 +12,7 @@ dist/
 !.env.example
 deploy/staging.env
 .data/
+data/
 .tools/
 
 # Local building resources are not approved for repository distribution.

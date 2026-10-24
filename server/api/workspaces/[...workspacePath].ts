@@ -100,7 +100,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (getMethod(event) === 'DELETE') {
-    const [config] = await getDb().delete(workspaceSitumConfigs).where(eq(workspaceSitumConfigs.workspaceId, workspaceId)).returning({ id: workspaceSitumConfigs.id })
+    const [config] = await getDb().delete(workspaceSitumConfigs).where(eq(workspaceSitumConfigs.workspaceId, workspaceId)).returning({ id: workspaceSitumConfigs.id }).all()
     if (!config) throw createError({ statusCode: 404, statusMessage: 'Situm configuration not found.' })
     return { ok: true }
   }
@@ -163,7 +163,7 @@ export default defineEventHandler(async (event) => {
     encryptedApiKey: workspaceSitumConfigs.encryptedApiKey,
     encryptedViewerApiKey: workspaceSitumConfigs.encryptedViewerApiKey,
     updatedAt: workspaceSitumConfigs.updatedAt,
-  })
+  }).all()
   if (!config) throw createError({ statusCode: 500, statusMessage: 'Unable to save Situm configuration.' })
   return {
     id: config.id,

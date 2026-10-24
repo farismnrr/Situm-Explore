@@ -80,7 +80,7 @@ async function submit() {
 </script>
 
 <template>
-  <AuthShell active="register" title="Create your account" intro="Verify your email, then set up your Situm Explore account.">
+  <AuthShell active="register" title="Create your account" intro="Verify your email, then set up your Senar account.">
     <p v-if="errorMessage" class="form-error" role="alert">{{ errorMessage }}</p>
     <div v-if="infoMessage" class="auth-success" role="status"><span>{{ infoMessage }}</span></div>
 

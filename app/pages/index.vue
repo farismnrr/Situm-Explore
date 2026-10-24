@@ -7,7 +7,7 @@ const primaryLabel = computed(() => loggedIn.value ? 'Open workspace' : 'Start e
 const androidDownloadUrl = computed(() => config.public.mobile.androidDownloadUrl || '')
 
 useHead({
-  title: 'Situm Explore — Indoor mapping, navigation & operations',
+  title: 'Senar — Indoor mapping, navigation & operations',
   meta: [
     {
       name: 'description',
@@ -72,9 +72,9 @@ const nativeHighlights = [
 
     <header class="site-header">
       <div class="landing-container header-inner">
-        <NuxtLink to="/" class="brand-link" aria-label="Situm Explore home">
+        <NuxtLink to="/" class="brand-link" aria-label="Senar home">
           <BrandMark size="sm" />
-          <span>Situm Explore</span>
+          <span>Senar</span>
         </NuxtLink>
 
         <nav class="desktop-nav" aria-label="Primary navigation">
@@ -105,12 +105,12 @@ const nativeHighlights = [
           <div class="hero-copy">
             <div class="hero-kicker">
               <span class="kicker-dot" aria-hidden="true" />
-              Indoor exploration & operations
+              Senar · sentuh dan antar
             </div>
 
             <h1>Make indoor spaces easier to understand, navigate and operate.</h1>
             <p class="hero-lede">
-              Situm Explore brings indoor cartography, route planning, Digital Twin walkthroughs,
+              Senar brings indoor cartography, route planning, Digital Twin walkthroughs,
               Realtime position operations and analytics into one calm workspace — with native
               positioning and navigation when sensors matter.
             </p>
@@ -153,7 +153,7 @@ const nativeHighlights = [
             </div>
           </div>
 
-          <div class="hero-product" aria-label="Situm Explore product preview">
+          <div class="hero-product" aria-label="Senar product preview">
             <div class="product-window">
               <div class="window-topbar">
                 <div class="window-dots" aria-hidden="true"><i /><i /><i /></div>
@@ -186,7 +186,7 @@ const nativeHighlights = [
                   <div class="preview-map">
                     <img
                       src="/building-layouts/gedung-lt1-big.jpeg"
-                      alt="Indoor floorplan used by Situm Explore"
+                      alt="Indoor floorplan used by Senar"
                     >
                     <div class="map-search"><UIcon name="i-lucide-search" /> Search places</div>
                     <div class="floor-pill">Floor 1 <UIcon name="i-lucide-chevron-down" /></div>
@@ -217,7 +217,7 @@ const nativeHighlights = [
         </div>
       </section>
 
-      <section class="signal-strip" aria-label="Situm Explore product areas">
+      <section class="signal-strip" aria-label="Senar product areas">
         <div class="landing-container signal-inner">
           <span>Built for real indoor operations</span>
           <div>
@@ -236,7 +236,7 @@ const nativeHighlights = [
             <span class="section-eyebrow">Capabilities</span>
             <h2>Spatial context first. Operational tools close behind.</h2>
             <p>
-              Situm Explore keeps the map primary while the surrounding workspace gives teams the
+              Senar keeps the map primary while the surrounding workspace gives teams the
               context they need to inspect, navigate and understand indoor environments.
             </p>
           </div>
@@ -344,7 +344,7 @@ const nativeHighlights = [
       <section class="final-cta-section">
         <div class="landing-container final-cta">
           <div>
-            <span class="section-eyebrow section-eyebrow-light">Situm Explore</span>
+            <span class="section-eyebrow section-eyebrow-light">Senar</span>
             <h2>Turn indoor cartography into an operating workspace.</h2>
             <p>Explore the web product, then move to native when live indoor positioning is the job.</p>
           </div>
@@ -364,7 +364,7 @@ const nativeHighlights = [
       <div class="landing-container footer-inner">
         <NuxtLink to="/" class="brand-link footer-brand">
           <BrandMark size="sm" />
-          <span>Situm Explore</span>
+          <span>Senar</span>
         </NuxtLink>
         <p>Indoor exploration, navigation and operations — built around Situm.</p>
         <div class="footer-links">

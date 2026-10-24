@@ -17,7 +17,7 @@ const initials = computed(() => displayName.value.split(' ').map(part => part.ch
 useHead({
   title: computed(() => {
     const pageTitle = typeof route.meta.title === 'string' ? route.meta.title.trim() : ''
-    return pageTitle ? `${pageTitle} · Situm Explore` : 'Situm Explore'
+    return pageTitle ? `${pageTitle} · Senar` : 'Senar'
   })
 })
 
@@ -98,7 +98,7 @@ async function logout() {
     <aside id="workspace-navigation" class="app-sidebar fixed inset-y-0 left-0 z-40 flex w-[228px] flex-col border-r border-default bg-[var(--explore-surface-subtle)] transition-transform" :class="{ 'translate-x-0': mobileOpen }" :aria-hidden="navigationHidden ? 'true' : undefined" :inert="navigationHidden">
       <div class="flex h-16 items-center border-b border-default px-4">
         <NuxtLink to="/" class="flex items-center gap-2 text-sm font-semibold tracking-tight text-highlighted" @click="mobileOpen = false">
-          <BrandMark size="sm" /><span>Situm Explore</span>
+          <BrandMark size="sm" /><span>Senar</span>
         </NuxtLink>
       </div>
       <nav class="flex-1 overflow-y-auto px-2.5 py-3" aria-label="Workspace navigation">
@@ -134,7 +134,7 @@ async function logout() {
     </div>
     </div>
 
-    <UModal v-model:open="searchOpen" title="Search Situm Explore" description="Search local workspace destinations and prototype records." :ui="{ content: 'w-full sm:max-w-[520px]' }" @after:leave="searchQuery = ''">
+    <UModal v-model:open="searchOpen" title="Search Senar" description="Search local workspace destinations and prototype records." :ui="{ content: 'w-full sm:max-w-[520px]' }" @after:leave="searchQuery = ''">
     <template #body>
       <UInput v-model="searchQuery" autofocus icon="i-lucide-search" placeholder="Search buildings, POIs, users, reports…" aria-label="Search workspace" class="w-full" />
       <div class="mt-3 max-h-80 overflow-y-auto">

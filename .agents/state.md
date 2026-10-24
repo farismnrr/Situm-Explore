@@ -1,8 +1,10 @@
 # Current State
 
-_Last reviewed: 2026-09-14_
+_Last reviewed: 2026-10-24_
 
 ## Current execution state
+
+The `chore/sqlite-senar` implementation branch is completing the user-assigned SQLite/Senar change and has not been integrated. It replaces the web relational store with SQLite and updates current runtime docs/configuration; it does not migrate existing PostgreSQL data. Local `npm run dev` configuration and the SQLite migration are prepared. Registration still needs a valid Sensio Env token, reachable endpoint, and SMTP settings; QA can use a temporary local seed script if that is unavailable. Next action: orchestrator review, then DevOps startup and QA acceptance.
 
 Plan 048 — Public Landing Page is integrated into `main` through PR #55 at merge commit `d4bee607663ab13b49e367945c0e031c61950cf4`. The stale prototype-era public page is replaced by the current capability-truthful landing page, including the conditional Android download CTA.
 
@@ -54,7 +56,7 @@ Current web Digital Twin contract:
 - switching workspace/building cannot silently reuse another context's model;
 - there is no flat/global GLB fallback;
 - missing model, WebGL failure, and semantic-room failure remain explicit 3D errors;
-- favicon/static assets are included in the production container context and tab titles use the Situm Explore product title.
+- favicon/static assets are included in the production container context and tab titles use the Senar product title.
 
 The web branch passed `web full` Engineering Guard, production build, lint, typecheck, dependency audit with 0 findings, maintainability, and agent-workspace validation before integration.
 

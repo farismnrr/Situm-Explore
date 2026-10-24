@@ -27,6 +27,9 @@ FROM dependencies AS migration
 COPY drizzle ./drizzle
 COPY server/db/schema.ts ./server/db/schema.ts
 COPY drizzle.config.ts tsconfig.json ./
+RUN mkdir -p /var/lib/situm-explore/data \
+    && chown -R 10001:10001 /var/lib/situm-explore
+USER 10001:10001
 CMD ["npm", "run", "db:migrate"]
 
 FROM node:22.22.0-bookworm-slim AS runtime
@@ -45,6 +48,8 @@ LABEL org.opencontainers.image.source="${OCI_SOURCE}" \
 COPY --from=build /app/.output ./.output
 RUN groupadd --system --gid 10001 nitro \
     && useradd --system --uid 10001 --gid nitro --no-create-home nitro \
+    && mkdir -p /var/lib/situm-explore/data \
+    && chown -R nitro:nitro /var/lib/situm-explore \
     && chown -R nitro:nitro /app
 USER nitro
 EXPOSE 3000

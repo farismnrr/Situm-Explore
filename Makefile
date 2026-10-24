@@ -118,9 +118,11 @@ staging-config:
 	$(STAGING_CONFIG)
 staging-migrate:
 	$(STAGING_CONFIG)
-	@database_url=$$(awk -F= '/^[[:space:]]*DATABASE_URL[[:space:]]*=/{sub(/^[[:space:]]*DATABASE_URL[[:space:]]*=/, ""); print; exit}' '$(STAGING_ENV_FILE)'); \
-		test -n "$$database_url" || { echo 'staging env is missing DATABASE_URL' >&2; exit 1; }; \
-		DATABASE_URL="$$database_url" npm run db:migrate
+	docker volume create situm-explore-sqlite >/dev/null
+	docker pull '$(IMAGE):$(MIGRATION_TAG)'
+	docker run --rm --env-file '$(STAGING_ENV_FILE)' \
+		--volume situm-explore-sqlite:/var/lib/situm-explore/data \
+		'$(IMAGE):$(MIGRATION_TAG)'
 
 define STAGING_CONFIG
 	@test -x '$(STAGING_ENV_MATERIALIZER)' || { echo 'missing executable staging env materializer: $(STAGING_ENV_MATERIALIZER)' >&2; exit 1; }

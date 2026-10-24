@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-This file is the current architecture contract for Situm Explore.
+This file is the current architecture contract for Senar.
 
 It describes the current runtime contract. Implementation history belongs in `plans/` and `.agents/`; this file describes the product architecture as it exists now.
 
@@ -28,7 +28,7 @@ browser / Vue / Nuxt UI
         ▼
       Nitro API
         │
-        ├── PostgreSQL / Drizzle
+        ├── SQLite / Drizzle
         │     app users, provider identities, workspaces,
         │     encrypted workspace configuration
         │
@@ -67,7 +67,7 @@ They are retained only to explain why process-global/env-owned patterns must not
 ```text
 app/                 browser/presentation/runtime UI
 server/api/          HTTP transport and request boundary
-server/db/           PostgreSQL/Drizzle application persistence
+server/db/           SQLite/Drizzle application persistence
 server/integrations/ concrete Situm/ClickHouse/telemetry integrations
 server/services/     only real orchestration/use cases
 server/utils/        narrow server-only helpers
@@ -106,7 +106,7 @@ Client-provided workspace identity is context, never authorization proof. Owners
 
 ## Identity and sessions
 
-- Application users are PostgreSQL-backed and have stable app-owned IDs.
+- Application users are SQLite-backed and have stable app-owned IDs.
 - Email/password registration/login is real product behavior.
 - Passwords are stored only as secure hashes using the project auth utility.
 - Nuxt sealed sessions remain the app session mechanism unless concrete evidence requires otherwise.
@@ -171,22 +171,22 @@ Rules:
 
 Account-specific building context is workspace/product state; one global public building ID is not authoritative across workspaces.
 
-## PostgreSQL / Drizzle
+## SQLite / Drizzle
 
-PostgreSQL owns application relational state, including:
+SQLite owns application relational state, including:
 
 - users;
 - password/provider identity records as needed;
 - private workspace ownership;
 - encrypted workspace Situm configuration metadata/envelope.
 
-Use a dedicated application database and select the application schema through `DATABASE_SCHEMA`; production currently uses database `situm` with schema `public`. Do not touch unrelated databases or schemas outside the configured application database/schema.
+Use the `DATABASE_PATH` file (default `data/senar.db`) for application state. Staging persists its database in the `situm-explore-sqlite` Docker volume; do not replace it with a process-local ephemeral file. SQLite migrations are generated and applied through Drizzle.
 
 Do not persist arbitrary Situm resources merely as a cache.
 
 ## ClickHouse analytics
 
-ClickHouse remains a concrete server-side analytics store and does not replace PostgreSQL.
+ClickHouse remains a concrete server-side analytics store and does not replace SQLite.
 
 Rules:
 
@@ -212,7 +212,7 @@ browser request
 -> correlation/trace context
 -> Nitro request span/log
 -> authenticated user/workspace context
--> PostgreSQL / ClickHouse / Situm downstream context
+-> SQLite / ClickHouse / Situm downstream context
 -> normalized response
 ```
 
@@ -279,7 +279,7 @@ Current ownership:
 - native Realtime remote reads remain foreground-oriented and server-mediated through the owner-scoped workspace route;
 - mobile receives only sanitized remote position/device fields and no broad Situm credential for remote monitoring;
 - the workspace Read & Write credential remains server-only; native positioning requests the workspace Only Read credential from Nitro after application-session and workspace-owner authorization;
-- mobile application sessions reuse the same PostgreSQL identity through the sealed `x-nuxt-session` transport and SecureStore persistence;
+- mobile application sessions reuse the same SQLite identity through the sealed `x-nuxt-session` transport and SecureStore persistence;
 - Share Live Location is not used as the product Realtime contract; generic remote MapView markers/focus remain unsupported by the current proven native surface.
 
 ## Data fetching / validation
@@ -310,7 +310,7 @@ Native positioning/navigation is implemented under the closed Plans 028–035 ev
 
 ## Native client architecture
 
-The standalone `mobile/` application is React Native + Expo and reuses the same Nitro/PostgreSQL identity and workspace authorization boundary as web.
+The standalone `mobile/` application is React Native + Expo and reuses the same Nitro/SQLite identity and workspace authorization boundary as web.
 
 - native application sessions use the sealed application session over `x-nuxt-session` and persist bearer-equivalent material only in SecureStore;
 - native Situm positioning receives only the owner-authorized Only Read credential from the backend; no Situm credential is embedded in the APK;
@@ -323,7 +323,7 @@ The standalone `mobile/` application is React Native + Expo and reuses the same 
 
 ## Distribution boundary
 
-Android standalone release/distribution is documented in `docs/mobile-distribution.md`. App identity is `Situm Explore` / `com.situm.explore`; current direct distribution produces arm64 APKs and publishes a versioned artifact plus a stable anonymous-download alias. Signing and write credentials remain external operator inputs.
+Android standalone release/distribution is documented in `docs/mobile-distribution.md`. The visible app name is `Senar`; its stable Android identifier remains `com.situm.explore`. Current direct distribution produces arm64 APKs and publishes a versioned artifact plus a stable anonymous-download alias. Signing and write credentials remain external operator inputs.
 
 There is no requirement for a second backend, mobile-only identity store, or client-side database access.
 

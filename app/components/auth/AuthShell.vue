@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<{
 <template>
   <main class="auth-page">
     <aside class="auth-art">
-      <NuxtLink to="/" class="auth-brand"><BrandMark size="sm" /><span>Situm Explore</span></NuxtLink>
+      <NuxtLink to="/" class="auth-brand"><BrandMark size="sm" /><span>Senar</span></NuxtLink>
       <div class="auth-art-copy">
         <p class="auth-eyebrow">Indoor operations, simplified</p>
         <h1>One workspace for maps, movement and spatial context.</h1>
@@ -24,11 +24,11 @@ const props = withDefaults(defineProps<{
           <div class="auth-art-card"><strong>POC workspace</strong><span>{{ props.artContext }}</span></div>
         </div>
       </div>
-      <span class="auth-art-foot">Situm Explore · 2026</span>
+      <span class="auth-art-foot">Senar · 2026</span>
     </aside>
     <section class="auth-panel" :aria-labelledby="`${props.active}-title`">
       <div class="auth-box">
-        <NuxtLink to="/" class="auth-brand-mobile"><BrandMark size="sm" /><span>Situm Explore</span></NuxtLink>
+        <NuxtLink to="/" class="auth-brand-mobile"><BrandMark size="sm" /><span>Senar</span></NuxtLink>
         <h2 :id="`${props.active}-title`">{{ props.title }}</h2>
         <p class="auth-intro">{{ props.intro }}</p>
         <slot />

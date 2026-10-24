@@ -1,2 +1,0 @@
-ALTER TABLE "situm_explore"."workspace_situm_configs" ALTER COLUMN "encrypted_api_key" DROP NOT NULL;--> statement-breakpoint
-ALTER TABLE "situm_explore"."workspace_situm_configs" DROP COLUMN "encrypted_positioning_api_key";

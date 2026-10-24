@@ -47,9 +47,9 @@ export default defineEventHandler(async (event) => {
   const passwordHash = await hashPassword(parsed.data.password)
 
   try {
-    const user = await db.transaction(async (tx) => {
+    const user = db.transaction((tx) => {
       const now = new Date()
-      const consumed = await tx.update(registrationVerificationCodes)
+      const consumed = tx.update(registrationVerificationCodes)
         .set({ consumedAt: now })
         .where(and(
           eq(registrationVerificationCodes.email, email),
@@ -58,13 +58,14 @@ export default defineEventHandler(async (event) => {
           gt(registrationVerificationCodes.expiresAt, now),
         ))
         .returning({ email: registrationVerificationCodes.email })
+        .all()
       if (consumed.length !== 1) throw createError({ statusCode: 401, statusMessage: 'Verification code is invalid or expired.' })
 
-      const [created] = await tx.insert(users).values({ email, passwordHash }).returning({
+      const [created] = tx.insert(users).values({ email, passwordHash }).returning({
         id: users.id,
         email: users.email,
         sessionVersion: users.sessionVersion,
-      })
+      }).all()
       return created
     })
 
@@ -72,7 +73,9 @@ export default defineEventHandler(async (event) => {
     await setUserSession(event, { user: { id: user.id, email: user.email, sessionVersion: user.sessionVersion } })
     return { ok: true, user: { id: user.id, email: user.email } }
   } catch (error: unknown) {
-    if ((error as { code?: string }).code === '23505') throw createError({ statusCode: 409, statusMessage: 'An account with that email already exists.' })
+    if ((error as { code?: string }).code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      throw createError({ statusCode: 409, statusMessage: 'An account with that email already exists.' })
+    }
     throw error
   }
 })

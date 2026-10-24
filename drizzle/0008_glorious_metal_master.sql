@@ -1,2 +1,0 @@
-ALTER TABLE "situm_explore"."users" ADD COLUMN "session_version" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
-ALTER TABLE "situm_explore"."workspace_situm_configs" ADD COLUMN "encrypted_positioning_api_key" varchar(2048);

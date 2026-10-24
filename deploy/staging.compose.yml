@@ -18,6 +18,7 @@ services:
       NUXT_PUBLIC_MOBILE_ANDROID_DOWNLOAD_URL: https://situm.devoutsys.com/api/mobile/android/download
       NUXT_SITUM3D_ASSET_DIR: /var/lib/situm-explore/3d
     volumes:
+      - senar-sqlite:/var/lib/situm-explore/data
       - ../.data/3d-models:/var/lib/situm-explore/3d:ro
     healthcheck:
       test:
@@ -37,3 +38,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m
+
+volumes:
+  senar-sqlite:
+    name: situm-explore-sqlite

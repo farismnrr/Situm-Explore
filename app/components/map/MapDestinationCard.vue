@@ -35,7 +35,7 @@ const emit = defineEmits<{
       <UButton v-if="nativeHref" :href="nativeHref" target="_self" icon="i-lucide-navigation" label="Open in app" class="primary-action" />
       <UButton color="neutral" variant="outline" label="Change" @click="emit('change')" />
     </div>
-    <p>Static web routes use the venue's configured Situm wayfinding paths. Indoor positioning and turn-by-turn guidance stay in Situm Explore Mobile.</p>
+    <p>Static web routes use the venue's configured Situm wayfinding paths. Indoor positioning and turn-by-turn guidance stay in Senar Mobile.</p>
   </section>
 </template>
 

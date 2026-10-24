@@ -45,6 +45,6 @@ async function submit() {
           </UFormField>
           <UButton type="submit" block size="lg" :loading="loading" :disabled="loading">Sign in <span aria-hidden="true">→</span></UButton>
         </form>
-        <p class="auth-helper">New to Situm Explore? <NuxtLink to="/register" class="font-medium text-primary">Create an account</NuxtLink></p>
+        <p class="auth-helper">New to Senar? <NuxtLink to="/register" class="font-medium text-primary">Create an account</NuxtLink></p>
   </AuthShell>
 </template>

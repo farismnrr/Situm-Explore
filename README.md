@@ -1,11 +1,11 @@
-# Situm Explore
+# Senar
 
-Situm Explore is an indoor-operations and exploration product built around Situm. It has two clients that share one application backend:
+Senar (sentuh dan antar) is an indoor-operations and exploration product built around Situm. It has two clients that share one application backend:
 
 - a Nuxt 4 web application for workspace administration, browser map exploration, organization/operations views, analytics, and installation handoff;
 - a React Native + Expo companion application for Android/iOS-oriented indoor positioning, native map/navigation, and Realtime positions.
 
-Nitro is the single application backend for both clients. PostgreSQL stores application identity/workspace state, ClickHouse stores workspace-isolated analytics, and Situm provides cartography, positioning, navigation, Viewer, and operational data within the capability boundaries documented in this repository.
+Nitro is the single application backend for both clients. SQLite stores application identity/workspace state, ClickHouse stores workspace-isolated analytics, and Situm provides cartography, positioning, navigation, Viewer, and operational data within the capability boundaries documented in this repository.
 
 ## Product capabilities
 
@@ -71,8 +71,11 @@ The important invariant is that mobile is a second client, **not a second backen
 ```sh
 npm install
 cp .env.example .env
+npm run db:migrate
 npm run dev
 ```
+
+The local relational database is created at `data/senar.db`; no PostgreSQL service is needed. Registration sends a verification code through SMTP configured in Sensio Env. Local registration needs a working Sensio Env endpoint, a valid `SENSIO_ENV_TOKEN` or token file, and `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, and `SMTP_FROM` values in the selected Sensio Env project.
 
 The standalone mobile package lives under `mobile/`:
 
@@ -109,7 +112,7 @@ Runtime acceptance should use a production build/preview for the web application
 
 ## Deployment and Android distribution
 
-The Makefile is the routine interface for image publication and staging operations. Staging Compose is pull-only and reuses external PostgreSQL, ClickHouse, and observability services; runtime secrets remain external to images and source control.
+The Makefile is the routine interface for image publication and staging operations. Staging Compose is pull-only and reuses external ClickHouse and observability services; SQLite data is persisted in the `situm-explore-sqlite` Docker volume, and runtime secrets remain external to images and source control.
 
 Android standalone releases are arm64 artifacts with deterministic semantic-version filenames and a stable public download alias. Build, verification, MinIO publishing, branding, and download behavior are documented in [docs/mobile-distribution.md](docs/mobile-distribution.md).
 

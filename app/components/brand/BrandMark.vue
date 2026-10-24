@@ -3,7 +3,7 @@
     class="brand-mark"
     :class="sizeClass"
     role="img"
-    aria-label="Situm Explore"
+    aria-label="Senar"
   >
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M21 3 3 10.5l7.5 3L14 21 21 3Z" />

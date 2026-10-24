@@ -75,13 +75,22 @@ Status: historical acceptance policy. Plan 025 is complete; do not reuse any tem
 
 ## Full-stack Nuxt backend/web architecture
 
-- The existing Nuxt 4 application with Nitro server routes remains the single web application and application backend for Situm Explore.
+- The existing Nuxt 4 application with Nitro server routes remains the single web application and application backend for Senar.
 - Plans 028–035 established a React Native companion **client**, not a second backend/service or separate application authority.
-- Use Nuxt UI, `nuxt-auth-utils`, PostgreSQL/Drizzle in a dedicated application database with schema selected through `DATABASE_SCHEMA`; production currently uses database `situm` and schema `public`. The existing ClickHouse analytics integration remains the web/backend analytics store.
+- Use Nuxt UI and `nuxt-auth-utils`; SQLite/Drizzle owns application identity and workspace records at the configured `DATABASE_PATH` (default `data/senar.db`). ClickHouse remains the web/backend analytics store.
 - Keep `app/`, `server/`, and genuinely shared `shared/` boundaries Nuxt-native; share contracts with mobile only when they are genuinely runtime-neutral.
 - KISS is the default tie-breaker. Do not add generic repositories/services, DI, global stores, event buses, caches, workers, or a second backend without concrete need.
 
 Status: active.
+
+### SQLite relational storage for Senar (2026-10-24)
+
+- The web application relational store uses SQLite through Drizzle and `better-sqlite3`; local development defaults to `data/senar.db`, while staging persists a dedicated SQLite volume.
+- `DATABASE_SCHEMA` and PostgreSQL connection configuration are retired from current runtime configuration. ClickHouse remains a separate analytics store.
+- The fresh SQLite migration initializes an empty database. Existing PostgreSQL identity/workspace data is not migrated by this change and must not be represented as preserved in the new database.
+
+Source: explicit user task and implementation on `chore/sqlite-senar`.
+Status: current implementation branch; pending orchestrator review/integration.
 
 ## Web vs native Situm boundary
 
@@ -160,7 +169,7 @@ Status: historical Plan 028 auth evidence; its dedicated Positioning-key decisio
 
 ### Plan 028 Phase 4 application session boundary (2026-08-17)
 
-- Native uses the same `nuxt-auth-utils` sealed PostgreSQL-user session through an `x-nuxt-session` header. Plan 029 must add a mobile login response that issues this opaque sealed value; it is not a second identity or JWT system.
+- Native uses the same `nuxt-auth-utils` sealed app-user session through an `x-nuxt-session` header. Plan 029 added a mobile login response that issues this opaque sealed value; it is not a second identity or JWT system.
 - Freeze a 7-day mobile session maximum age, OS secure storage later selected by Phase 5, explicit server logout, and no credential/token values in URLs or logs. Cookie-only React Native persistence is not proven.
 - Existing `requireUserSession` ownership checks remain authoritative for every native request; client-provided user/workspace identity is never trusted.
 
@@ -190,7 +199,7 @@ Status: historical Plan 028 closeout; Plans 029–035 are now closed/integrated.
 
 ## Plans 021–025 identity/workspace model
 
-- Real application users are persisted in PostgreSQL.
+- Real application users are persisted in SQLite/Drizzle. Existing PostgreSQL data is not automatically imported into a SQLite file.
 - Email/password registration/login is acceptance-critical.
 - Google OAuth is prepared through schema/provider/config plumbing; real OAuth runtime acceptance is deferred to the user.
 - One application user may own many private workspaces.
@@ -205,7 +214,7 @@ Status: active runtime architecture.
 - The Makefile is canonical for routine Docker, Buildx, release, and staging operations; raw Docker/Buildx/Compose commands are diagnosis-only.
 - Local laptop builds/pushes publish GHCR multi-platform images for `linux/amd64` and `linux/arm64`; a 64-bit Orange Pi consumes `linux/arm64`; no CI is used.
 - Builds use the approved filtered local context helper; routine root-dot context is prohibited. Compose is pull-only and contains neither `build:` nor `context:`.
-- Runtime secrets are external only and `.env` is never baked into images. PostgreSQL, ClickHouse, and observability remain external/reused.
+- Runtime secrets are external only and `.env` is never baked into images. SQLite application data is persisted in the staging volume; ClickHouse and observability remain external/reused.
 - Staging updates run `pull -> recreate -> health -> smoke`; immutable SHA tags/digests provide rollback. `staging-migrate` is explicit and never runs at startup.
 
 Status: active durable runtime decision.
@@ -241,7 +250,7 @@ Status: active.
 ## ClickHouse analytics boundary
 
 - Reuse the user's existing local ClickHouse instance; do not provision another ClickHouse server or Docker/Compose stack.
-- PostgreSQL/Drizzle remains relational application storage; ClickHouse remains analytics storage.
+- SQLite/Drizzle is relational application storage; ClickHouse remains analytics storage.
 - Browser code never connects directly to ClickHouse or receives ClickHouse credentials.
 - Analytics reads are workspace-isolated.
 - Legacy unscoped analytics rows must not be assigned arbitrarily to a user/workspace. Preserve them non-destructively unless attribution is proven or the user supplies a retention/migration policy.

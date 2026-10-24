@@ -17,7 +17,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 503, statusMessage: 'Workspace analytics could not be cleaned up; the workspace was not deleted.' })
   }
 
-  const [workspace] = await getDb().delete(workspaces).where(and(eq(workspaces.id, id), eq(workspaces.ownerId, session.user.id))).returning({ id: workspaces.id })
+  const [workspace] = await getDb()
+    .delete(workspaces)
+    .where(and(eq(workspaces.id, id), eq(workspaces.ownerId, session.user.id)))
+    .returning({ id: workspaces.id })
+    .all()
   if (!workspace) throw createError({ statusCode: 404, statusMessage: 'Workspace not found.' })
   return { ok: true }
 })

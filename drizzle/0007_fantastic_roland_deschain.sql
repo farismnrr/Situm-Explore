@@ -1,2 +1,0 @@
-ALTER TABLE "situm_explore"."workspace_situm_configs" DROP CONSTRAINT "workspace_situm_configs_access_mode_check";--> statement-breakpoint
-ALTER TABLE "situm_explore"."workspace_situm_configs" DROP COLUMN "access_mode";

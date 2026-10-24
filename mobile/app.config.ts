@@ -9,7 +9,7 @@ const iosBuildNumber = process.env.EXPO_PUBLIC_IOS_BUILD_NUMBER || '1'
 if (!Number.isSafeInteger(androidVersionCode) || androidVersionCode < 1) throw new Error('EXPO_PUBLIC_ANDROID_VERSION_CODE must be a positive integer.')
 
 const config = {
-  name: 'Situm Explore',
+  name: 'Senar',
   slug: 'situm-explore',
   version,
   orientation: 'default',

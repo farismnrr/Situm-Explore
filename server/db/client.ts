@@ -1,24 +1,21 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { Pool } from 'pg'
+import { mkdirSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import Database from 'better-sqlite3'
+import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
+import * as schema from './schema'
 
-let db: ReturnType<typeof drizzle> | undefined
-
-function databaseSchema(value: unknown) {
-  const schema = typeof value === 'string' ? value : ''
-  if (!/^[a-z_][a-z0-9_]*$/.test(schema)) {
-    throw createError({ statusCode: 500, statusMessage: 'DATABASE_SCHEMA is invalid.' })
-  }
-  return schema
-}
+let db: BetterSQLite3Database<typeof schema> | undefined
 
 export function getDb() {
   const config = useRuntimeConfig()
-  const databaseUrl = process.env.DATABASE_URL || config.databaseUrl
-  if (!databaseUrl) throw createError({ statusCode: 500, statusMessage: 'DATABASE_URL is not configured.' })
-  const schema = databaseSchema(process.env.DATABASE_SCHEMA || config.databaseSchema)
-  db ||= drizzle(new Pool({
-    connectionString: databaseUrl,
-    options: `-c search_path=${schema},public`,
-  }))
+  const path = resolve(process.env.DATABASE_PATH || config.databasePath || 'data/senar.db')
+  mkdirSync(dirname(path), { recursive: true })
+  if (!db) {
+    const sqlite = new Database(path)
+    sqlite.pragma('journal_mode = WAL')
+    sqlite.pragma('foreign_keys = ON')
+    sqlite.pragma('busy_timeout = 5000')
+    db = drizzle(sqlite, { schema })
+  }
   return db
 }
