@@ -45,3 +45,4 @@ dist
 target
 __pycache__
 .venv
+project-notes/
