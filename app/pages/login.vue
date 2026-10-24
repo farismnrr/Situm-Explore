@@ -7,7 +7,10 @@ const password = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
 
-const redirectPath = computed(() => typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/') ? route.query.redirect : '/app')
+const redirectPath = computed(() => {
+  const redirect = route.query.redirect
+  return typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//') && !redirect.startsWith('/\\/') ? redirect : '/app'
+})
 
 if (loggedIn.value) {
   await navigateTo('/app', { replace: true })

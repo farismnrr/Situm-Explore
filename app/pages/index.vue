@@ -184,10 +184,6 @@ const nativeHighlights = [
                   </div>
 
                   <div class="preview-map">
-                    <img
-                      src="/building-layouts/gedung-lt1-big.jpeg"
-                      alt="Indoor floorplan used by Senar"
-                    >
                     <div class="map-search"><UIcon name="i-lucide-search" /> Search places</div>
                     <div class="floor-pill">Floor 1 <UIcon name="i-lucide-chevron-down" /></div>
                     <svg class="route-line" viewBox="0 0 500 220" preserveAspectRatio="none" aria-hidden="true">
@@ -727,17 +723,6 @@ const nativeHighlights = [
   inset: 0;
   pointer-events: none;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 45%);
-}
-
-.preview-map img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.78;
-  filter: grayscale(1) contrast(0.76) brightness(1.18);
-  transform: scale(1.08);
 }
 
 .map-search,

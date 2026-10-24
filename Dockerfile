@@ -12,6 +12,7 @@ LABEL org.opencontainers.image.source="${OCI_SOURCE}" \
 
 FROM base AS dependencies
 COPY package.json package-lock.json ./
+COPY patches ./patches
 RUN npm ci
 
 FROM dependencies AS build

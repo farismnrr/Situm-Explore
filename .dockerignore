@@ -6,6 +6,8 @@
 !tsconfig.json
 !eslint.config.mjs
 !drizzle.config.ts
+!patches/
+!patches/**
 !app/**
 !server/**
 !shared/**

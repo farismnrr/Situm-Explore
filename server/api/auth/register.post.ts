@@ -5,7 +5,7 @@ import { registrationVerificationCodes, users } from '../../db/schema'
 
 const registrationSchema = z.object({
   email: z.string().trim().email().max(320),
-  password: z.string().min(8).max(128),
+  password: z.string().min(10).max(128),
   code: z.string().regex(/^\d{6}$/),
 })
 
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
   const db = getDb()
 
   const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1)
-  if (existing[0]) throw createError({ statusCode: 409, statusMessage: 'An account with that email already exists.' })
+  if (existing[0]) throw createError({ statusCode: 401, statusMessage: 'Verification code is invalid or expired.' })
 
   const [verification] = await db.select({
     codeHash: registrationVerificationCodes.codeHash,

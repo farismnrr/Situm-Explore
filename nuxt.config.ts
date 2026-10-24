@@ -15,9 +15,9 @@ export default defineNuxtConfig({
     clientBundle: { scan: true }
   },
   css: ['~/assets/css/main.css'],
-  colorMode: { preference: 'light', fallback: 'light', classSuffix: '' },
+  colorMode: { preference: 'light', fallback: 'light', classSuffix: '', storage: 'cookie' },
   runtimeConfig: {
-    session: { name: 'nuxt-session', password: process.env.NUXT_SESSION_PASSWORD || '', maxAge: 60 * 60 * 24 * 7, sessionHeader: 'x-nuxt-session', cookie: { secure: process.env.NUXT_SESSION_COOKIE_SECURE === 'true' } },
+    session: { name: 'nuxt-session', password: process.env.NUXT_SESSION_PASSWORD || '', maxAge: 60 * 60 * 24 * 7, sessionHeader: 'x-nuxt-session', cookie: { secure: process.env.NUXT_SESSION_COOKIE_SECURE !== 'false' } },
     databasePath: process.env.DATABASE_PATH || 'data/senar.db',
     otel: { serviceName: process.env.OTEL_SERVICE_NAME || 'senar', endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || '', protocol: process.env.OTEL_EXPORTER_OTLP_PROTOCOL || 'http/protobuf' },
     oauth: { google: { clientId: process.env.NUXT_OAUTH_GOOGLE_CLIENT_ID || '', clientSecret: process.env.NUXT_OAUTH_GOOGLE_CLIENT_SECRET || '', redirectURL: process.env.NUXT_OAUTH_GOOGLE_REDIRECT_URL || '' } },

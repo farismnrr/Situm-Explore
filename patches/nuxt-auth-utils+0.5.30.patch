@@ -1,0 +1,22 @@
+diff --git a/node_modules/nuxt-auth-utils/dist/runtime/app/plugins/session.client.js b/node_modules/nuxt-auth-utils/dist/runtime/app/plugins/session.client.js
+index 980fa69..5ae7486 100644
+--- a/node_modules/nuxt-auth-utils/dist/runtime/app/plugins/session.client.js
++++ b/node_modules/nuxt-auth-utils/dist/runtime/app/plugins/session.client.js
+@@ -7,9 +7,13 @@ export default defineNuxtPlugin(async (nuxtApp) => {
+       await useUserSession().fetch();
+     });
+   }
+-  if (localStorage.getItem("temp-nuxt-auth-utils-popup")) {
+-    localStorage.removeItem("temp-nuxt-auth-utils-popup");
+-    const error = useError();
+-    if (!error.value) window.close();
++  try {
++    if (localStorage.getItem("temp-nuxt-auth-utils-popup")) {
++      localStorage.removeItem("temp-nuxt-auth-utils-popup");
++      const error = useError();
++      if (!error.value) window.close();
++    }
++  } catch {
++    // Session cookies work when browser storage is unavailable.
+   }
+ });

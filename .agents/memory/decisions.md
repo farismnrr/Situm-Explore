@@ -88,6 +88,7 @@ Status: active.
 - The web application relational store uses SQLite through Drizzle and `better-sqlite3`; local development defaults to `data/senar.db`, while staging persists a dedicated SQLite volume.
 - `DATABASE_SCHEMA` and PostgreSQL connection configuration are retired from current runtime configuration. ClickHouse remains a separate analytics store.
 - The fresh SQLite migration initializes an empty database. Existing PostgreSQL identity/workspace data is not migrated by this change and must not be represented as preserved in the new database.
+- Workspace Situm credentials use AES-GCM v2 envelopes authenticated with the workspace ID; decryption continues to accept v1 envelopes during transition.
 
 Source: explicit user task and implementation on `chore/sqlite-senar`.
 Status: current implementation branch; pending orchestrator review/integration.

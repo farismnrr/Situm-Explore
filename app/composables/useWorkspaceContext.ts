@@ -20,6 +20,25 @@ interface ApiErrorShape {
   statusMessage?: string
 }
 
+const WORKSPACE_STORAGE_KEY = 'situm-explore-workspace-id'
+
+function readSavedWorkspaceId() {
+  try {
+    return window.localStorage.getItem(WORKSPACE_STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function persistWorkspaceId(id: string | null) {
+  try {
+    if (id) window.localStorage.setItem(WORKSPACE_STORAGE_KEY, id)
+    else window.localStorage.removeItem(WORKSPACE_STORAGE_KEY)
+  } catch {
+    // Workspace selection remains available for the current page session.
+  }
+}
+
 export function getSafeErrorMessage(error: unknown, fallback: string) {
   const value = error as ApiErrorShape
   return value.data?.data?.requestId
@@ -40,10 +59,10 @@ export function useWorkspaceContext() {
     const records = await $fetch<WorkspaceSummary[]>('/api/workspaces')
     workspaces.value = records
     if (!records.some(workspace => workspace.id === selectedWorkspaceId.value)) {
-      const saved = import.meta.client ? window.localStorage.getItem('situm-explore-workspace-id') : null
+      const saved = import.meta.client ? readSavedWorkspaceId() : null
       selectedWorkspaceId.value = records.find(workspace => workspace.id === saved)?.id ?? records[0]?.id ?? null
     }
-    if (import.meta.client && selectedWorkspaceId.value) window.localStorage.setItem('situm-explore-workspace-id', selectedWorkspaceId.value)
+    if (import.meta.client && selectedWorkspaceId.value) persistWorkspaceId(selectedWorkspaceId.value)
     loaded.value = true
     return records
   }
@@ -51,8 +70,7 @@ export function useWorkspaceContext() {
   function selectWorkspace(id: string | null) {
     selectedWorkspaceId.value = id
     if (import.meta.client) {
-      if (id) window.localStorage.setItem('situm-explore-workspace-id', id)
-      else window.localStorage.removeItem('situm-explore-workspace-id')
+      persistWorkspaceId(id)
     }
   }
 

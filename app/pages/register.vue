@@ -15,7 +15,7 @@ let countdownTimer: ReturnType<typeof setInterval> | undefined
 const resendSeconds = computed(() => Math.max(0, Math.ceil((resendAvailableAt.value - now.value) / 1000)))
 const codeWasSent = computed(() => sentEmail.value === email.value.trim().toLowerCase())
 const canSendCode = computed(() => Boolean(email.value.trim()) && !sendingCode.value && resendSeconds.value === 0)
-const canSubmit = computed(() => codeWasSent.value && /^\d{6}$/.test(code.value) && password.value.length >= 8 && !loading.value)
+const canSubmit = computed(() => codeWasSent.value && /^\d{6}$/.test(code.value) && password.value.length >= 10 && !loading.value)
 
 if (loggedIn.value) await navigateTo('/app', { replace: true })
 
@@ -53,7 +53,7 @@ async function sendCode() {
     code.value = ''
     resendAvailableAt.value = Date.parse(result.resendAvailableAt)
     now.value = Date.now()
-    infoMessage.value = `Verification code sent to ${sentEmail.value}. It expires in 5 minutes.`
+      infoMessage.value = `If ${sentEmail.value} can receive a code, it will arrive shortly. Codes expire in 5 minutes.`
   } catch (error: unknown) {
     errorMessage.value = fetchErrorMessage(error, 'Unable to send a verification code. Please try again.')
   } finally {
@@ -98,8 +98,8 @@ async function submit() {
         </div>
       </UFormField>
 
-      <UFormField label="Password" name="password" required hint="At least 8 characters">
-        <FormPasswordInput v-model="password" autocomplete="new-password" placeholder="Create a password" minlength="8" required class="w-full" />
+      <UFormField label="Password" name="password" required hint="At least 10 characters">
+        <FormPasswordInput v-model="password" autocomplete="new-password" placeholder="Create a password" minlength="10" required class="w-full" />
       </UFormField>
 
       <UButton type="submit" block size="lg" :loading="loading" :disabled="!canSubmit">Create account <span aria-hidden="true">→</span></UButton>

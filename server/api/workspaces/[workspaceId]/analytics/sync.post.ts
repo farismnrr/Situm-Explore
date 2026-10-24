@@ -4,6 +4,7 @@ import { isValidDateRange } from '../../../../utils/date-range'
 import { requireOwnedWorkspace } from '../../../../utils/workspace-owner'
 import { getWorkspaceSitumApiKey } from '../../../../utils/workspace-situm'
 import { ensureClickHouseSchema } from '../../../../integrations/clickhouse/schema'
+import { requireUserRateLimit } from '../../../../utils/rate-limit'
 
 const syncSchema = z.object({
   report: z.enum(['visitors', 'positioning_time', 'geofencing_stay_time']),
@@ -14,6 +15,8 @@ const syncSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  const session = await requireUserSession(event)
+  requireUserRateLimit(session.user.id, 'workspace-analytics-sync', 10, 15 * 60_000)
   const workspaceId = await requireOwnedWorkspace(event, getRouterParam(event, 'workspaceId') || '')
   const apiKey = await getWorkspaceSitumApiKey(event, workspaceId)
   const parsed = syncSchema.safeParse(await readBody(event))

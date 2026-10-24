@@ -34,3 +34,14 @@ logs/
 
 # Mobile release artifacts
 mobile/dist/
+*.pem
+*.key
+id_rsa*
+node_modules
+.next
+.nuxt
+.output
+dist
+target
+__pycache__
+.venv

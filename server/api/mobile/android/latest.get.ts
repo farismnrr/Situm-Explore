@@ -1,7 +1,9 @@
 import { getLatestAndroidReleaseManifest } from '../../../utils/mobile-release-storage'
+import { requireRateLimit } from '../../../utils/rate-limit'
 
 export default defineEventHandler(async (event) => {
-  setHeader(event, 'Cache-Control', 'no-store')
+  requireRateLimit(event, 'mobile-android-latest', 60, 60_000)
+  setHeader(event, 'Cache-Control', 'public, max-age=30, stale-while-revalidate=30')
   try {
     const manifest = await getLatestAndroidReleaseManifest()
     const baseUrl = useRuntimeConfig(event).mobileRelease.publicBaseUrl.trim().replace(/\/$/, '')

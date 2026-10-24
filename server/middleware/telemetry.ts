@@ -6,7 +6,8 @@ const workspacePath = /\/api\/workspaces\/([0-9a-f-]{36})(?:\/|$)/i
 
 export default defineEventHandler((event) => {
   const tracer = trace.getTracer('situm-explore.server')
-  const requestId = getRequestHeader(event, 'x-request-id')?.trim() || randomUUID()
+  const incomingRequestId = getRequestHeader(event, 'x-request-id')?.trim()
+  const requestId = incomingRequestId && /^[\w-]{8,64}$/.test(incomingRequestId) ? incomingRequestId : randomUUID()
   const carrier: Record<string, string> = {}
   const traceparent = getRequestHeader(event, 'traceparent')
   if (traceparent) carrier.traceparent = traceparent

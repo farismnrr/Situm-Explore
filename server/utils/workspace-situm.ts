@@ -21,17 +21,17 @@ async function getOwnedWorkspaceSitumConfig(event: Parameters<typeof requireUser
 export async function getWorkspaceSitumClient(event: Parameters<typeof requireUserSession>[0], workspaceId: string) {
   const config = await getOwnedWorkspaceSitumConfig(event, workspaceId)
   if (!config.encryptedViewerApiKey) throw createError({ statusCode: 409, statusMessage: 'This feature needs an Only Read Situm API key. Add one in Workspace → Situm configuration.' })
-  return { client: new SitumSDK({ auth: { apiKey: decryptWorkspaceApiKey(config.encryptedViewerApiKey) }, compact: true }), situmAccountId: config.situmAccountId }
+  return { client: new SitumSDK({ auth: { apiKey: decryptWorkspaceApiKey(config.encryptedViewerApiKey, config.workspaceId) }, compact: true }), situmAccountId: config.situmAccountId }
 }
 
 export async function getWorkspaceSitumApiKey(event: Parameters<typeof requireUserSession>[0], workspaceId: string) {
   const config = await getOwnedWorkspaceSitumConfig(event, workspaceId)
   if (!config.encryptedViewerApiKey) throw createError({ statusCode: 409, statusMessage: 'This feature needs an Only Read Situm API key. Add one in Workspace → Situm configuration.' })
-  return decryptWorkspaceApiKey(config.encryptedViewerApiKey)
+  return decryptWorkspaceApiKey(config.encryptedViewerApiKey, config.workspaceId)
 }
 
 export async function getWorkspaceSitumReadWriteClient(event: Parameters<typeof requireUserSession>[0], workspaceId: string) {
   const config = await getOwnedWorkspaceSitumConfig(event, workspaceId)
   if (!config.encryptedApiKey) throw createError({ statusCode: 409, statusMessage: 'This operation needs a Read & Write Situm API key. Add one in Workspace → Situm configuration.' })
-  return { client: new SitumSDK({ auth: { apiKey: decryptWorkspaceApiKey(config.encryptedApiKey) }, compact: true }), situmAccountId: config.situmAccountId }
+  return { client: new SitumSDK({ auth: { apiKey: decryptWorkspaceApiKey(config.encryptedApiKey, config.workspaceId) }, compact: true }), situmAccountId: config.situmAccountId }
 }

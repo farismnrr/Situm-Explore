@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
   const db = getDb()
   const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1)
-  if (existing[0]) throw createError({ statusCode: 409, statusMessage: 'An account with that email already exists.' })
+  if (existing[0]) return verificationRequestAccepted()
 
   const current = await db.select({ resendAvailableAt: registrationVerificationCodes.resendAvailableAt })
     .from(registrationVerificationCodes)
@@ -66,9 +66,13 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 503, statusMessage: 'Verification email is unavailable. Please try again.' })
   }
 
+  return verificationRequestAccepted(expiresAt, resendAvailableAt)
+})
+
+function verificationRequestAccepted(expiresAt = new Date(Date.now() + CODE_TTL_MS), resendAvailableAt = new Date(Date.now() + RESEND_COOLDOWN_MS)) {
   return {
-    message: 'Verification code sent.',
+    message: 'If this address can receive a code, one will arrive shortly.',
     expiresAt: expiresAt.toISOString(),
     resendAvailableAt: resendAvailableAt.toISOString(),
   }
-})
+}

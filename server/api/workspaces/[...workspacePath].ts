@@ -141,8 +141,8 @@ export default defineEventHandler(async (event) => {
   }
   const situmAccountId = organizationResolution.organizationId
 
-  const encryptedApiKey = parsed.data.apiKey ? encryptWorkspaceApiKey(parsed.data.apiKey) : undefined
-  const encryptedViewerApiKey = parsed.data.viewerApiKey ? encryptWorkspaceApiKey(parsed.data.viewerApiKey) : undefined
+  const encryptedApiKey = parsed.data.apiKey ? encryptWorkspaceApiKey(parsed.data.apiKey, workspaceId) : undefined
+  const encryptedViewerApiKey = parsed.data.viewerApiKey ? encryptWorkspaceApiKey(parsed.data.viewerApiKey, workspaceId) : undefined
   const [config] = await getDb().insert(workspaceSitumConfigs).values({
     workspaceId,
     situmAccountId,

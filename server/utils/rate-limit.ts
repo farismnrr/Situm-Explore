@@ -28,12 +28,19 @@ function pruneExpired(now: number): void {
 }
 
 export function requireRateLimit(event: Parameters<typeof getRequestIP>[0], scope: string, limit: number, windowMs: number): void {
-  // The staging/production deployment (deploy/staging.compose.yml) publishes
-  // the Nitro server directly on the host port with no reverse proxy in
-  // front of it, so there is no trusted contract that sanitizes
-  // X-Forwarded-For. Trusting that client-supplied header here would let an
-  // unauthenticated caller rotate it to bypass this limiter entirely.
-  // Use only the server-observed socket address (xForwardedFor: false).
-  const ip = getRequestIP(event, { xForwardedFor: false }) || 'unknown'
+  const trustProxy = process.env.TRUSTED_PROXY === 'true'
+  const ip = getRequestIP(event, { xForwardedFor: trustProxy }) || 'unknown'
   if (!rateLimit(`${scope}:${ip}`, limit, windowMs)) throw createError({ statusCode: 429, statusMessage: 'Too many requests. Try again later.' })
+}
+
+export function requireUserRateLimit(userId: string, scope: string, limit: number, windowMs: number): void {
+  if (!rateLimit(`${scope}:user:${userId}`, limit, windowMs)) {
+    throw createError({ statusCode: 429, statusMessage: 'Too many requests. Try again later.' })
+  }
+}
+
+export function requireEmailRateLimit(email: string, scope: string, limit: number, windowMs: number): void {
+  if (!rateLimit(`${scope}:email:${email}`, limit, windowMs)) {
+    throw createError({ statusCode: 429, statusMessage: 'Too many sign-in attempts. Try again later.' })
+  }
 }
